@@ -9,27 +9,359 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+// Prisma schema generated to match SQL schema: Magna Coders (v1.0)
 
-// Example User model
-model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// Enums
+enum Availability {
+  available
+  busy
+  unavailable
+}
+
+enum ConversationType {
+  direct
+  group
+}
+
+enum PostType {
+  text
+  project
+  reel
+  photo
+  design
+  opportunity
+}
+
+enum Visibility {
+  public
+  private
+}
+
+enum ProficiencyLevel {
+  beginner
+  intermediate
+  advanced
+  expert
+}
+
+enum OpportunityStatus {
+  open
+  closed
+}
+
+enum ProjectStatus {
+  active
+  completed
+  archived
+}
+
+enum NotificationType {
+  invite
+  mention
+  system
+  friend_request
+}
+
+// Users table: note id references auth.users(id) in SQL. We'll model local users table with id uuid.
+model users {
+  id                         String    @id @default(uuid()) @db.Uuid
+  username                   String    @unique
+  email                      String    @unique
+  created_at                 DateTime? @default(now()) @db.Timestamptz
+  updated_at                 DateTime? @default(now()) @db.Timestamptz
+  availability               Availability @default(available)
+  profile_complete_percentage Int      @default(0)
+  avatar_url                 String?   @db.Text
+  location                   String?   @db.Text
+  bio                        String?   @db.Text
+  website_url                String?   @db.Text
+  github_url                 String?   @db.Text
+  linkedin_url               String?   @db.Text
+  twitter_url                String?   @db.Text
+  whatsapp_url               String?   @db.Text
+
+  // relations
+  roles                      user_roles[]
+  categories                 user_categories[]
+  skills                     user_skills[]
+  sentFriendRequests         friend_requests[] @relation("sender")
+  receivedFriendRequests     friend_requests[] @relation("receiver")
+  friends                   friends[] @relation("userFriends")
+  friendOf                   friends[] @relation("friendOf")
+  posts                      posts[]
+  comments                   comments[]
+  likes                      likes[]
+  projects                   projects[] @relation("owner")
+  projectMemberships         project_members[]
+  conversationMemberships    conversation_members[]
+  messages                   messages[] @relation("senderMessages")
+  notifications              notifications[]
+  reels                      reels[]
+  opportunities              opportunities[]
+  eventsCreated              events[] @relation("createdBy")
 
   @@map("users")
 }
 
-// Example Post model
-model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+model user_roles {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String?  @db.Uuid
+  role_name  String
+  created_at DateTime? @default(now()) @db.Timestamptz
+
+  user users? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_roles")
+}
+
+model user_categories {
+  id         String   @id @default(uuid()) @db.Uuid
+  user_id    String?  @db.Uuid
+  category_name String
+  created_at DateTime? @default(now()) @db.Timestamptz
+
+  user users? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_categories")
+}
+
+model user_skills {
+  id               String   @id @default(uuid()) @db.Uuid
+  user_id          String?  @db.Uuid
+  skill_name       String
+  proficiency_level ProficiencyLevel @default(beginner)
+  availability     Availability @default(available)
+  created_at       DateTime? @default(now()) @db.Timestamptz
+
+  user users? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("user_skills")
+}
+
+model friend_requests {
+  id         String   @id @default(uuid()) @db.Uuid
+  sender_id  String?  @db.Uuid
+  receiver_id String? @db.Uuid
+  message    String?  @db.Text
+  status     String   @default("pending")
+  created_at DateTime? @default(now()) @db.Timestamptz
+
+  sender users? @relation("sender", fields: [sender_id], references: [id], onDelete: Cascade)
+  receiver users? @relation("receiver", fields: [receiver_id], references: [id], onDelete: Cascade)
+
+  @@map("friend_requests")
+}
+
+model friends {
+  id          String   @id @default(uuid()) @db.Uuid
+  user_id     String?  @db.Uuid
+  friend_id   String?  @db.Uuid
+  connected_at DateTime? @default(now()) @db.Timestamptz
+
+  user users? @relation("userFriends", fields: [user_id], references: [id], onDelete: Cascade)
+  friend users? @relation("friendOf", fields: [friend_id], references: [id], onDelete: Cascade)
+
+  @@map("friends")
+}
+
+model conversations {
+  id        String   @id @default(uuid()) @db.Uuid
+  type      ConversationType
+  name      String?  @db.Text
+  created_at DateTime? @default(now()) @db.Timestamptz
+
+  members conversation_members[]
+  messages messages[]
+
+  @@map("conversations")
+}
+
+model conversation_members {
+  conversation_id String @db.Uuid
+  user_id         String @db.Uuid
+  joined_at       DateTime? @default(now()) @db.Timestamptz
+
+  conversation conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@id([conversation_id, user_id])
+  @@map("conversation_members")
+}
+
+model messages {
+  id             String   @id @default(uuid()) @db.Uuid
+  conversation_id String?  @db.Uuid
+  sender_id      String?  @db.Uuid
+  content        String
+  created_at     DateTime? @default(now()) @db.Timestamptz
+
+  conversation conversations? @relation(fields: [conversation_id], references: [id], onDelete: Cascade)
+  sender users? @relation("senderMessages", fields: [sender_id], references: [id], onDelete: SetNull)
+
+  @@map("messages")
+}
+
+model tags {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @unique
+
+  post_tags post_tags[]
+
+  @@map("tags")
+}
+
+model posts {
+  id          String   @id @default(uuid()) @db.Uuid
+  author_id   String?  @db.Uuid
+  post_type   PostType
+  title       String?  @db.Text
+  content     String?  @db.Text
+  created_at  DateTime? @default(now()) @db.Timestamptz
+  updated_at  DateTime? @default(now()) @db.Timestamptz
+  visibility  Visibility @default(public)
+  likes_count Int      @default(0)
+  comments_count Int   @default(0)
+
+  author users? @relation(fields: [author_id], references: [id], onDelete: Cascade)
+  media post_media[]
+  tags post_tags[]
+  comments comments[]
+  likes likes[]
 
   @@map("posts")
+}
+
+model post_media {
+  id        String @id @default(uuid()) @db.Uuid
+  post_id   String? @db.Uuid
+  media_type String?
+  media_url String? @db.Text
+  created_at DateTime? @default(now()) @db.Timestamptz
+
+  post posts? @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  @@map("post_media")
+}
+
+model post_tags {
+  post_id String @db.Uuid
+  tag_id  String @db.Uuid
+
+  post posts @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  tag  tags  @relation(fields: [tag_id], references: [id], onDelete: Cascade)
+
+  @@id([post_id, tag_id])
+  @@map("post_tags")
+}
+
+model comments {
+  id        String @id @default(uuid()) @db.Uuid
+  post_id   String? @db.Uuid
+  author_id String? @db.Uuid
+  content   String
+  created_at DateTime? @default(now()) @db.Timestamptz
+
+  post posts? @relation(fields: [post_id], references: [id], onDelete: Cascade)
+  author users? @relation(fields: [author_id], references: [id], onDelete: Cascade)
+
+  @@map("comments")
+}
+
+model likes {
+  id        String @id @default(uuid()) @db.Uuid
+  user_id   String? @db.Uuid
+  post_id   String? @db.Uuid
+  created_at DateTime? @default(now()) @db.Timestamptz
+
+  user users? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  post posts? @relation(fields: [post_id], references: [id], onDelete: Cascade)
+
+  @@map("likes")
+}
+
+model projects {
+  id        String @id @default(uuid()) @db.Uuid
+  owner_id  String? @db.Uuid
+  title     String
+  description String?
+  repo_url  String?
+  status    ProjectStatus @default(active)
+  created_at DateTime? @default(now()) @db.Timestamptz
+
+  owner users? @relation("owner", fields: [owner_id], references: [id], onDelete: Cascade)
+  members project_members[]
+
+  @@map("projects")
+}
+
+model project_members {
+  project_id String @db.Uuid
+  user_id    String @db.Uuid
+  role       String?
+  joined_at  DateTime? @default(now()) @db.Timestamptz
+
+  project projects @relation(fields: [project_id], references: [id], onDelete: Cascade)
+  user users @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@id([project_id, user_id])
+  @@map("project_members")
+}
+
+model opportunities {
+  id          String @id @default(uuid()) @db.Uuid
+  creator_id  String? @db.Uuid
+  title       String
+  description String?
+  company_name String?
+  contact_email String?
+  location    String?
+  status      OpportunityStatus @default(open)
+  created_at  DateTime? @default(now()) @db.Timestamptz
+
+  creator users? @relation(fields: [creator_id], references: [id], onDelete: Cascade)
+
+  @@map("opportunities")
+}
+
+model reels {
+  id          String @id @default(uuid()) @db.Uuid
+  user_id     String? @db.Uuid
+  title       String?
+  video_url   String
+  thumbnail_url String?
+  views       Int @default(0)
+  likes_count Int @default(0)
+  created_at  DateTime? @default(now()) @db.Timestamptz
+
+  user users? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("reels")
+}
+
+model notifications {
+  id        String @id @default(uuid()) @db.Uuid
+  user_id   String? @db.Uuid
+  type      NotificationType?
+  message   String?
+  link      String?
+  read      Boolean @default(false)
+  created_at DateTime? @default(now()) @db.Timestamptz
+
+  user users? @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+model events {
+  id        String @id @default(uuid()) @db.Uuid
+  title     String
+  description String?
+  location  String?
+  start_time DateTime?
+  end_time  DateTime?
+  created_by String? @db.Uuid
+
+  createdBy users? @relation("createdBy", fields: [created_by], references: [id], onDelete: SetNull)
+
+  @@map("events")
 }
