@@ -17,10 +17,11 @@ const createPaymentIntent = asyncHandler(async (req: Request, res: Response) => 
   } = req.body;
 
   if (!amount || !currency || !method) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: 'Amount, currency, and payment method are required'
     });
+    return;
   }
 
   const paymentData = {
@@ -40,6 +41,7 @@ const createPaymentIntent = asyncHandler(async (req: Request, res: Response) => 
     message: 'Payment intent created successfully',
     data: result
   });
+  return;
 });
 
 // Get payment history
@@ -54,6 +56,7 @@ const getPaymentHistory = asyncHandler(async (req: Request, res: Response) => {
     success: true,
     data: payments
   });
+  return;
 });
 
 // Get wallet balance
@@ -66,6 +69,7 @@ const getWalletBalance = asyncHandler(async (req: Request, res: Response) => {
     success: true,
     data: wallet
   });
+  return;
 });
 
 // Process refund
@@ -73,10 +77,11 @@ const processRefund = asyncHandler(async (req: Request, res: Response) => {
   const { paymentId, amount, reason } = req.body;
 
   if (!paymentId) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: 'Payment ID is required'
     });
+    return;
   }
 
   const refund = await paymentService.processRefund(paymentId, amount, reason);
@@ -86,6 +91,7 @@ const processRefund = asyncHandler(async (req: Request, res: Response) => {
     message: 'Refund processed successfully',
     data: refund
   });
+  return;
 });
 
 // Wallet transfer
@@ -94,10 +100,11 @@ const walletTransfer = asyncHandler(async (req: Request, res: Response) => {
   const { toUserId, amount, description } = req.body;
 
   if (!toUserId || !amount) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: 'Recipient user ID and amount are required'
     });
+    return;
   }
 
   const paymentData = {
@@ -116,6 +123,7 @@ const walletTransfer = asyncHandler(async (req: Request, res: Response) => {
     message: 'Wallet transfer completed successfully',
     data: result
   });
+  return;
 });
 
 // Get payment methods
@@ -162,6 +170,7 @@ const getPaymentMethods = asyncHandler(async (req: Request, res: Response) => {
     success: true,
     data: methods.filter(method => method.enabled)
   });
+  return;
 });
 
 // Get payment statistics
@@ -180,6 +189,7 @@ const getPaymentStats = asyncHandler(async (req: Request, res: Response) => {
       totalTransactions: wallet._count.transactions,
     }
   });
+  return;
 });
 
 export {

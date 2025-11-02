@@ -6,9 +6,9 @@ import axios from 'axios';
 const prisma = new PrismaClient();
 
 // Initialize payment providers
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2023-10-16',
-});
+const stripe: Stripe | null = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY || '', ({ apiVersion: '2023-10-16' } as any))
+  : null as any;
 
 const paypalClient = new paypal.core.PayPalHttpClient(
   new paypal.core.SandboxEnvironment(
@@ -51,8 +51,8 @@ class PaymentService {
         method: data.method,
         status: 'PENDING',
         fromUserId: data.fromUserId,
-        toUserId: data.toUserId,
-        projectId: data.projectId,
+        toUserId: data.toUserId ?? null,
+        projectId: data.projectId ?? null,
         description: data.description,
         metadata: data.metadata,
       }
@@ -77,14 +77,15 @@ class PaymentService {
   // Stripe payment processing
   private async createStripePaymentIntent(payment: any, data: PaymentData): Promise<any> {
     try {
+      if (!stripe) throw new Error('Stripe not configured');
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(data.amount * 100), // Convert to cents
         currency: data.currency.toLowerCase(),
         metadata: {
           paymentId: payment.id,
           fromUserId: data.fromUserId,
-          toUserId: data.toUserId,
-          projectId: data.projectId,
+          toUserId: data.toUserId ?? '',
+          projectId: data.projectId ?? '',
         },
         description: data.description,
       });
@@ -139,7 +140,7 @@ class PaymentService {
       return {
         paymentId: payment.id,
         orderId: order.result.id,
-        approvalUrl: order.result.links?.find(link => link.rel === 'approve')?.href,
+    approvalUrl: order.result.links?.find((link: any) => link.rel === 'approve')?.href,
       };
     } catch (error) {
       console.error('PayPal order creation failed:', error);
@@ -430,7 +431,10 @@ class PaymentService {
       _sum: { amount: true }
     });
 
-    if (totalPaid._sum.amount >= project.budget) {
+    const totalAmountPaid = totalPaid._sum.amount ?? 0;
+    const projectBudget = project.budget ?? 0;
+
+    if (totalAmountPaid >= projectBudget) {
       await this.prisma.project.update({
         where: { id: payment.projectId },
         data: { status: 'COMPLETED' }
@@ -528,6 +532,7 @@ class PaymentService {
   }
 
   private async processStripeRefund(payment: any, amount: number, reason?: string): Promise<any> {
+    if (!stripe) throw new Error('Stripe not configured');
     const refund = await stripe.refunds.create({
       payment_intent: payment.externalId,
       amount: Math.round(amount * 100),

@@ -1,4 +1,4 @@
-import { Project } from '../models';
+import { Project } from '../api';
 
 class ProjectService {
   private projectModel: Project;

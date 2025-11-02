@@ -50,7 +50,7 @@ class SocialIntegrationService {
         },
         update: {
           accessToken,
-          profileData: profile,
+          profileData: profile as any,
           isConnected: true,
           connectedAt: new Date(),
         },
@@ -58,7 +58,7 @@ class SocialIntegrationService {
           userId,
           platform: 'GITHUB',
           accessToken,
-          profileData: profile,
+          profileData: profile as any,
           isConnected: true,
           connectedAt: new Date(),
         }
@@ -134,7 +134,7 @@ class SocialIntegrationService {
         },
         update: {
           accessToken,
-          profileData: profile,
+          profileData: profile as any,
           isConnected: true,
           connectedAt: new Date(),
         },
@@ -142,7 +142,7 @@ class SocialIntegrationService {
           userId,
           platform: 'LINKEDIN',
           accessToken,
-          profileData: profile,
+          profileData: profile as any,
           isConnected: true,
           connectedAt: new Date(),
         }
@@ -184,7 +184,7 @@ class SocialIntegrationService {
         update: {
           accessToken,
           refreshToken,
-          profileData: profile,
+          profileData: profile as any,
           isConnected: true,
           connectedAt: new Date(),
         },
@@ -193,7 +193,7 @@ class SocialIntegrationService {
           platform: 'TWITTER',
           accessToken,
           refreshToken,
-          profileData: profile,
+          profileData: profile as any,
           isConnected: true,
           connectedAt: new Date(),
         }
@@ -244,7 +244,7 @@ class SocialIntegrationService {
         update: {
           accessToken,
           refreshToken,
-          profileData: profile,
+          profileData: profile as any,
           isConnected: true,
           connectedAt: new Date(),
         },
@@ -253,7 +253,7 @@ class SocialIntegrationService {
           platform: 'DISCORD',
           accessToken,
           refreshToken,
-          profileData: profile,
+          profileData: profile as any,
           isConnected: true,
           connectedAt: new Date(),
         }
@@ -286,7 +286,7 @@ class SocialIntegrationService {
     const integrations = await this.prisma.socialIntegration.findMany({
       where: {
         userId,
-        platform: { in: platforms },
+        platform: { in: platforms as any },
         isConnected: true
       }
     });
@@ -394,7 +394,7 @@ class SocialIntegrationService {
             continue;
         }
 
-        await this.prisma.socialIntegration.update({
+          await this.prisma.socialIntegration.update({
           where: {
             userId_platform: {
               userId,
@@ -402,7 +402,7 @@ class SocialIntegrationService {
             }
           },
           data: {
-            profileData: updatedProfile,
+            profileData: updatedProfile as any,
             lastSyncedAt: new Date()
           }
         });

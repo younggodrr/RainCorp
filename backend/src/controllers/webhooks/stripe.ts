@@ -2,9 +2,9 @@ import { Request, Response } from 'express';
 import Stripe from 'stripe';
 import PaymentService from '../../services/paymentService';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
-  apiVersion: '2023-10-16',
-});
+const stripe: Stripe | null = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY, ({ apiVersion: '2023-10-16' } as any))
+  : null;
 
 const paymentService = new PaymentService();
 
@@ -22,6 +22,12 @@ const handleStripeWebhook = async (req: Request, res: Response): Promise<void> =
   let event: Stripe.Event;
 
   try {
+    if (!stripe) {
+      console.error('Stripe not configured for webhooks');
+      res.status(503).json({ error: 'Stripe not configured' });
+      return;
+    }
+
     event = stripe.webhooks.constructEvent(req.body, sig, endpointSecret);
   } catch (err: any) {
     console.error(`Webhook signature verification failed: ${err.message}`);

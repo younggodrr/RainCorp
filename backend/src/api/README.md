@@ -1,9 +1,9 @@
-# API
+# Models
 
-This directory contains API routes and controllers for the magna-coders backend.
+This directory contains data models for the magna-coders backend.
 
 ## Structure
-- Route definitions
-- Controller logic
-- Request/response handling
-- API versioning
+- Database models
+- Type definitions
+- Data validation schemas
+- Model relationships

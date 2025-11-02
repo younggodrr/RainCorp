@@ -2,14 +2,78 @@ import express from 'express';
 import OTPService from '../services/otpService';
 import { asyncHandler } from '../middleware/errorHandler';
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     OTPRequest:
+ *       type: object
+ *       required:
+ *         - identifier
+ *       properties:
+ *         identifier:
+ *           type: string
+ *           description: Email or phone number to send OTP to
+ *         method:
+ *           type: string
+ *           enum: [email, sms, whatsapp]
+ *           default: email
+ *           description: Method to deliver OTP
+ *     OTPVerification:
+ *       type: object
+ *       required:
+ *         - identifier
+ *         - otp
+ *       properties:
+ *         identifier:
+ *           type: string
+ *           description: Email or phone number used in OTP request
+ *         otp:
+ *           type: string
+ *           description: OTP code to verify
+ *     OTPResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *         message:
+ *           type: string
+ *         deliveryMethod:
+ *           type: string
+ *           enum: [email, sms, whatsapp]
+ */
+
 const router = express.Router();
 const otpService = new OTPService();
 
 // Initialize OTP cleanup
 otpService.initCleanupInterval();
 
-// Request OTP
-router.post('/request', asyncHandler(async (req, res) => {
+/**
+ * @swagger
+ * /api/otp/request:
+ *   post:
+ *     summary: Request a new OTP
+ *     tags: [OTP]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/OTPRequest'
+ *     responses:
+ *       200:
+ *         description: OTP sent successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/OTPResponse'
+ *       400:
+ *         description: Invalid request parameters
+ *       500:
+ *         description: Server error
+ */
+router.post('/request', asyncHandler(async (req: express.Request, res: express.Response) => {
   const { identifier, method } = req.body;
 
   if (!identifier) {
@@ -30,15 +94,38 @@ router.post('/request', asyncHandler(async (req, res) => {
 
   await otpService.requestOTP(identifier, deliveryMethod as 'email' | 'sms' | 'whatsapp');
 
-  res.status(200).json({
+  return res.status(200).json({
     success: true,
     message: `OTP sent via ${deliveryMethod}`,
     deliveryMethod
   });
 }));
 
-// Verify OTP
-router.post('/verify', asyncHandler(async (req, res) => {
+/**
+ * @swagger
+ * /api/otp/verify:
+ *   post:
+ *     summary: Verify an OTP
+ *     tags: [OTP]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/OTPVerification'
+ *     responses:
+ *       200:
+ *         description: OTP verified successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/OTPResponse'
+ *       400:
+ *         description: Invalid or expired OTP
+ *       500:
+ *         description: Server error
+ */
+router.post('/verify', asyncHandler(async (req: express.Request, res: express.Response) => {
   const { identifier, otp } = req.body;
 
   if (!identifier || !otp) {
@@ -51,28 +138,71 @@ router.post('/verify', asyncHandler(async (req, res) => {
   const isValid = await otpService.verifyAndCleanOTP(identifier, otp);
 
   if (isValid) {
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: 'OTP verified successfully'
     });
   } else {
-    res.status(400).json({
+    return res.status(400).json({
       success: false,
       message: 'Invalid or expired OTP'
     });
   }
 }));
 
-// Get OTP status (for debugging - remove in production)
-router.get('/status/:identifier', asyncHandler(async (req, res) => {
+/**
+ * @swagger
+ * /api/otp/status/{identifier}:
+ *   get:
+ *     summary: Get OTP status for an identifier (Development only)
+ *     tags: [OTP]
+ *     parameters:
+ *       - in: path
+ *         name: identifier
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Email or phone number to check OTP status
+ *     responses:
+ *       200:
+ *         description: OTP status retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 status:
+ *                   type: object
+ *                   properties:
+ *                     exists:
+ *                       type: boolean
+ *                     remaining:
+ *                       type: number
+ *                     expiresAt:
+ *                       type: string
+ *                       format: date-time
+ *       500:
+ *         description: Server error
+ */
+router.get('/status/:identifier', asyncHandler(async (req: express.Request, res: express.Response) => {
   const { identifier } = req.params;
 
-  const status = otpService.getOTPStatus(identifier);
+  if (identifier) {
 
-  res.status(200).json({
-    success: true,
-    status
-  });
+    const status = otpService.getOTPStatus(identifier);
+    res.status(200).json({
+      success: true,
+      status
+    });
+  } else {
+    res.status(400).json({
+      success: false,
+      message: 'Identifier is required'
+    });
+  }
+
 }));
 
 export default router;

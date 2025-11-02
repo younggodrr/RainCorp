@@ -1,4 +1,4 @@
-import { Post, Comment, Social } from '../models';
+import { Post, Comment, Social } from '../api';
 import { cloudinary } from '../utils/config';
 
 class PostService {

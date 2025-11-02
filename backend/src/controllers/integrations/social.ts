@@ -10,10 +10,11 @@ const connectGitHub = asyncHandler(async (req: Request, res: Response) => {
   const { accessToken } = req.body;
 
   if (!accessToken) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: 'GitHub access token is required'
     });
+    return;
   }
 
   await socialIntegration.connectGitHub(userId, accessToken);
@@ -22,6 +23,7 @@ const connectGitHub = asyncHandler(async (req: Request, res: Response) => {
     success: true,
     message: 'GitHub account connected successfully'
   });
+  return;
 });
 
 // LinkedIn Integration
@@ -30,10 +32,11 @@ const connectLinkedIn = asyncHandler(async (req: Request, res: Response) => {
   const { accessToken } = req.body;
 
   if (!accessToken) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: 'LinkedIn access token is required'
     });
+    return;
   }
 
   await socialIntegration.connectLinkedIn(userId, accessToken);
@@ -42,6 +45,7 @@ const connectLinkedIn = asyncHandler(async (req: Request, res: Response) => {
     success: true,
     message: 'LinkedIn account connected successfully'
   });
+  return;
 });
 
 // Twitter Integration
@@ -50,10 +54,11 @@ const connectTwitter = asyncHandler(async (req: Request, res: Response) => {
   const { accessToken, refreshToken } = req.body;
 
   if (!accessToken) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: 'Twitter access token is required'
     });
+    return;
   }
 
   await socialIntegration.connectTwitter(userId, accessToken, refreshToken);
@@ -62,6 +67,7 @@ const connectTwitter = asyncHandler(async (req: Request, res: Response) => {
     success: true,
     message: 'Twitter account connected successfully'
   });
+  return;
 });
 
 // Discord Integration
@@ -70,10 +76,11 @@ const connectDiscord = asyncHandler(async (req: Request, res: Response) => {
   const { accessToken, refreshToken } = req.body;
 
   if (!accessToken) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: 'Discord access token is required'
     });
+    return;
   }
 
   await socialIntegration.connectDiscord(userId, accessToken, refreshToken);
@@ -82,6 +89,7 @@ const connectDiscord = asyncHandler(async (req: Request, res: Response) => {
     success: true,
     message: 'Discord account connected successfully'
   });
+  return;
 });
 
 // Get connected platforms
@@ -94,6 +102,7 @@ const getConnectedPlatforms = asyncHandler(async (req: Request, res: Response) =
     success: true,
     platforms
   });
+  return;
 });
 
 // Disconnect platform
@@ -102,10 +111,11 @@ const disconnectPlatform = asyncHandler(async (req: Request, res: Response) => {
   const { platform } = req.params;
 
   if (!platform) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: 'Platform is required'
     });
+    return;
   }
 
   await socialIntegration.disconnectPlatform(userId, platform.toUpperCase());
@@ -114,6 +124,7 @@ const disconnectPlatform = asyncHandler(async (req: Request, res: Response) => {
     success: true,
     message: `${platform} account disconnected successfully`
   });
+  return;
 });
 
 // Share to social platforms
@@ -122,17 +133,19 @@ const shareToSocialPlatforms = asyncHandler(async (req: Request, res: Response) 
   const { content, platforms } = req.body;
 
   if (!content) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: 'Content is required'
     });
+    return;
   }
 
   if (!platforms || !Array.isArray(platforms)) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: 'Platforms array is required'
     });
+    return;
   }
 
   await socialIntegration.shareToSocialPlatforms(userId, content, platforms);
@@ -141,6 +154,7 @@ const shareToSocialPlatforms = asyncHandler(async (req: Request, res: Response) 
     success: true,
     message: `Content shared to ${platforms.join(', ')}`
   });
+  return;
 });
 
 // Sync social data
@@ -153,6 +167,7 @@ const syncSocialData = asyncHandler(async (req: Request, res: Response) => {
     success: true,
     message: 'Social data synchronized successfully'
   });
+  return;
 });
 
 // OAuth callback handlers
@@ -161,10 +176,11 @@ const githubOAuthCallback = asyncHandler(async (req: Request, res: Response) => 
   const userId = req.user as string;
 
   if (!code) {
-    return res.status(400).json({
+    res.status(400).json({
       success: false,
       message: 'Authorization code is required'
     });
+    return;
   }
 
   // Exchange code for access token (implement OAuth flow)
@@ -176,6 +192,7 @@ const githubOAuthCallback = asyncHandler(async (req: Request, res: Response) => 
     code,
     state
   });
+  return;
 });
 
 const linkedinOAuthCallback = asyncHandler(async (req: Request, res: Response) => {
