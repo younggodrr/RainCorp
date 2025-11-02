@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,26 +7,489 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Example User model
 model User {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  name      String?
+  id             String     @id @default(cuid())
+  username       String     @unique
+  email          String     @unique
+  phone          String?
+  passwordHash   String
+  avatar         String?
+  bio            String?
+  role           UserRole   @default(DEVELOPER)
+  postKarma      Int        @default(0)
+  commentKarma   Int        @default(0)
+  tokens         Int        @default(0)
+  isVerified     Boolean    @default(false)
+  verificationBadge String?
+  portfolioUrl   String?
+  skills         String[]
+  experience     String?
+  location       String?
+
+  // Two-factor authentication
+  twoFactorEnabled Boolean   @default(false)
+  twoFactorSecret  String?
+  backupCodes      String[]
+
+  // Security
+  lastLoginAt      DateTime?
+  loginAttempts    Int        @default(0)
+  lockedUntil      DateTime?
+
+  // Relations
+  posts          Post[]
+  comments       Comment[]
+  replies        Reply[]
+  clientProjects Project[]    @relation("ProjectClient")
+  assignedProjects Project[]  @relation("ProjectAssignee")
+  bids           Bid[]
+  messages       Message[]
+  chatRooms      ChatRoomMember[]
+  followers      Follow[]     @relation("UserFollowers")
+  following      Follow[]     @relation("UserFollowing")
+  likes          Like[]
+  notifications  Notification[]
+  reports        Report[]     @relation("Reporter")
+  reportedBy     Report[]     @relation("ReportedUser")
+
+  // New relations
+  socialIntegrations SocialIntegration[]
+  paymentsFrom       Payment[]          @relation("PaymentFrom")
+  paymentsTo         Payment[]          @relation("PaymentTo")
+  wallet             Wallet?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("users")
 }
 
-// Example Post model
 model Post {
-  id        String   @id @default(cuid())
-  title     String
-  content   String?
-  published Boolean  @default(false)
-  authorId  String
+  id         String    @id @default(cuid())
+  title      String
+  content    String?
+  postType   PostType  @default(TEXT)
+  tags       String[]
+  isVerified Boolean   @default(false)
+  verifiedBy String?
+  verifiedAt DateTime?
+
+  // Relations
+  author     User      @relation(fields: [authorId], references: [id])
+  authorId   String
+  category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?
+  comments   Comment[]
+  likes      Like[]
+  reports    Report[]  @relation("PostReports")
+
+  // Social features
+  likesCount    Int @default(0)
+  commentsCount Int @default(0)
+  sharesCount   Int @default(0)
+  viewsCount    Int @default(0)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("posts")
+}
+
+model Project {
+  id           String        @id @default(cuid())
+  title        String
+  description  String
+  projectType  ProjectType
+  technologies String[]
+  githubUrl    String?
+  liveUrl      String?
+  images       String[]
+  budget       Float?
+  status       ProjectStatus @default(OPEN)
+  deadline     DateTime?
+
+  // Relations
+  client           User       @relation("ProjectClient", fields: [clientId], references: [id])
+  clientId         String
+  assignedTo       User?      @relation("ProjectAssignee", fields: [assignedToId], references: [id])
+  assignedToId     String?
+  payments         Payment[]
+  bids         Bid[]
+  category     Category @relation(fields: [categoryId], references: [id])
+  categoryId   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("projects")
+}
+
+model Category {
+  id          String  @id @default(cuid())
+  name        String  @unique
+  description String?
+  icon        String?
+  color       String?
+
+  // Relations
+  posts    Post[]
+  projects Project[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("categories")
+}
+
+model Comment {
+  id       String  @id @default(cuid())
+  content  String
+  isEdited Boolean @default(false)
+
+  // Relations
+  post     Post    @relation(fields: [postId], references: [id])
+  postId   String
+  author   User    @relation(fields: [authorId], references: [id])
+  authorId String
+  replies  Reply[]
+  likes    Like[]
+
+  likesCount   Int @default(0)
+  repliesCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("comments")
+}
+
+model Reply {
+  id       String  @id @default(cuid())
+  content  String
+  isEdited Boolean @default(false)
+
+  // Relations
+  comment   Comment @relation(fields: [commentId], references: [id])
+  commentId String
+  author    User    @relation(fields: [authorId], references: [id])
+  authorId  String
+  likes     Like[]
+
+  likesCount Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("replies")
+}
+
+model Bid {
+  id       String    @id @default(cuid())
+  amount   Float
+  proposal String
+  status   BidStatus @default(PENDING)
+
+  // Relations
+  project   Project @relation(fields: [projectId], references: [id])
+  projectId String
+  bidder    User    @relation(fields: [bidderId], references: [id])
+  bidderId  String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("bids")
+}
+
+model ChatRoom {
+  id       String   @id @default(cuid())
+  name     String?
+  type     ChatType @default(DIRECT)
+  isActive Boolean  @default(true)
+
+  // Relations
+  members  ChatRoomMember[]
+  messages Message[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("chat_rooms")
+}
+
+model ChatRoomMember {
+  id String @id @default(cuid())
+
+  // Relations
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+  chatRoomId String
+  user       User     @relation(fields: [userId], references: [id])
+  userId     String
+
+  joinedAt DateTime @default(now())
+
+  @@unique([chatRoomId, userId])
+  @@map("chat_room_members")
+}
+
+model Message {
+  id          String      @id @default(cuid())
+  content     String
+  messageType MessageType @default(TEXT)
+  isEdited    Boolean     @default(false)
+
+  // Relations
+  chatRoom   ChatRoom @relation(fields: [chatRoomId], references: [id])
+  chatRoomId String
+  sender     User     @relation(fields: [senderId], references: [id])
+  senderId   String
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("messages")
+}
+
+model Follow {
+  id String @id @default(cuid())
+
+  // Relations
+  follower    User   @relation("UserFollowers", fields: [followerId], references: [id])
+  followerId  String
+  following   User   @relation("UserFollowing", fields: [followingId], references: [id])
+  followingId String
+
+  createdAt DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@map("follows")
+}
+
+model Like {
+  id String @id @default(cuid())
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  // Polymorphic relations (one of these will be set)
+  post      Post?    @relation(fields: [postId], references: [id])
+  postId    String?
+  comment   Comment? @relation(fields: [commentId], references: [id])
+  commentId String?
+  reply     Reply?   @relation(fields: [replyId], references: [id])
+  replyId   String?
+
+  createdAt DateTime @default(now())
+
+  @@map("likes")
+}
+
+model Notification {
+  id      String           @id @default(cuid())
+  type    NotificationType
+  title   String
+  message String
+  isRead  Boolean          @default(false)
+
+  // Relations
+  user   User   @relation(fields: [userId], references: [id])
+  userId String
+
+  // Optional relations for specific notifications
+  postId    String?
+  commentId String?
+  projectId String?
+  messageId String?
+
+  createdAt DateTime @default(now())
+
+  @@map("notifications")
+}
+
+model Report {
+  id          String       @id @default(cuid())
+  reason      String
+  description String?
+  status      ReportStatus @default(PENDING)
+
+  // Relations
+  reporter       User    @relation("Reporter", fields: [reporterId], references: [id])
+  reporterId     String
+  reportedUser   User?   @relation("ReportedUser", fields: [reportedUserId], references: [id])
+  reportedUserId String?
+  reportedPost   Post?   @relation("PostReports", fields: [reportedPostId], references: [id])
+  reportedPostId String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("reports")
+}
+
+// Enums
+enum UserRole {
+  DEVELOPER
+  CLIENT
+  ADMIN
+}
+
+enum PostType {
+  TEXT
+  IMAGE
+  VIDEO
+  LINK
+  PROJECT
+}
+
+enum ProjectType {
+  WEBSITE
+  MOBILE_APP
+  DESKTOP_APP
+  API
+  OTHER
+}
+
+enum ProjectStatus {
+  OPEN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum BidStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum ChatType {
+  DIRECT
+  GROUP
+  PROJECT
+}
+
+enum MessageType {
+  TEXT
+  IMAGE
+  FILE
+  CODE
+}
+
+enum NotificationType {
+  LIKE
+  COMMENT
+  FOLLOW
+  PROJECT_BID
+  PROJECT_ASSIGNED
+  PROJECT_COMPLETED
+  MESSAGE
+  SYSTEM
+}
+
+enum ReportStatus {
+  PENDING
+  REVIEWED
+  RESOLVED
+  DISMISSED
+}
+
+enum SocialPlatform {
+  GITHUB
+  LINKEDIN
+  TWITTER
+  DISCORD
+  STACKOVERFLOW
+  MEDIUM
+}
+
+enum PaymentMethod {
+  STRIPE
+  PAYPAL
+  MPESA
+  BANK_TRANSFER
+  WALLET
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  CANCELLED
+  REFUNDED
+}
+
+enum Currency {
+  USD
+  EUR
+  GBP
+  KES
+}
+
+model SocialIntegration {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  platform      SocialPlatform
+  accessToken   String?
+  refreshToken  String?
+  profileData   Json?
+  isConnected   Boolean  @default(false)
+  connectedAt   DateTime?
+  lastSyncedAt  DateTime?
+
+  @@unique([userId, platform])
+  @@map("social_integrations")
+}
+
+model Payment {
+  id              String        @id @default(cuid())
+  amount          Float
+  currency        Currency      @default(USD)
+  method          PaymentMethod
+  status          PaymentStatus @default(PENDING)
+  transactionId   String?       @unique
+  externalId      String?       // Stripe/PayPal/M-Pesa reference
+
+  // Relations
+  fromUserId      String
+  fromUser        User          @relation("PaymentFrom", fields: [fromUserId], references: [id])
+  toUserId        String?
+  toUser          User?         @relation("PaymentTo", fields: [toUserId], references: [id])
+
+  // Project related payments
+  projectId       String?
+  project         Project?      @relation(fields: [projectId], references: [id])
+
+  // Wallet relation
+  walletId        String?
+  wallet          Wallet?       @relation(fields: [walletId], references: [id])
+
+  // Metadata
+  description     String?
+  metadata        Json?
+  processedAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@map("payments")
+}
+
+model Wallet {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  balance     Float    @default(0)
+  currency    Currency @default(USD)
+  isActive    Boolean  @default(true)
+
+  // Transaction history
+  transactions Payment[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("wallets")
 }
