@@ -14,7 +14,8 @@ const handleMpesaWebhook = async (req: Request, res: Response): Promise<void> =>
     // Validate callback data
     if (!callbackData.Body?.stkCallback) {
       console.error('Invalid M-Pesa callback format');
-      return res.status(400).json({ error: 'Invalid callback format' });
+      res.status(400).json({ error: 'Invalid callback format' });
+      return;
     }
 
     const stkCallback = callbackData.Body.stkCallback;
@@ -40,6 +41,7 @@ const handleMpesaWebhook = async (req: Request, res: Response): Promise<void> =>
         ResultCode: 0,
         ResultDesc: 'Success'
       });
+      return;
 
     } else {
       // Payment failed
@@ -52,6 +54,7 @@ const handleMpesaWebhook = async (req: Request, res: Response): Promise<void> =>
         ResultCode: resultCode,
         ResultDesc: resultDesc
       });
+      return;
     }
 
   } catch (error) {
@@ -60,6 +63,7 @@ const handleMpesaWebhook = async (req: Request, res: Response): Promise<void> =>
       ResultCode: 1,
       ResultDesc: 'Internal server error'
     });
+    return;
   }
 };
 
@@ -75,6 +79,7 @@ const validateMpesaPayment = async (req: Request, res: Response): Promise<void> 
       ResultCode: 0,
       ResultDesc: 'Accepted'
     });
+    return;
 
   } catch (error) {
     console.error('M-Pesa validation error:', error);
@@ -82,6 +87,7 @@ const validateMpesaPayment = async (req: Request, res: Response): Promise<void> 
       ResultCode: 1,
       ResultDesc: 'Validation failed'
     });
+    return;
   }
 };
 
@@ -104,12 +110,14 @@ const confirmMpesaPayment = async (req: Request, res: Response):Promise<void> =>
       success: true,
       message: 'M-Pesa payment confirmed successfully'
     });
+    return;
   } catch (error) {
     console.error('M-Pesa confirmation error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to confirm M-Pesa payment'
     });
+    return;
   }
 };
 
@@ -117,20 +125,27 @@ const confirmMpesaPayment = async (req: Request, res: Response):Promise<void> =>
 const queryMpesaPaymentStatus = async (req: Request, res: Response):Promise<void> => {
   const { checkoutRequestId } = req.params;
 
+  if (!checkoutRequestId) {
+    res.status(400).json({ success: false, message: 'checkoutRequestId is required' });
+    return;
+  }
+
   try {
     // Query STK Push status from M-Pesa
-    const status = await querySTKPushStatus(checkoutRequestId);
+    const status = await querySTKPushStatus(checkoutRequestId as string);
 
     res.status(200).json({
       success: true,
       data: status
     });
+    return;
   } catch (error) {
     console.error('M-Pesa status query error:', error);
     res.status(500).json({
       success: false,
       message: 'Failed to query payment status'
     });
+    return;
   }
 };
 

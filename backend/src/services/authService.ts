@@ -9,9 +9,49 @@ const prisma = new PrismaClient();
 
 class AuthService {
   private prisma: PrismaClient;
+  private userModel: any;
 
   constructor() {
     this.prisma = prisma;
+    // lightweight userModel wrapper to keep older code paths working
+    this.userModel = {
+      findById: async (id: string) => this.prisma.user.findUnique({ where: { id } }),
+      update: async (id: string, data: any) => this.prisma.user.update({ where: { id }, data }),
+      getProfile: async (id: string) => this.prisma.user.findUnique({
+        where: { id },
+        select: {
+          id: true,
+          username: true,
+          email: true,
+          avatar: true,
+          bio: true,
+          role: true,
+          postKarma: true,
+          commentKarma: true,
+          tokens: true,
+          isVerified: true,
+          verificationBadge: true,
+          portfolioUrl: true,
+          skills: true,
+          experience: true,
+          location: true,
+          _count: {
+            select: {
+              posts: true,
+              followers: true,
+              following: true,
+            }
+          },
+          createdAt: true,
+        }
+      }),
+      verifyUser: async (id: string, badge?: string) => this.prisma.user.update({ where: { id }, data: { isVerified: true, verificationBadge: badge || null } }),
+      awardTokens: async (id: string, amount: number) => this.prisma.user.update({ where: { id }, data: { tokens: { increment: amount } } }),
+      awardKarma: async (id: string, type: 'post' | 'comment', amount: number) => {
+        if (type === 'post') return this.prisma.user.update({ where: { id }, data: { postKarma: { increment: amount } } });
+        return this.prisma.user.update({ where: { id }, data: { commentKarma: { increment: amount } } });
+      }
+    };
   }
 
   // Register new user
@@ -248,7 +288,7 @@ class AuthService {
     }
 
     // Remove used backup code
-    const updatedCodes = user.backupCodes.filter(c => c !== code);
+  const updatedCodes = user.backupCodes.filter((c: string) => c !== code);
     await this.userModel.update(userId, { backupCodes: updatedCodes });
 
     return { message: 'Backup code used successfully' };
