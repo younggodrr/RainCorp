@@ -1,5 +1,5 @@
 import express from 'express';
-import { loginUser, signupUser, getUserProfile, updateUserProfile } from '../controllers/auth/auth';
+import { loginUser, signupUser, getUserProfile, updateUserProfile, refreshAccessToken } from '../controllers/auth/auth';
 import { asyncHandler } from '../middleware/errorHandler';
 import { authenticateToken } from '../middleware/auth';
 
@@ -76,6 +76,40 @@ const router = express.Router();
  *         description: Server error
  */
 router.post('/login', asyncHandler(loginUser));
+
+/**
+ * @swagger
+ * /api/auth/refresh:
+ *   post:
+ *     summary: Refresh access token using a refresh token
+ *     tags: [Authentication]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - refreshToken
+ *             properties:
+ *               refreshToken:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: New access token issued
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 accessToken:
+ *                   type: string
+ *                 refreshToken:
+ *                   type: string
+ *       401:
+ *         description: Invalid or expired refresh token
+ */
+router.post('/refresh', asyncHandler(refreshAccessToken));
 
 /**
  * @swagger

@@ -20,7 +20,7 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
 
   if (!user) {
     res
-      .status(400)
+      .status(401)
       .send({ message: 'No account with this username has been registered.' });
     return;
   }
@@ -32,14 +32,23 @@ const loginUser = async (req: Request, res: Response): Promise<void> => {
     return;
   }
 
-  const payloadForToken = {
-    id: user.id,
-  };
+  const accessToken = jwt.sign({ id: user.id }, SECRET as any, { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '30m' } as any);
 
-  const token = jwt.sign(payloadForToken, SECRET);
+  // Create refresh token and persist
+  const refreshToken = jwt.sign({ id: user.id }, SECRET as any, { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '1d' } as any);
+  const expiresAt = new Date(Date.now() + (parseInt(process.env.REFRESH_TOKEN_EXPIRES_DAYS || '30') * 24 * 60 * 60 * 1000));
+
+  await (prisma as any).refreshToken.create({
+    data: {
+      userId: user.id,
+      token: refreshToken,
+      expiresAt,
+    }
+  });
 
   res.status(200).json({
-    token,
+    accessToken,
+    refreshToken,
     username: user.username,
     id: user.id,
     avatar: user.avatar,
@@ -107,14 +116,15 @@ const signupUser = async (req: Request, res: Response): Promise<void> => {
     }
   });
 
-  const payloadForToken = {
-    id: user.id,
-  };
+  const accessToken = jwt.sign({ id: user.id }, SECRET as any, { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m' } as any);
+  const refreshToken = jwt.sign({ id: user.id }, SECRET as any, { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '30d' } as any);
+  const expiresAt = new Date(Date.now() + (parseInt(process.env.REFRESH_TOKEN_EXPIRES_DAYS || '30') * 24 * 60 * 60 * 1000));
 
-  const token = jwt.sign(payloadForToken, SECRET);
+  await (prisma as any).refreshToken.create({ data: { userId: user.id, token: refreshToken, expiresAt } });
 
   res.status(200).json({
-    token,
+    accessToken,
+    refreshToken,
     username: user.username,
     email: user.email,
     id: user.id,
@@ -124,6 +134,46 @@ const signupUser = async (req: Request, res: Response): Promise<void> => {
     isVerified: user.isVerified,
     tokens: user.tokens,
   });
+};
+
+const refreshAccessToken = async (req: Request, res: Response): Promise<void> => {
+  const { refreshToken } = req.body;
+
+  if (!refreshToken) {
+    res.status(400).json({ message: 'Refresh token required' });
+    return;
+  }
+
+  try {
+    // Verify JWT signature
+  const decoded = jwt.verify(refreshToken, SECRET as any) as { id: string };
+
+    // Find token in database
+  const tokenRecord = await (prisma as any).refreshToken.findFirst({ where: { token: refreshToken } });
+    if (!tokenRecord || tokenRecord.revoked) {
+      res.status(401).json({ message: 'Invalid refresh token' });
+      return;
+    }
+
+    if (tokenRecord.expiresAt < new Date()) {
+      res.status(401).json({ message: 'Refresh token expired' });
+      return;
+    }
+
+    // Rotate: revoke old token and create a new refresh token
+  await (prisma as any).refreshToken.update({ where: { id: tokenRecord.id }, data: { revoked: true } });
+
+  const newRefreshToken = jwt.sign({ id: decoded.id }, SECRET as any, { expiresIn: process.env.REFRESH_TOKEN_EXPIRES_IN || '30d' } as any);
+    const newExpiresAt = new Date(Date.now() + (parseInt(process.env.REFRESH_TOKEN_EXPIRES_DAYS || '30') * 24 * 60 * 60 * 1000));
+  await (prisma as any).refreshToken.create({ data: { userId: decoded.id, token: newRefreshToken, expiresAt: newExpiresAt } });
+
+  const newAccessToken = jwt.sign({ id: decoded.id }, SECRET as any, { expiresIn: process.env.ACCESS_TOKEN_EXPIRES_IN || '15m' } as any);
+
+    res.status(200).json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
+  } catch (error) {
+    console.error('Refresh token error', error);
+    res.status(401).json({ message: 'Invalid or expired refresh token' });
+  }
 };
 
 const getUserProfile = async (req: Request, res: Response): Promise<void> => {
@@ -210,4 +260,4 @@ const updateUserProfile = async (req: Request, res: Response): Promise<void> => 
   res.status(200).json(updatedUser);
 };
 
-export { loginUser, signupUser, getUserProfile, updateUserProfile };
+export { loginUser, signupUser, getUserProfile, updateUserProfile, refreshAccessToken };

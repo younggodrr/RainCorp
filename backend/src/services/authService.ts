@@ -93,7 +93,6 @@ class AuthService {
     });
 
     // Generate token
-    const token = this.generateToken(user.id);
 
     return {
       user: {
@@ -104,8 +103,7 @@ class AuthService {
         role: user.role,
         isVerified: user.isVerified,
         tokens: user.tokens,
-      },
-      token,
+      }
     };
   }
 
