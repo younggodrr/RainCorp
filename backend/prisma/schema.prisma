@@ -93,6 +93,7 @@ model User {
   paymentsFrom       Payment[]          @relation("PaymentFrom")
   paymentsTo         Payment[]          @relation("PaymentTo")
   wallet             Wallet?
+  refreshTokens      RefreshToken[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -770,4 +771,16 @@ model Wallet {
 
   @@map("wallets")
 >>>>>>> 86df2493645e4ef09bcef74454f135f41f3fd6df
+}
+
+model RefreshToken {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  token      String   @unique
+  revoked    Boolean  @default(false)
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+
+  @@map("refresh_tokens")
 }
