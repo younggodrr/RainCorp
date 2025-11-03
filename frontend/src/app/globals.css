@@ -190,10 +190,15 @@
   }
 }
 
-* {
+*:not(button):not(a) {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+}
+
+/* Ensure buttons maintain their Tailwind padding/margin */
+button, a {
+  box-sizing: border-box;
 }
 
 html,
@@ -324,10 +329,22 @@ a {
 }
 
 @layer base {
-  * {
+  *:not(button):not(a):not(input):not(textarea):not(select) {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+  }
+  
+  /* Ensure buttons have proper box-sizing and no unwanted borders */
+  button, a[role="button"] {
+    box-sizing: border-box;
+    border: none;
+    outline: none;
+  }
+  
+  /* Reset any conflicting button styles */
+  button:focus, a[role="button"]:focus {
+    outline: none;
   }
 }

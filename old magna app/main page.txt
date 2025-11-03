@@ -1,15 +1,16 @@
 'use client';
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import PWAInstaller from "./components/PWAInstaller";
 import { 
-  Zap, 
-  MessageCircle, 
-  Rocket, 
-  Palette,
-  Users,
-  UserPlus
-} from "lucide-react";
+  IconBolt, 
+  IconMessageCircle, 
+  IconRocket, 
+  IconPalette,
+  IconUsers,
+  IconUserPlus
+} from "@tabler/icons-react";
 
 // Custom Typewriter component for one-by-one letter effect with Framer Motion
 const TypewriterTitle = ({ text, speed = 100 }: { text: string; speed?: number }) => {
@@ -60,9 +61,6 @@ export default function Home() {
   const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [particles, setParticles] = useState<Array<{id: number, x: number, y: number, delay: number, duration: number}>>([]);
-  const [techSymbolPositions, setTechSymbolPositions] = useState<Array<{left: string, top: string, fontSize: string}>>([]);
-  
   const titles = [
     "Magna Coders",
     "Build. Collaborate. Solve.",
@@ -79,28 +77,21 @@ export default function Home() {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
   
-  // Tech symbols for floating animation
-  const techSymbols = ['<', '>', '{', '}', '/', '*', '+', '=', '&', '#', '@', '$', '%', '^', '~'];
+  // Available tech icons: 1-30 (some missing like 22, 25)
+  const availableIcons = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,23,24,26,27,28,29,30];
+  const techIcons = Array.from({ length: 60 }, (_, i) => {
+    const iconIndex = i % availableIcons.length;
+    return availableIcons[iconIndex];
+  });
 
-  // Generate random positions for particle effects (client-side only)
-  useEffect(() => {
-    const generatedParticles = Array.from({ length: 20 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      delay: Math.random() * 2,
-      duration: 3 + Math.random() * 2
-    }));
-    setParticles(generatedParticles);
-
-    // Generate tech symbol positions (client-side only)
-    const generatedPositions = Array.from({ length: 30 }, () => ({
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      fontSize: `${Math.random() * 20 + 10}px`
-    }));
-    setTechSymbolPositions(generatedPositions);
-  }, []);
+  // Generate random positions for particle effects
+  const particles = Array.from({ length: 20 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    delay: Math.random() * 2,
+    duration: 3 + Math.random() * 2
+  }));
 
   useEffect(() => {
     // Simulate loading sequence
@@ -142,33 +133,32 @@ export default function Home() {
       
       {/* Floating Tech Symbols and Letters */}
       <div className="fixed inset-0 pointer-events-none z-0">
-        {techSymbolPositions.slice(0, 15).map((position, i) => (
+        {Array.from({ length: 15 }, (_, i) => (
           <motion.div
             key={`float-${i}`}
             className="absolute text-[#E70008] opacity-20 font-mono font-bold"
             style={{
-              left: position.left,
-              top: position.top,
-              fontSize: position.fontSize,
+              left: `${Math.random() * 100}%`,
+              top: `${Math.random() * 100}%`,
+              fontSize: `${Math.random() * 20 + 10}px`,
             }}
             animate={{
               y: [0, -30, 0],
-              x: [0, 10 - 20 * (i % 2), 0],
+              x: [0, Math.random() * 20 - 10, 0],
               opacity: [0.1, 0.3, 0.1],
-              rotate: [0, 180 * (i % 2 === 0 ? 1 : -1), 0],
+              rotate: [0, Math.random() * 360, 0],
             }}
             transition={{
-              duration: 8 + (i % 3) * 2,
+              duration: Math.random() * 10 + 5,
               repeat: Infinity,
               delay: i * 0.5,
               ease: "easeInOut"
             }}
           >
-            {techSymbols[i] || 'M'}
+            {['<', '>', '{', '}', '/', '*', '+', '=', '&', '#', '@', '$', '%', '^', '~'][i] || 'M'}
           </motion.div>
         ))}
       </div>
-
       {/* Loading Animation */}
       <AnimatePresence>
         {isLoading && (
@@ -221,16 +211,12 @@ export default function Home() {
         )}
       </AnimatePresence>
 
-      {/* Animated background tech symbols */}
-      <div className="absolute w-full h-full pointer-events-none">
-        {techSymbolPositions.map((position, index) => (
+      {/* Animated background tech icons */}
+      <div className="falling-symbols absolute w-full h-full pointer-events-none">
+        {techIcons.map((num, index) => (
           <motion.div 
-            key={`tech-${index}`} 
-            className="absolute"
-            style={{
-              left: position.left,
-              top: position.top,
-            }}
+            key={`${num}-${index}`} 
+            className="symbol"
             initial={{ opacity: 0, y: -100 }}
             animate={{ opacity: 0.3, y: 0 }}
             transition={{ 
@@ -239,17 +225,18 @@ export default function Home() {
               ease: "easeOut"
             }}
           >
-            <motion.div 
-              className="w-8 h-8 opacity-30 transition-all duration-300 cursor-pointer text-[#E70008] font-mono font-bold text-lg flex items-center justify-center"
+            <motion.img 
+              src={`/tech icons/${num}.svg`} 
+              alt={`Tech icon ${num}`}
+              className="w-8 h-8 opacity-30 transition-all duration-300 cursor-pointer"
               whileHover={{ 
                 scale: 1.5, 
                 opacity: 0.8,
                 rotate: 360,
+                filter: "brightness(1.2)"
               }}
               transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              {techSymbols[index % techSymbols.length]}
-            </motion.div>
+            />
           </motion.div>
         ))}
       </div>
@@ -287,23 +274,23 @@ export default function Home() {
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 3.3, duration: 0.8, ease: "easeOut" }}
-              className="flex gap-8 justify-center lg:justify-start"
+              className="flex gap-6 justify-center lg:justify-start"
             >
               <motion.button 
                 whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(231, 0, 8, 0.3)" }}
                 whileTap={{ scale: 0.95 }}
-                className="px-10 py-4 bg-[#E70008] text-[#F9E4AD] font-bold rounded-full hover:bg-[#D60007] transition-all duration-200 shadow-lg font-sans flex items-center gap-3 min-h-[56px]"
+                className="px-8 py-3 bg-[#E70008] text-[#F9E4AD] font-bold rounded-full hover:bg-[#D60007] transition-all duration-200 shadow-lg font-sans flex items-center gap-2"
               >
-                <Users size={20} />
+                <IconUsers size={18} />
                 Start Collaborating
               </motion.button>
               <motion.a 
                 href="/create-account"
                 whileHover={{ scale: 1.05, backgroundColor: "#E70008", color: "#F9E4AD" }}
                 whileTap={{ scale: 0.95 }}
-                className="px-10 py-4 border-2 border-[#E70008] text-[#F9E4AD] font-bold rounded-full transform transition-all duration-200 font-sans cursor-pointer flex items-center gap-3 min-h-[56px]"
+                className="px-8 py-3 border-2 border-[#E70008] text-[#F9E4AD] font-bold rounded-full transform transition-all duration-200 font-sans cursor-pointer flex items-center gap-2"
               >
-                <UserPlus size={20} />
+                <IconUserPlus size={18} />
                 Join Community
               </motion.a>
             </motion.div>
@@ -335,16 +322,16 @@ export default function Home() {
                   transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
                   className="text-[#E70008]"
                 >
-                  <Zap size={24} />
+                  <IconBolt size={24} />
                 </motion.div>
                 What&apos;s Happening Inside
               </motion.h3>
               
               <div className="space-y-3">
                 {[
-                  { icon: MessageCircle, text: "12 new members joined today", delay: 4.0 },
-                  { icon: Rocket, text: "3 projects started this week", delay: 4.2 },
-                  { icon: Palette, text: "find your coding partner closest to you", delay: 4.4 }
+                  { icon: IconMessageCircle, text: "12 new members joined today", delay: 4.0 },
+                  { icon: IconRocket, text: "3 projects started this week", delay: 4.2 },
+                  { icon: IconPalette, text: "find your coding partner closest to you", delay: 4.4 }
                 ].map((item, index) => (
                   <motion.div
                     key={index}
@@ -383,16 +370,30 @@ export default function Home() {
             >
               <h3 className="text-xl font-bold text-[#F9E4AD] mb-4">Faces of the Revolution</h3>
               <div className="grid grid-cols-4 gap-2">
-                {Array.from({ length: 8 }, (_, i) => (
+                {[1, 2, 4, 5, 6, 7, 8, 1].map((faceNum, i) => (
                   <motion.div
                     key={i}
                     initial={{ opacity: 0, scale: 0 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 4.8 + i * 0.1, duration: 0.4, ease: "backOut" }}
                     whileHover={{ scale: 1.1, rotate: 5 }}
-                    className="w-12 h-12 bg-gradient-to-br from-[#E70008] to-[#FF9940] rounded-full flex items-center justify-center text-white font-bold text-sm cursor-pointer border-2 border-[#E70008]"
+                    className="w-12 h-12 rounded-full overflow-hidden border-2 border-[#E70008] cursor-pointer"
                   >
-                    {String.fromCharCode(65 + i)}
+                    <img 
+                      src={`/face/face ${faceNum}.png`}
+                      alt={`Community member ${faceNum}`}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback to gradient background with letter if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        const parent = target.parentElement;
+                        if (parent) {
+                          parent.className = "w-12 h-12 bg-gradient-to-br from-[#E70008] to-[#FF9940] rounded-full flex items-center justify-center text-white font-bold text-sm cursor-pointer";
+                          parent.innerHTML = String.fromCharCode(65 + i);
+                        }
+                      }}
+                    />
                   </motion.div>
                 ))}
               </div>
@@ -409,6 +410,14 @@ export default function Home() {
         </div>
       </motion.main>
 
+
+
+
+
+
+
+
+      
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -424,6 +433,8 @@ export default function Home() {
           About Us
         </motion.a>
       </motion.div>
+      
+      <PWAInstaller />
     </div>
   );
 }
