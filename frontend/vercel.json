@@ -1,14 +1,6 @@
 {
   "version": 2,
   "name": "magna-coders-frontend",
-  "env": {
-    "NEXT_PUBLIC_API_URL": "@next_public_api_url"
-  },
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_API_URL": "@next_public_api_url"
-    }
-  },
   "functions": {
     "app/api/**/*.js": {
       "maxDuration": 30
