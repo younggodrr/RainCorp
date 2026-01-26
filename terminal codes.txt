@@ -1,0 +1,1 @@
+C:\Users\Great Awareness\Desktop\MAGNA CONSCIUS\MAGNA CODERS\magna-coders\frontend [0:] $ pnpm dev

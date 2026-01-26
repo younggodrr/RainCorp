@@ -5,61 +5,49 @@ import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Eye, EyeOff, Mail, Lock, ArrowRight } from 'lucide-react';
 
-export default function LoginPage() {
+export default function NewLogin2Page() {
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
-    // Clear error when user starts typing
     if (errors[name]) {
-      setErrors(prev => ({
-        ...prev,
-        [name]: ''
-      }));
+      setErrors(prev => ({ ...prev, [name]: '' }));
     }
   };
 
   const validateForm = () => {
-    const newErrors: {[key: string]: string} = {};
-    
+    const newErrors: { [key: string]: string } = {};
     if (!formData.email) {
       newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = 'Please enter a valid email';
     }
-    
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
-    
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!validateForm()) return;
-    
     setIsLoading(true);
-    
     try {
-      // TODO: Implement actual login API call
-      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate API call
-      console.log('Login attempt:', formData);
-      // Redirect to main feed on success
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      console.log('Login attempt (new-login-2):', formData);
       window.location.href = '/feed';
     } catch (error) {
       console.error('Login error:', error);
@@ -99,9 +87,9 @@ export default function LoginPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4, duration: 0.5 }}
-          className="bg-black/40 backdrop-blur-lg border border-[#E70008]/20 rounded-2xl p-8 shadow-2xl"
+          className="bg-black/40 backdrop-blur-lg border border-[#E70008]/20 rounded-2xl p-8 shadow-2xl ui-card"
         >
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6 max-w-sm mx-auto">
             {/* General Error */}
             {errors.general && (
               <motion.div
@@ -118,7 +106,7 @@ export default function LoginPage() {
               <label htmlFor="email" className="block text-[#F9E4AD] text-sm font-medium">
                 Email Address
               </label>
-              <div className="relative">
+              <div className="relative ui-control mx-auto">
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#E70008] w-5 h-5" />
                 <input
                   type="email"
@@ -127,8 +115,8 @@ export default function LoginPage() {
                   value={formData.email}
                   onChange={handleInputChange}
                   className={`w-full pl-12 pr-4 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all duration-200 ${
-                    errors.email 
-                      ? 'border-red-500 focus:ring-red-500/50' 
+                    errors.email
+                      ? 'border-red-500 focus:ring-red-500/50'
                       : 'border-[#E70008]/30 focus:ring-[#E70008]/50 focus:border-[#E70008]'
                   }`}
                   placeholder="Enter your email"
@@ -150,7 +138,7 @@ export default function LoginPage() {
               <label htmlFor="password" className="block text-[#F9E4AD] text-sm font-medium">
                 Password
               </label>
-              <div className="relative">
+              <div className="relative ui-control mx-auto">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#E70008] w-5 h-5" />
                 <input
                   type={showPassword ? 'text' : 'password'}
@@ -159,8 +147,8 @@ export default function LoginPage() {
                   value={formData.password}
                   onChange={handleInputChange}
                   className={`w-full pl-12 pr-12 py-3 bg-black/30 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 transition-all duration-200 ${
-                    errors.password 
-                      ? 'border-red-500 focus:ring-red-500/50' 
+                    errors.password
+                      ? 'border-red-500 focus:ring-red-500/50'
                       : 'border-[#E70008]/30 focus:ring-[#E70008]/50 focus:border-[#E70008]'
                   }`}
                   placeholder="Enter your password"
@@ -204,7 +192,7 @@ export default function LoginPage() {
               disabled={isLoading}
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              className="w-full bg-gradient-to-r from-[#E70008] to-[#B50006] text-white py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-2 hover:from-[#B50006] hover:to-[#E70008] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="ui-btn mx-auto bg-gradient-to-r from-[#E70008] to-[#B50006] text-white py-3 px-6 rounded-lg font-semibold flex items-center justify-center gap-2 hover:from-[#B50006] hover:to-[#E70008] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>

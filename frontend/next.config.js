@@ -10,10 +10,17 @@ const nextConfig = {
   },
   
   async rewrites() {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL;
+    const isValid = typeof apiBase === 'string' && /^(https?:\/\/|\/)/.test(apiBase);
+    if (!isValid) {
+      // No valid API base URL set; skip rewrites to avoid invalid config
+      return [];
+    }
+    const normalized = apiBase.replace(/\/$/, '');
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL}/api/:path*`,
+        destination: `${normalized}/api/:path*`,
       },
     ];
   },
@@ -28,9 +35,9 @@ const nextConfig = {
     ],
   },
   
-  // Optimize for Vercel deployment
+  // Optimize for Vercel deployment (disable optimizeCss to avoid 'critters' dependency)
   experimental: {
-    optimizeCss: true,
+    optimizeCss: false,
   },
   
   // Security headers

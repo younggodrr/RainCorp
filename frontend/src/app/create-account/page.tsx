@@ -187,7 +187,7 @@ export default function CreateAccountPage() {
   };
 
   return (
-    <div className="min-h-screen magna-bg transition-all duration-500">
+    <div className={`min-h-screen transition-all duration-500 ${isDarkMode ? 'bg-dark-theme' : 'bg-light-theme'}`}>
       {/* Animated Background Elements with Magna Colors */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full opacity-20 bg-magna-red blur-3xl animate-pulse"></div>
