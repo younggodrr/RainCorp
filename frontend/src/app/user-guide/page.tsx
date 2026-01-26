@@ -97,7 +97,7 @@ export default function UserGuidePage() {
     if (step > 1) setStep(step - 1);
   };
 
-  const updateFormData = (key: keyof FormData, value: any) => {
+  const updateFormData = (key: keyof FormData, value: FormData[keyof FormData]) => {
     setFormData(prev => ({ ...prev, [key]: value }));
   };
 
