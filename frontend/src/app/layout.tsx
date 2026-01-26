@@ -9,8 +9,8 @@ export const metadata: Metadata = {
   description: 'The community for builders and developers.',
   manifest: "/manifest.json",
   icons: {
-    icon: "/icons/icon.jpg",
-    apple: "/icons/icon.jpg",
+    icon: "/icons/image.svg",
+    apple: "/icons/image.svg",
   },
 }
 

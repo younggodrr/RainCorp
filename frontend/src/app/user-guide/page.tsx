@@ -332,7 +332,7 @@ export default function UserGuidePage() {
                 value={formData.bio}
                 onChange={(e) => updateFormData('bio', e.target.value)}
                 placeholder="Tell us about your journey, interests, and what drives you..."
-                className="w-full h-32 p-4 rounded-xl border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] outline-none resize-none bg-gray-50"
+                className="w-full h-32 p-4 rounded-xl border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] outline-none resize-none bg-gray-50 text-black"
               />
               <div className="text-right mt-1">
                 <span className={`text-xs ${formData.bio.length > 0 && formData.bio.length < 40 ? 'text-red-500' : 'text-gray-400'}`}>
@@ -353,7 +353,7 @@ export default function UserGuidePage() {
                   placeholder="Country (e.g. Kenya)"
                   value={formData.country}
                   onChange={(e) => updateFormData('country', e.target.value)}
-                  className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] outline-none bg-white"
+                  className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] outline-none bg-white text-black"
                 />
 
                 {formData.country.toLowerCase() === 'kenya' && (
@@ -366,7 +366,7 @@ export default function UserGuidePage() {
                     <select
                       value={formData.county}
                       onChange={(e) => updateFormData('county', e.target.value)}
-                      className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] outline-none bg-white appearance-none"
+                      className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] outline-none bg-white appearance-none text-black"
                     >
                       <option value="">Select a county...</option>
                       {COUNTIES.map((county) => (
