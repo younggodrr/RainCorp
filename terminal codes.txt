@@ -1,1 +1,2 @@
 cd frontend; pnpm dev
+cd backend; pnpm dev

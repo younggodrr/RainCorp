@@ -8,6 +8,10 @@ export const metadata: Metadata = {
   title: 'Magna Coders',
   description: 'The community for builders and developers.',
   manifest: "/manifest.json",
+  icons: {
+    icon: "/icons/icon.jpg",
+    apple: "/icons/icon.jpg",
+  },
 }
 
 export const viewport: Viewport = {
