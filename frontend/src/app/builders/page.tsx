@@ -1,0 +1,222 @@
+"use client";
+
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { 
+  LayoutGrid, Users, MessageSquare, Settings, Search, 
+  MapPin, Github, Linkedin, MessageCircle, Check, Globe,
+  ChevronLeft, ChevronRight, Menu, X, Bell
+} from 'lucide-react';
+
+// Mock Data for Builders
+const MOCK_BUILDERS = Array.from({ length: 50 }).map((_, i) => ({
+  id: i + 1,
+  name: i % 2 === 0 ? 'Ashwa' : 'abdijabar',
+  email: i % 2 === 0 ? 'ashwaashard@gmail.com' : 'abdijabarmadeyteno@gmail.com',
+  bio: i % 2 === 0 
+    ? 'Ux Ui designer| Author | Deep Thinker | Content Creator | Artist 🎨 💻 📽️' 
+    : 'Great mind with ambitions, flowing with destiny with submission.',
+  roles: i % 2 === 0 
+    ? ['UX Designer', 'Designer'] 
+    : ['AI/ML Engineer', 'Backend Developer', 'Developer', 'Research/Analyst'],
+  location: i % 2 === 0 ? 'Nairobi' : 'Mandera, Kenya (Home Address)',
+  status: 'available',
+  connected: i % 3 === 0,
+  avatar: null // Will use initials or placeholder
+}));
+
+export default function BuildersPage() {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const itemsPerPage = 6; // Grid 3x2 or List
+  
+  const totalPages = Math.ceil(MOCK_BUILDERS.length / itemsPerPage);
+  const currentBuilders = MOCK_BUILDERS.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
+  return (
+    <div className="min-h-screen bg-[#FDF8F5] font-sans text-[#444444] flex overflow-hidden">
+      
+      {/* DESKTOP SIDEBAR (Reused structure) */}
+      <div className="w-[80px] bg-white border-r border-gray-100 flex-col items-center py-6 gap-8 z-20 hidden md:flex">
+        <Link href="/feed" className="w-10 h-10 rounded-lg bg-[#E50914] flex items-center justify-center text-white mb-4 shadow-md hover:bg-[#cc0812] transition-colors">
+           <span className="font-bold text-xl">M</span>
+        </Link>
+
+        <div className="flex flex-col gap-6 w-full items-center">
+          <Link href="/feed" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
+            <LayoutGrid size={24} />
+            <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Feed</span>
+          </Link>
+          
+          <Link href="/builders" className="p-3 rounded-xl text-[#E50914] bg-red-50 relative group">
+            <Users size={24} />
+             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Builders</span>
+          </Link>
+
+          <Link href="/messages" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
+            <MessageSquare size={24} />
+             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Messages</span>
+          </Link>
+        </div>
+
+        <div className="mt-auto flex flex-col gap-6 w-full items-center">
+          <Link href="/settings" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
+            <Settings size={24} />
+             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Settings</span>
+          </Link>
+          
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm cursor-pointer hover:shadow-md transition-all">
+            JD
+          </div>
+        </div>
+      </div>
+
+      {/* MAIN CONTENT */}
+      <div className="flex-1 flex flex-col h-screen overflow-y-auto">
+        
+        {/* TOP NAVIGATION BAR (Fixed) */}
+        <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-sm border-b border-gray-100 px-4 py-4 flex items-center justify-between">
+           <div className="flex items-center gap-4 flex-1">
+             {/* Mobile Back */}
+             <Link href="/feed" className="md:hidden text-gray-400">
+               <ChevronLeft size={24} />
+             </Link>
+             
+             {/* Search Bar (Centered) */}
+             <div className="relative w-full md:max-w-lg">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+                <input 
+                  type="text" 
+                  placeholder="Search by name, category, role, location..." 
+                  className="w-full bg-gray-50 border border-gray-100 rounded-full pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#E50914] transition-all"
+                />
+             </div>
+           </div>
+           
+           {/* Actions */}
+           <div className="flex items-center gap-2 ml-4">
+              <button className="relative p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
+                <Bell size={20} />
+                <div className="absolute top-2 right-2.5 w-2 h-2 bg-[#E50914] rounded-full"></div>
+              </button>
+              <button className="p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
+                <Menu size={20} />
+              </button>
+           </div>
+        </div>
+
+        {/* BUILDERS GRID / LIST */}
+        <div className="px-4 md:px-10 py-8 pb-24 md:pb-10">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {currentBuilders.map((builder) => (
+              <div key={builder.id} className="bg-white rounded-2xl p-6 border border-black hover:shadow-md transition-all flex flex-col gap-4">
+                {/* Header: Avatar & Info */}
+                <div className="flex gap-4 items-start">
+                  <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0 text-gray-500 font-bold text-xl">
+                    {/* Placeholder Avatar */}
+                    {builder.avatar ? (
+                      <img src={builder.avatar} alt={builder.name} className="w-full h-full object-cover" />
+                    ) : (
+                      builder.name.substring(0, 2).toUpperCase()
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h3 className="font-bold text-black truncate">{builder.name}</h3>
+                    </div>
+                    <p className="text-xs text-gray-500 truncate">{builder.email}</p>
+                    <p className="text-xs text-gray-600 mt-1 line-clamp-2 leading-relaxed">{builder.bio}</p>
+                  </div>
+                  <span className="px-2 py-0.5 bg-[#2ECC71]/10 text-[#2ECC71] rounded-full text-[10px] font-medium flex-shrink-0">
+                    {builder.status}
+                  </span>
+                </div>
+
+                {/* Roles */}
+                <div className="flex flex-wrap gap-2">
+                  {builder.roles.map((role, idx) => (
+                    <span key={idx} className={`px-3 py-1 rounded-full text-[10px] font-medium border ${idx === 0 ? 'bg-[#F4A261]/10 text-[#F4A261] border-[#F4A261]/20' : 'bg-[#E50914]/10 text-[#E50914] border-[#E50914]/20'}`}>
+                      {role}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Details */}
+                <div className="space-y-2 mt-auto">
+                   <div className="flex items-center gap-2 text-xs text-gray-500">
+                     <MapPin size={14} className="text-[#E50914]" />
+                     <span className="truncate">{builder.location}</span>
+                   </div>
+                   <div className="flex items-center gap-3 text-gray-400">
+                      <Globe size={16} className="text-[#F4A261] cursor-pointer transition-colors" />
+                      <Github size={16} className="text-black cursor-pointer transition-colors" />
+                      <Linkedin size={16} className="text-[#0077b5] cursor-pointer transition-colors" />
+                      <MessageCircle size={16} className="text-[#25D366] cursor-pointer transition-colors" />
+                   </div>
+                </div>
+
+                {/* Actions */}
+                <div className="grid grid-cols-2 gap-3 mt-2">
+                  <button className={`py-2 rounded-xl text-xs font-bold transition-all ${builder.connected ? 'bg-[#F4A261]/10 text-[#F4A261] border border-[#F4A261]/20' : 'bg-[#F4A261] text-white hover:bg-[#e08e4d] shadow-sm'}`}>
+                    {builder.connected ? 'Connected' : 'Connect'}
+                  </button>
+                  <button className="py-2 rounded-xl text-xs font-bold bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 transition-all">
+                    Message
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Pagination (Mobile & Desktop) */}
+          <div className="mt-8 flex justify-center items-center gap-4">
+            <button 
+              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg bg-white border border-gray-200 text-gray-400 disabled:opacity-50 hover:text-[#E50914] hover:border-[#E50914] transition-all shadow-sm"
+            >
+              <ChevronLeft size={20} />
+            </button>
+            <span className="text-sm text-gray-500">
+              Page <span className="text-[#E50914] font-bold">{currentPage}</span> of {totalPages}
+            </span>
+            <button 
+              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-lg bg-white border border-gray-200 text-gray-400 disabled:opacity-50 hover:text-[#E50914] hover:border-[#E50914] transition-all shadow-sm"
+            >
+              <ChevronRight size={20} />
+            </button>
+          </div>
+        </div>
+
+      </div>
+
+      {/* MOBILE BOTTOM NAV */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-3 md:hidden z-50 flex justify-between items-center pb-5 pt-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <Link href="/feed" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
+          <LayoutGrid size={24} />
+          <span className="text-[10px] font-medium">Feed</span>
+        </Link>
+        <Link href="/builders" className="flex flex-col items-center gap-1 text-[#E50914] transition-colors">
+          <Search size={24} />
+          <span className="text-[10px] font-medium">Builders</span>
+        </Link>
+        <Link href="/messages" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
+          <MessageSquare size={24} />
+          <span className="text-[10px] font-medium">Chat</span>
+        </Link>
+        <Link href="/user-profile" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-[10px]">
+             JD
+          </div>
+          <span className="text-[10px] font-medium">Profile</span>
+        </Link>
+      </div>
+
+    </div>
+  );
+}
