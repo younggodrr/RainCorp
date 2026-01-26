@@ -1,429 +1,211 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { 
-  Zap, 
-  MessageCircle, 
-  Rocket, 
-  Palette,
-  Users,
-  UserPlus
-} from "lucide-react";
-
-// Custom Typewriter component for one-by-one letter effect with Framer Motion
-const TypewriterTitle = ({ text, speed = 100 }: { text: string; speed?: number }) => {
-  const [displayText, setDisplayText] = useState('');
-  const [showCursor, setShowCursor] = useState(true);
-
-  useEffect(() => {
-    setDisplayText('');
-    let currentIndex = 0;
-    
-    const typeInterval = setInterval(() => {
-      if (currentIndex <= text.length) {
-        setDisplayText(text.slice(0, currentIndex));
-        currentIndex++;
-      } else {
-        clearInterval(typeInterval);
-        // Blink cursor for 3 seconds then hide
-        setTimeout(() => setShowCursor(false), 3000);
-      }
-    }, speed);
-
-    return () => {
-      clearInterval(typeInterval);
-      setShowCursor(true);
-    };
-  }, [text, speed]);
-
-  return (
-    <motion.h1 
-      className="text-6xl md:text-7xl font-bold text-[#F9E4AD] mb-8"
-      initial={{ opacity: 0, y: 30 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, ease: "easeOut" }}
-    >
-      <span className="font-mono">{displayText}</span>
-      {showCursor && <motion.span 
-        animate={{ opacity: [1, 0] }}
-        transition={{ duration: 0.8, repeat: Infinity, repeatType: "reverse" }}
-        className="inline-block ml-1"
-      >
-        |
-      </motion.span>}
-    </motion.h1>
-  );
-};
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Code2, Users, Lightbulb, TrendingUp, Menu, X } from 'lucide-react';
 
 export default function Home() {
-  const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  const [particles, setParticles] = useState<Array<{id: number, x: number, y: number, delay: number, duration: number}>>([]);
-  const [techSymbolPositions, setTechSymbolPositions] = useState<Array<{left: string, top: string, fontSize: string}>>([]);
-  
-  const titles = [
-    "Magna Coders",
-    "Build. Collaborate. Solve.",
-    "Code the Future",
-    "Join the Revolution"
-  ];
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Mouse tracking for interactive effects
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      setMousePosition({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-  
-  // Tech symbols for floating animation
-  const techSymbols = ['<', '>', '{', '}', '/', '*', '+', '=', '&', '#', '@', '$', '%', '^', '~'];
+  const toggleMobileMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
 
-  // Generate random positions for particle effects (client-side only)
-  useEffect(() => {
-    const generatedParticles = Array.from({ length: 20 }, (_, i) => ({
-      id: i,
-      x: Math.random() * 100,
-      y: Math.random() * 100,
-      delay: Math.random() * 2,
-      duration: 3 + Math.random() * 2
-    }));
-    setParticles(generatedParticles);
+  const fadeInUp = {
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.5, ease: "easeOut" }
+  };
 
-    // Generate tech symbol positions (client-side only)
-    const generatedPositions = Array.from({ length: 30 }, () => ({
-      left: `${Math.random() * 100}%`,
-      top: `${Math.random() * 100}%`,
-      fontSize: `${Math.random() * 20 + 10}px`
-    }));
-    setTechSymbolPositions(generatedPositions);
-  }, []);
-
-  useEffect(() => {
-    // Simulate loading sequence
-    const loadingTimer = setTimeout(() => {
-      setIsLoading(false);
-    }, 2000);
-
-    // Cycle through different titles every 6 seconds
-    const titleInterval = setInterval(() => {
-      setCurrentTitleIndex(prev => (prev + 1) % titles.length);
-    }, 6000);
-
-    return () => {
-      clearTimeout(loadingTimer);
-      clearInterval(titleInterval);
-    };
-  }, [titles.length]);
+  const staggerContainer = {
+    animate: {
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-black">
-      {/* Mouse-following glow effect */}
-      <motion.div
-        className="fixed w-96 h-96 pointer-events-none z-0"
-        style={{
-          background: 'radial-gradient(circle, rgba(231, 0, 8, 0.1) 0%, transparent 70%)',
-          left: mousePosition.x - 192,
-          top: mousePosition.y - 192,
-        }}
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.3, 0.5, 0.3],
-        }}
-        transition={{
-          duration: 3,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      />
+    <div className="min-h-screen bg-gradient-to-br from-[#F9E8B2] to-[#FBE6A4] text-[#444444] font-sans selection:bg-[#E50914] selection:text-white overflow-x-hidden">
       
-      {/* Floating Tech Symbols and Letters */}
-      <div className="fixed inset-0 pointer-events-none z-0">
-        {techSymbolPositions.slice(0, 15).map((position, i) => (
-          <motion.div
-            key={`float-${i}`}
-            className="absolute text-[#E70008] opacity-20 font-mono font-bold"
-            style={{
-              left: position.left,
-              top: position.top,
-              fontSize: position.fontSize,
-            }}
-            animate={{
-              y: [0, -30, 0],
-              x: [0, 10 - 20 * (i % 2), 0],
-              opacity: [0.1, 0.3, 0.1],
-              rotate: [0, 180 * (i % 2 === 0 ? 1 : -1), 0],
-            }}
-            transition={{
-              duration: 8 + (i % 3) * 2,
-              repeat: Infinity,
-              delay: i * 0.5,
-              ease: "easeInOut"
-            }}
-          >
-            {techSymbols[i] || 'M'}
-          </motion.div>
-        ))}
-      </div>
-
-      {/* Loading Animation */}
-      <AnimatePresence>
-        {isLoading && (
-          <motion.div
-            initial={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.8, ease: "easeInOut" }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black"
-          >
-            <div className="relative">
-              {/* Animated logo or symbol */}
-              <motion.div
-                animate={{ 
-                  rotate: 360,
-                  scale: [1, 1.2, 1]
-                }}
-                transition={{ 
-                  duration: 2,
-                  repeat: Infinity,
-                  ease: "linear"
-                }}
-                className="w-24 h-24 border-4 border-[#E70008] rounded-full"
-              >
-                <motion.div
-                  animate={{ rotate: -360 }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
-                  className="w-full h-full flex items-center justify-center"
-                >
-                  <motion.div 
-                    animate={{ 
-                      scale: [1, 1.3, 1],
-                      opacity: [0.7, 1, 0.7]
-                    }}
-                    transition={{ duration: 1, repeat: Infinity, ease: "easeInOut" }}
-                    className="w-8 h-8 bg-[#FF9940] rounded-full" 
-                  />
-                </motion.div>
-              </motion.div>
-              
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5, duration: 0.8 }}
-                className="absolute -bottom-12 left-1/2 transform -translate-x-1/2 text-[#F9E4AD] font-mono text-sm whitespace-nowrap"
-              >
-                Loading Magna...
-              </motion.p>
+      {/* Navigation */}
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-[#F9E8B2]/90 backdrop-blur-sm border-b border-white/20">
+        <div className="max-w-7xl mx-auto px-6 h-20 flex justify-between items-center">
+          {/* Logo */}
+          <Link href="/" className="flex items-center gap-3 group">
+            <div className="w-10 h-10 rounded-full bg-[#8B0000] flex items-center justify-center text-white shadow-md group-hover:scale-105 transition-transform">
+              {/* Abstract Tree/Crest Icon Placeholder */}
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+              </svg>
             </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <span className="text-xl font-bold tracking-tight">
+              <span className="text-[#F4A261]">Magna</span>
+              <span className="text-[#E50914]">Coders</span>
+            </span>
+          </Link>
 
-      {/* Animated background tech symbols */}
-      <div className="absolute w-full h-full pointer-events-none">
-        {techSymbolPositions.map((position, index) => (
-          <motion.div 
-            key={`tech-${index}`} 
-            className="absolute"
-            style={{
-              left: position.left,
-              top: position.top,
-            }}
-            initial={{ opacity: 0, y: -100 }}
-            animate={{ opacity: 0.3, y: 0 }}
-            transition={{ 
-              delay: index * 0.05 + 2.2, 
-              duration: 1,
-              ease: "easeOut"
-            }}
-          >
-            <motion.div 
-              className="w-8 h-8 opacity-30 transition-all duration-300 cursor-pointer text-[#E70008] font-mono font-bold text-lg flex items-center justify-center"
-              whileHover={{ 
-                scale: 1.5, 
-                opacity: 0.8,
-                rotate: 360,
-              }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              {techSymbols[index % techSymbols.length]}
-            </motion.div>
-          </motion.div>
-        ))}
-      </div>
-      
-      <motion.main 
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 2.2, duration: 1, ease: "easeOut" }}
-        className="relative z-10 min-h-screen p-8"
-      >
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 min-h-screen items-center max-w-7xl mx-auto">
-          {/* Left Side - Hero Content */}
-          <motion.div 
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 2.5, duration: 0.8, ease: "easeOut" }}
-            className="text-center lg:text-left"
-          >
-            <TypewriterTitle 
-              key={currentTitleIndex} 
-              text={titles[currentTitleIndex]} 
-              speed={80} 
-            />
-            
-            <motion.p 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 3, duration: 0.8, ease: "easeOut" }}
-              className="text-2xl text-[#FF9940] mb-12 font-sans"
-            >
-              Where developers, designers, and problem-solvers unite to create tech solutions for real-world challenges.
-            </motion.p>
-            
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 3.3, duration: 0.8, ease: "easeOut" }}
-              className="flex gap-8 justify-center lg:justify-start"
-            >
-              <motion.button 
-                whileHover={{ scale: 1.05, boxShadow: "0 20px 40px rgba(231, 0, 8, 0.3)" }}
-                whileTap={{ scale: 0.95 }}
-                className="px-10 py-4 bg-[#E70008] text-[#F9E4AD] font-bold rounded-full hover:bg-[#D60007] transition-all duration-200 shadow-lg font-sans flex items-center gap-3 min-h-[56px]"
-              >
-                <Users size={20} />
-                Start Collaborating
-              </motion.button>
-              <motion.a 
-                href="/create-account"
-                whileHover={{ scale: 1.05, backgroundColor: "#E70008", color: "#F9E4AD" }}
-                whileTap={{ scale: 0.95 }}
-                className="px-10 py-4 border-2 border-[#E70008] text-[#F9E4AD] font-bold rounded-full transform transition-all duration-200 font-sans cursor-pointer flex items-center gap-3 min-h-[56px]"
-              >
-                <UserPlus size={20} />
-                Join Community
-              </motion.a>
-            </motion.div>
-          </motion.div>
+          {/* Desktop Nav Links */}
+          <div className="hidden md:flex items-center gap-8">
+            <Link href="#features" className="text-black font-medium hover:text-[#E50914] transition-colors">Features</Link>
+            <Link href="#community" className="text-black font-medium hover:text-[#E50914] transition-colors">Community</Link>
+            <Link href="#about" className="text-black font-medium hover:text-[#E50914] transition-colors">About</Link>
+          </div>
 
-          {/* Right Side - Dynamic Sections */}
-          <motion.div 
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 3.5, duration: 1, ease: "easeOut" }}
-            className="space-y-8"
-          >
-            {/* What's Happening Inside (Living Pulse) */}
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 3.8, duration: 0.8, ease: "easeOut" }}
-              className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6"
+          {/* Desktop Auth Buttons */}
+          <div className="hidden md:flex items-center gap-4">
+            <Link 
+              href="/login" 
+              className="px-6 py-2.5 rounded-full border-2 border-[#E50914] text-[#E50914] font-medium bg-white hover:bg-red-50 transition-colors"
             >
-              <motion.h3 
-                className="text-2xl font-bold text-[#F9E4AD] mb-4 flex items-center gap-2"
-                animate={{ 
-                  textShadow: ["0 0 10px rgba(249, 228, 173, 0.3)", "0 0 20px rgba(249, 228, 173, 0.6)", "0 0 10px rgba(249, 228, 173, 0.3)"]
-                }}
-                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-              >
-                <motion.div 
-                  animate={{ rotate: [0, 360] }}
-                  transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
-                  className="text-[#E70008]"
-                >
-                  <Zap size={24} />
-                </motion.div>
-                What&apos;s Happening Inside
-              </motion.h3>
-              
-              <div className="space-y-3">
-                {[
-                  { icon: MessageCircle, text: "12 new members joined today", delay: 4.0 },
-                  { icon: Rocket, text: "3 projects started this week", delay: 4.2 },
-                  { icon: Palette, text: "find your coding partner closest to you", delay: 4.4 }
-                ].map((item, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: item.delay, duration: 0.6, ease: "easeOut" }}
-                    className="flex items-center gap-3 p-3 bg-black/20 rounded-lg border border-gray-600/30"
-                  >
-                    <motion.div 
-                      animate={{ 
-                        scale: [1, 1.2, 1],
-                        filter: ["brightness(1)", "brightness(1.5)", "brightness(1)"]
-                      }}
-                      transition={{ 
-                        duration: 2, 
-                        repeat: Infinity, 
-                        delay: index * 0.5,
-                        ease: "easeInOut" 
-                      }}
-                      className="text-[#E70008]"
-                    >
-                      <item.icon size={24} />
-                    </motion.div>
-                    <span className="text-[#FF9940] font-medium">{item.text}</span>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
+              Sign In
+            </Link>
+            <Link 
+              href="/register" 
+              className="px-6 py-2.5 rounded-full bg-[#E50914] text-white font-medium shadow-md hover:bg-[#cc0812] hover:shadow-lg transition-all"
+            >
+              Join Community
+            </Link>
+          </div>
 
-            {/* Faces of the Revolution Preview */}
-            <motion.div 
-              initial={{ opacity: 0, y: 30 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 4.6, duration: 0.8, ease: "easeOut" }}
-              className="bg-gradient-to-br from-gray-900/50 to-gray-800/30 backdrop-blur-sm border border-gray-700/50 rounded-2xl p-6"
-            >
-              <h3 className="text-xl font-bold text-[#F9E4AD] mb-4">Faces of the Revolution</h3>
-              <div className="grid grid-cols-4 gap-2">
-                {Array.from({ length: 8 }, (_, i) => (
-                  <motion.div
-                    key={i}
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 4.8 + i * 0.1, duration: 0.4, ease: "backOut" }}
-                    whileHover={{ scale: 1.1, rotate: 5 }}
-                    className="w-12 h-12 bg-gradient-to-br from-[#E70008] to-[#FF9940] rounded-full flex items-center justify-center text-white font-bold text-sm cursor-pointer border-2 border-[#E70008]"
-                  >
-                    {String.fromCharCode(65 + i)}
-                  </motion.div>
-                ))}
-              </div>
-              <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 5.6, duration: 0.6 }}
-                className="text-[#FF9940] text-sm mt-3"
-              >
-                1,200+ builders shaping African tech
-              </motion.p>
-            </motion.div>
-          </motion.div>
+          {/* Mobile Menu Toggle */}
+          <button onClick={toggleMobileMenu} className="md:hidden text-black p-2">
+            {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
+          </button>
         </div>
-      </motion.main>
 
-      <motion.div 
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 3.8, duration: 0.8, ease: "easeOut" }}
-        className="fixed bottom-4 left-1/2 transform -translate-x-1/2 z-20"
-      >
-        <motion.a 
-          href="/about" 
-          whileHover={{ scale: 1.05, backgroundColor: "#D60007" }}
-          whileTap={{ scale: 0.95 }}
-          className="px-6 py-2 bg-[#E70008] text-[#F9E4AD] font-bold rounded-full transition-all duration-200 shadow-lg"
-        >
-          About Us
-        </motion.a>
-      </motion.div>
+        {/* Mobile Menu Overlay */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div 
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden bg-[#F9E8B2] border-t border-white/20 overflow-hidden"
+            >
+              <div className="flex flex-col p-6 gap-4">
+                <Link href="#features" className="text-black font-medium py-2" onClick={toggleMobileMenu}>Features</Link>
+                <Link href="#community" className="text-black font-medium py-2" onClick={toggleMobileMenu}>Community</Link>
+                <Link href="#about" className="text-black font-medium py-2" onClick={toggleMobileMenu}>About</Link>
+                <div className="h-px bg-gray-300 my-2"></div>
+                <Link href="/login" className="text-[#E50914] font-bold py-2" onClick={toggleMobileMenu}>Sign In</Link>
+                <Link href="/register" className="bg-[#E50914] text-white text-center py-3 rounded-full font-medium shadow-sm" onClick={toggleMobileMenu}>Join Community</Link>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </nav>
+
+      {/* Hero Section */}
+      <main className="max-w-7xl mx-auto px-6 pt-32 pb-20 md:pt-40 md:pb-32 min-h-screen flex flex-col justify-center">
+        <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+          
+          {/* Left Column: Text Stack */}
+          <motion.div 
+            initial="initial"
+            animate="animate"
+            variants={staggerContainer}
+            className="space-y-8 text-center md:text-left"
+          >
+            {/* Badge */}
+            <motion.div variants={fadeInUp} className="flex justify-center md:justify-start">
+              <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-white border border-[#F4A261]/50 shadow-sm text-sm font-medium text-[#444444]">
+                Where Skills Meet Purpose
+              </span>
+            </motion.div>
+
+            {/* Heading */}
+            <motion.h1 variants={fadeInUp} className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
+              <span className="text-black">Build. Collaborate.</span><br />
+              <span className="text-[#E50914]">Create Impact</span><br />
+              <span className="text-black">Together</span>
+            </motion.h1>
+
+            {/* Paragraph */}
+            <motion.p variants={fadeInUp} className="text-lg md:text-xl text-[#444444] leading-relaxed max-w-[520px] mx-auto md:mx-0">
+              Join Kenya&apos;s premier community of developers, designers, and innovators. Connect with talent, collaborate on projects, and turn ideas into reality.
+            </motion.p>
+
+            {/* CTA Buttons */}
+            <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+              <Link 
+                href="/register" 
+                className="px-8 py-4 rounded-full bg-[#E50914] text-white font-semibold text-lg shadow-md hover:bg-[#cc0812] hover:shadow-xl transition-all hover:-translate-y-0.5"
+              >
+                Get Started Free
+              </Link>
+              <Link 
+                href="/projects" 
+                className="px-8 py-4 rounded-full bg-white border-2 border-[#E50914] text-[#E50914] font-semibold text-lg hover:bg-red-50 transition-all"
+              >
+                Explore Projects
+              </Link>
+            </motion.div>
+
+            {/* Stats Row */}
+            <motion.div variants={fadeInUp} className="grid grid-cols-3 gap-6 pt-8 border-t border-black/5">
+              <div className="text-center md:text-left">
+                <div className="text-2xl md:text-3xl font-bold text-[#E50914]">5,000+</div>
+                <div className="text-sm font-medium text-[#777777]">Active Members</div>
+              </div>
+              <div className="text-center md:text-left">
+                <div className="text-2xl md:text-3xl font-bold text-[#F4A261]">1,200+</div>
+                <div className="text-sm font-medium text-[#777777]">Projects Completed</div>
+              </div>
+              <div className="text-center md:text-left">
+                <div className="text-2xl md:text-3xl font-bold text-[#22c55e]">98%</div>
+                <div className="text-sm font-medium text-[#777777]">Success Rate</div>
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Right Column: Feature Cards Grid */}
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+          >
+            <FeatureCard 
+              icon={<Code2 className="w-8 h-8 text-[#E50914]" />}
+              title="Developer Network"
+              subtitle="Connect with skilled developers"
+            />
+            <FeatureCard 
+              icon={<Users className="w-8 h-8 text-[#F4A261]" />}
+              title="Team Building"
+              subtitle="Form project teams easily"
+              className="sm:translate-y-8"
+            />
+            <FeatureCard 
+              icon={<Lightbulb className="w-8 h-8 text-[#E50914]" />}
+              title="Share Ideas"
+              subtitle="Bring concepts to life"
+            />
+            <FeatureCard 
+              icon={<TrendingUp className="w-8 h-8 text-[#F4A261]" />}
+              title="Grow Together"
+              subtitle="Build your portfolio"
+              className="sm:translate-y-8"
+            />
+          </motion.div>
+
+        </div>
+      </main>
     </div>
+  );
+}
+
+function FeatureCard({ icon, title, subtitle, className = "" }: { icon: React.ReactNode; title: string; subtitle: string; className?: string }) {
+  return (
+    <motion.div 
+      whileHover={{ y: -5 }}
+      className={`bg-white p-6 rounded-[20px] shadow-sm hover:shadow-md transition-all border border-transparent hover:border-[#F9E8B2] ${className}`}
+    >
+      <div className="bg-gray-50 w-14 h-14 rounded-full flex items-center justify-center mb-4">
+        {icon}
+      </div>
+      <h3 className="text-xl font-bold text-black mb-1">{title}</h3>
+      <p className="text-[#777777] text-sm">{subtitle}</p>
+    </motion.div>
   );
 }
