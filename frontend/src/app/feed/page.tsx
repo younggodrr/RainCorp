@@ -29,6 +29,7 @@ import Link from 'next/link';
 export default function FeedPage() {
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isPostModalOpen, setIsPostModalOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-[#FDF8F5] font-sans text-[#444444] flex">
@@ -410,26 +411,7 @@ export default function FeedPage() {
           </div>
         )}
 
-        {/* Post Composer */}
-        <div className="bg-white rounded-2xl p-6 shadow-sm mb-8">
-          <div className="flex gap-4">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex-shrink-0 flex items-center justify-center text-white font-bold text-sm">
-              JD
-            </div>
-            <div className="flex-1">
-              <input 
-                type="text" 
-                placeholder="What are you building today?" 
-                className="w-full bg-[#FDF8F5] rounded-full px-6 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#E50914]/20 transition-all"
-              />
-              <div className="flex gap-4 mt-4">
-                <ActionButton icon={<ImageIcon size={18} />} label="Photo" />
 
-                <ActionButton icon={<FolderKanban size={18} />} label="Project" />
-              </div>
-            </div>
-          </div>
-        </div>
 
         {/* Filter Pills */}
         <div className="flex gap-3 mb-8 overflow-x-auto pb-2 scrollbar-hide">
@@ -580,6 +562,47 @@ export default function FeedPage() {
         </div>
 
       </main>
+
+      {/* FLOATING ACTION BUTTON & MODAL */}
+      <div className="fixed bottom-24 right-6 md:bottom-10 md:right-10 z-40 flex flex-col items-end gap-4">
+        {/* Modal Options */}
+        {isPostModalOpen && (
+          <div className="flex flex-col gap-3 mb-2 origin-bottom-right">
+             <button className="flex items-center gap-3 px-5 py-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all group whitespace-nowrap">
+                <span className="text-sm font-bold text-gray-700 group-hover:text-[#E50914]">Post Project</span>
+                <div className="w-8 h-8 rounded-full bg-[#F4A261]/10 text-[#F4A261] flex items-center justify-center group-hover:bg-[#E50914] group-hover:text-white transition-all">
+                  <FolderKanban size={18} />
+                </div>
+             </button>
+             
+             <button className="flex items-center gap-3 px-5 py-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all group whitespace-nowrap">
+                <span className="text-sm font-bold text-gray-700 group-hover:text-[#E50914]">Job Opportunity</span>
+                <div className="w-8 h-8 rounded-full bg-[#2ECC71]/10 text-[#2ECC71] flex items-center justify-center group-hover:bg-[#E50914] group-hover:text-white transition-all">
+                  <Briefcase size={18} />
+                </div>
+             </button>
+
+             <button className="flex items-center gap-3 px-5 py-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all group whitespace-nowrap">
+                <span className="text-sm font-bold text-gray-700 group-hover:text-[#E50914]">Create Post</span>
+                <div className="w-8 h-8 rounded-full bg-[#E50914]/10 text-[#E50914] flex items-center justify-center group-hover:bg-[#E50914] group-hover:text-white transition-all">
+                  <ImageIcon size={18} />
+                </div>
+             </button>
+          </div>
+        )}
+
+        {/* FAB Trigger */}
+        <button 
+          onClick={() => setIsPostModalOpen(!isPostModalOpen)}
+          className={`w-14 h-14 rounded-2xl shadow-xl flex items-center justify-center text-white transition-all transform hover:scale-105 active:scale-95 ${
+            isPostModalOpen 
+              ? 'bg-gray-800 rotate-45' 
+              : 'bg-[#E50914]'
+          }`}
+        >
+          <Plus size={28} strokeWidth={2.5} />
+        </button>
+      </div>
 
       {/* MOBILE BOTTOM NAVIGATION */}
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-3 md:hidden z-50 flex justify-between items-center pb-5 pt-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
