@@ -96,101 +96,221 @@ export default function Home() {
       </nav>
 
       {/* Hero Section */}
-      <main className="max-w-7xl mx-auto px-6 pt-32 pb-20 md:pt-40 md:pb-32 min-h-screen flex flex-col justify-center">
-        <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
-          
-          {/* Left Column: Text Stack */}
-          <motion.div 
-            initial="initial"
-            animate="animate"
-            variants={staggerContainer}
-            className="space-y-8 text-center md:text-left"
-          >
-            {/* Badge */}
-            <motion.div variants={fadeInUp} className="flex justify-center md:justify-start">
-              <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-white border border-[#F4A261]/50 shadow-sm text-sm font-medium text-[#444444]">
-                Where Skills Meet Purpose
-              </span>
+      <main className="w-full">
+        <section className="max-w-7xl mx-auto px-6 pt-32 pb-20 md:pt-40 md:pb-32 min-h-screen flex flex-col justify-center">
+          <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
+            
+            {/* Left Column: Text Stack */}
+            <motion.div 
+              initial="initial"
+              animate="animate"
+              variants={staggerContainer}
+              className="space-y-8 text-center md:text-left"
+            >
+              {/* Badge */}
+              <motion.div variants={fadeInUp} className="flex justify-center md:justify-start">
+                <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-white border border-[#F4A261]/50 shadow-sm text-sm font-medium text-[#444444]">
+                  Where Skills Meet Purpose
+                </span>
+              </motion.div>
+
+              {/* Heading */}
+              <motion.h1 variants={fadeInUp} className="text-4xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
+                <span className="text-black">Build. Collaborate.</span><br />
+                <span className="text-[#E50914]">Create Impact</span><br />
+                <span className="text-black">Together</span>
+              </motion.h1>
+
+              {/* Paragraph */}
+              <motion.p variants={fadeInUp} className="text-lg md:text-xl text-[#444444] leading-relaxed max-w-[520px] mx-auto md:mx-0">
+                Join Kenya&apos;s premier community of developers, designers, and innovators. Connect with talent, collaborate on projects, and turn ideas into reality.
+              </motion.p>
+
+              {/* CTA Buttons */}
+              <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                <Link 
+                  href="/register" 
+                  className="px-8 py-4 rounded-full bg-[#E50914] text-white font-semibold text-lg shadow-md hover:bg-[#cc0812] hover:shadow-xl transition-all hover:-translate-y-0.5"
+                >
+                  Get Started Free
+                </Link>
+                <Link 
+                  href="/projects" 
+                  className="px-8 py-4 rounded-full bg-white border-2 border-[#E50914] text-[#E50914] font-semibold text-lg hover:bg-red-50 transition-all"
+                >
+                  Explore Projects
+                </Link>
+              </motion.div>
+
+              {/* Stats Row */}
+              <motion.div variants={fadeInUp} className="grid grid-cols-1 sm:grid-cols-3 gap-6 pt-8 border-t border-black/5">
+                <div className="text-center md:text-left">
+                  <div className="text-3xl font-bold text-[#E50914]">5,000+</div>
+                  <div className="text-sm font-medium text-[#777777]">Active Members</div>
+                </div>
+                <div className="text-center md:text-left">
+                  <div className="text-3xl font-bold text-[#F4A261]">1,200+</div>
+                  <div className="text-sm font-medium text-[#777777]">Projects Completed</div>
+                </div>
+                <div className="text-center md:text-left">
+                  <div className="text-3xl font-bold text-[#22c55e]">98%</div>
+                  <div className="text-sm font-medium text-[#777777]">Success Rate</div>
+                </div>
+              </motion.div>
             </motion.div>
 
-            {/* Heading */}
-            <motion.h1 variants={fadeInUp} className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-[1.1]">
-              <span className="text-black">Build. Collaborate.</span><br />
-              <span className="text-[#E50914]">Create Impact</span><br />
-              <span className="text-black">Together</span>
-            </motion.h1>
+            {/* Right Column: Feature Cards Grid */}
+            <motion.div 
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8, delay: 0.2 }}
+              className="grid grid-cols-1 sm:grid-cols-2 gap-6"
+            >
+              <FeatureCard 
+                icon={<Code2 className="w-8 h-8 text-[#E50914]" />}
+                title="Developer Network"
+                subtitle="Connect with skilled developers"
+              />
+              <FeatureCard 
+                icon={<Users className="w-8 h-8 text-[#F4A261]" />}
+                title="Team Building"
+                subtitle="Form project teams easily"
+                className="sm:translate-y-8"
+              />
+              <FeatureCard 
+                icon={<Lightbulb className="w-8 h-8 text-[#E50914]" />}
+                title="Share Ideas"
+                subtitle="Bring concepts to life"
+              />
+              <FeatureCard 
+                icon={<TrendingUp className="w-8 h-8 text-[#F4A261]" />}
+                title="Grow Together"
+                subtitle="Build your portfolio"
+                className="sm:translate-y-8"
+              />
+            </motion.div>
+          </div>
+        </section>
 
-            {/* Paragraph */}
-            <motion.p variants={fadeInUp} className="text-lg md:text-xl text-[#444444] leading-relaxed max-w-[520px] mx-auto md:mx-0">
-              Join Kenya&apos;s premier community of developers, designers, and innovators. Connect with talent, collaborate on projects, and turn ideas into reality.
-            </motion.p>
+        {/* Features Section */}
+        <section id="features" className="py-24 bg-white/60 backdrop-blur-sm">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center mb-16 max-w-3xl mx-auto">
+              <h2 className="text-3xl md:text-5xl font-bold mb-6 text-black">Why Magna Coders?</h2>
+              <p className="text-xl text-[#444444]">Everything you need to build, grow, and scale your tech career in Kenya and beyond.</p>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {[
+                {
+                  icon: <Users className="w-8 h-8 text-[#E50914]" />,
+                  title: "Vibrant Community",
+                  desc: "Connect with thousands of developers, designers, and founders."
+                },
+                {
+                  icon: <Code2 className="w-8 h-8 text-[#F4A261]" />,
+                  title: "Project Collaboration",
+                  desc: "Find the perfect team members for your next big idea."
+                },
+                {
+                  icon: <TrendingUp className="w-8 h-8 text-[#E50914]" />,
+                  title: "Career Growth",
+                  desc: "Access mentorship, job opportunities, and skill development."
+                }
+              ].map((item, i) => (
+                <div key={i} className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-all border border-gray-100">
+                  <div className="bg-[#F9E8B2]/30 w-16 h-16 rounded-2xl flex items-center justify-center mb-6">
+                    {item.icon}
+                  </div>
+                  <h3 className="text-xl font-bold text-black mb-3">{item.title}</h3>
+                  <p className="text-[#666666] leading-relaxed">{item.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
 
-            {/* CTA Buttons */}
-            <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+        {/* Community Section */}
+        <section id="community" className="py-24 relative overflow-hidden">
+          <div className="absolute inset-0 bg-[#E50914] opacity-[0.03]"></div>
+          <div className="max-w-7xl mx-auto px-6 relative">
+            <div className="bg-black rounded-[3rem] p-8 md:p-16 text-center text-white overflow-hidden relative">
+              <div className="absolute top-0 left-0 w-full h-full bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20"></div>
+              
+              <h2 className="text-3xl md:text-5xl font-bold mb-6 relative z-10">Ready to Start Building?</h2>
+              <p className="text-lg md:text-xl text-gray-300 max-w-2xl mx-auto mb-10 relative z-10">
+                Join the fastest growing tech community in the region. Your next co-founder, mentor, or opportunity is waiting.
+              </p>
+              
               <Link 
                 href="/register" 
-                className="px-8 py-4 rounded-full bg-[#E50914] text-white font-semibold text-lg shadow-md hover:bg-[#cc0812] hover:shadow-xl transition-all hover:-translate-y-0.5"
+                className="inline-block px-10 py-4 rounded-full bg-[#E50914] text-white font-bold text-lg hover:bg-[#cc0812] transition-transform hover:scale-105 relative z-10"
               >
-                Get Started Free
+                Join Now - It&apos;s Free
               </Link>
-              <Link 
-                href="/projects" 
-                className="px-8 py-4 rounded-full bg-white border-2 border-[#E50914] text-[#E50914] font-semibold text-lg hover:bg-red-50 transition-all"
-              >
-                Explore Projects
-              </Link>
-            </motion.div>
-
-            {/* Stats Row */}
-            <motion.div variants={fadeInUp} className="grid grid-cols-3 gap-6 pt-8 border-t border-black/5">
-              <div className="text-center md:text-left">
-                <div className="text-2xl md:text-3xl font-bold text-[#E50914]">5,000+</div>
-                <div className="text-sm font-medium text-[#777777]">Active Members</div>
-              </div>
-              <div className="text-center md:text-left">
-                <div className="text-2xl md:text-3xl font-bold text-[#F4A261]">1,200+</div>
-                <div className="text-sm font-medium text-[#777777]">Projects Completed</div>
-              </div>
-              <div className="text-center md:text-left">
-                <div className="text-2xl md:text-3xl font-bold text-[#22c55e]">98%</div>
-                <div className="text-sm font-medium text-[#777777]">Success Rate</div>
-              </div>
-            </motion.div>
-          </motion.div>
-
-          {/* Right Column: Feature Cards Grid */}
-          <motion.div 
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-            className="grid grid-cols-1 sm:grid-cols-2 gap-6"
-          >
-            <FeatureCard 
-              icon={<Code2 className="w-8 h-8 text-[#E50914]" />}
-              title="Developer Network"
-              subtitle="Connect with skilled developers"
-            />
-            <FeatureCard 
-              icon={<Users className="w-8 h-8 text-[#F4A261]" />}
-              title="Team Building"
-              subtitle="Form project teams easily"
-              className="sm:translate-y-8"
-            />
-            <FeatureCard 
-              icon={<Lightbulb className="w-8 h-8 text-[#E50914]" />}
-              title="Share Ideas"
-              subtitle="Bring concepts to life"
-            />
-            <FeatureCard 
-              icon={<TrendingUp className="w-8 h-8 text-[#F4A261]" />}
-              title="Grow Together"
-              subtitle="Build your portfolio"
-              className="sm:translate-y-8"
-            />
-          </motion.div>
-
-        </div>
+            </div>
+          </div>
+        </section>
       </main>
+
+      {/* Footer */}
+      <footer className="bg-white border-t border-gray-200 pt-16 pb-8">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+            <div className="col-span-1 md:col-span-1">
+              <Link href="/" className="flex items-center gap-2 mb-6">
+                <div className="w-8 h-8 rounded-full bg-[#8B0000] flex items-center justify-center text-white text-xs">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                  </svg>
+                </div>
+                <span className="text-lg font-bold">
+                  <span className="text-[#F4A261]">Magna</span>
+                  <span className="text-[#E50914]">Coders</span>
+                </span>
+              </Link>
+              <p className="text-[#666666] text-sm leading-relaxed">
+                Empowering the next generation of tech innovators through community, collaboration, and code.
+              </p>
+            </div>
+            
+            <div>
+              <h4 className="font-bold text-black mb-4">Platform</h4>
+              <ul className="space-y-3 text-sm text-[#666666]">
+                <li><Link href="#features" className="hover:text-[#E50914]">Features</Link></li>
+                <li><Link href="#community" className="hover:text-[#E50914]">Community</Link></li>
+                <li><Link href="/projects" className="hover:text-[#E50914]">Projects</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-bold text-black mb-4">Company</h4>
+              <ul className="space-y-3 text-sm text-[#666666]">
+                <li><Link href="/about" className="hover:text-[#E50914]">About Us</Link></li>
+                <li><Link href="/blog" className="hover:text-[#E50914]">Blog</Link></li>
+                <li><Link href="/careers" className="hover:text-[#E50914]">Careers</Link></li>
+              </ul>
+            </div>
+            
+            <div>
+              <h4 className="font-bold text-black mb-4">Connect</h4>
+              <ul className="space-y-3 text-sm text-[#666666]">
+                <li><a href="#" className="hover:text-[#E50914]">Twitter</a></li>
+                <li><a href="#" className="hover:text-[#E50914]">LinkedIn</a></li>
+                <li><a href="#" className="hover:text-[#E50914]">GitHub</a></li>
+              </ul>
+            </div>
+          </div>
+          
+          <div className="border-t border-gray-100 pt-8 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-400">
+            <p>&copy; 2025 Magna Coders. All rights reserved.</p>
+            <div className="flex gap-6">
+              <Link href="/privacy" className="hover:text-[#E50914]">Privacy Policy</Link>
+              <Link href="/terms" className="hover:text-[#E50914]">Terms of Service</Link>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
