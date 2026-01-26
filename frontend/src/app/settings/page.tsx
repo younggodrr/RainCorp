@@ -9,10 +9,7 @@ import {
   Briefcase, 
   Settings, 
   Plus, 
-  Search, 
-  BookOpen, 
   Camera,
-  LogOut,
   Chrome,
   User,
   Building2,
@@ -22,9 +19,7 @@ import {
   ShieldCheck,
   MapPin,
   HelpCircle,
-  Globe,
   Mail,
-  Phone,
   ChevronRight,
   ToggleLeft,
   ToggleRight,
@@ -35,7 +30,6 @@ import {
 import Link from 'next/link';
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState('Settings');
   const [activeModule, setActiveModule] = useState('Account');
 
   const renderModuleContent = () => {
