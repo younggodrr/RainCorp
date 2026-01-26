@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, ChevronRight, ChevronLeft, Check, User, MapPin, Briefcase, Award, Target } from 'lucide-react';
 
