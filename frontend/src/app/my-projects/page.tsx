@@ -4,8 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { 
   LayoutGrid, Users, MessageCircleQuestion, Settings, 
-  Menu, X, FolderKanban, Plus, Search, Filter, 
-  MoreVertical, Calendar, Code2, Layers, ExternalLink,
+  Menu, X, FolderKanban, Plus, Search, 
   MessageSquare, LayoutDashboard, Bell
 } from 'lucide-react';
 

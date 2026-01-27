@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { 
   ChevronLeft, Star, Users, Clock, Award, 
-  PlayCircle, CheckCircle, Lock, FileText, 
+  PlayCircle, CheckCircle, FileText, 
   Share2, Heart, Download, MonitorPlay,
   LayoutDashboard, MessageSquare, Search, Settings, Bell, LayoutGrid, Menu, X, GraduationCap, BadgeCheck, BookOpen
 } from 'lucide-react';

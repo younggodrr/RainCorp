@@ -4,9 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { 
   LayoutGrid, Users, MessageCircleQuestion, Settings, Search, 
-  Menu, X, FolderKanban, Briefcase, Plus, BookOpen, GraduationCap, 
-  BadgeCheck, LayoutDashboard, MessageSquare, MapPin, Globe, 
-  Github, Linkedin, Twitter, ExternalLink, CheckCircle2, MoreHorizontal 
+  Menu, X, FolderKanban, Plus, BadgeCheck, LayoutDashboard, MessageSquare, MapPin, Globe, 
+  Github, Linkedin, ExternalLink, MoreHorizontal 
 } from 'lucide-react';
 
 export default function UserProfilePage() {

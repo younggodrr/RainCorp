@@ -4,18 +4,17 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   LayoutDashboard, 
   Users, 
-  FolderKanban, 
   MessageSquare, 
-  Briefcase, 
   Settings, 
   Plus, 
   Search, 
   BookOpen, 
-  Image as ImageIcon, 
   Globe, 
   MoreHorizontal,
   MapPin,
   DollarSign,
+  FolderKanban,
+  Briefcase,
   GraduationCap,
   BadgeCheck,
   Heart,
@@ -506,60 +505,20 @@ export default function FeedPage() {
         
         {!hasMore && filteredPosts.length > 0 && (
            <div className="py-8 text-center text-gray-400 text-sm font-medium">
-              You're all caught up!
+              You&apos;re all caught up!
            </div>
         )}
 
       </main>
 
-      {/* FLOATING ACTION BUTTON & MODAL */}
-      <div className="fixed bottom-24 right-6 md:bottom-10 md:right-10 z-40 flex flex-col items-end gap-4">
-        {/* Modal Options */}
-        {isPostModalOpen && (
-          <div className="flex flex-col gap-3 mb-2 origin-bottom-right">
-             <button 
-                onClick={() => router.push('/create-project')}
-                className="flex items-center gap-3 px-5 py-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all group whitespace-nowrap text-left"
-             >
-                <span className="text-sm font-bold text-gray-700 group-hover:text-[#E50914]">Create Project</span>
-                <div className="w-8 h-8 rounded-full bg-[#F4A261]/10 text-[#F4A261] flex items-center justify-center group-hover:bg-[#E50914] group-hover:text-white transition-all">
-                  <FolderKanban size={18} />
-                </div>
-             </button>
-             
-             <button 
-                onClick={() => router.push('/create-job')}
-                className="flex items-center gap-3 px-5 py-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all group whitespace-nowrap text-left"
-             >
-                <span className="text-sm font-bold text-gray-700 group-hover:text-[#E50914]">Job Opportunity</span>
-                <div className="w-8 h-8 rounded-full bg-[#2ECC71]/10 text-[#2ECC71] flex items-center justify-center group-hover:bg-[#E50914] group-hover:text-white transition-all">
-                  <Briefcase size={18} />
-                </div>
-             </button>
-
-             <button 
-                onClick={() => router.push('/create-post')}
-                className="flex items-center gap-3 px-5 py-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all group whitespace-nowrap"
-             >
-                <span className="text-sm font-bold text-gray-700 group-hover:text-[#E50914]">Create Post</span>
-                <div className="w-8 h-8 rounded-full bg-[#E50914]/10 text-[#E50914] flex items-center justify-center group-hover:bg-[#E50914] group-hover:text-white transition-all">
-                  <ImageIcon size={18} />
-                </div>
-             </button>
-          </div>
-        )}
-
-        {/* FAB Trigger */}
-        <button 
-          onClick={() => setIsPostModalOpen(!isPostModalOpen)}
-          className={`w-14 h-14 rounded-2xl shadow-xl flex items-center justify-center text-white transition-all transform hover:scale-105 active:scale-95 ${
-            isPostModalOpen 
-              ? 'bg-gray-800 rotate-45' 
-              : 'bg-[#E50914]'
-          }`}
+      {/* FLOATING ACTION BUTTON */}
+      <div className="fixed bottom-24 right-6 md:bottom-10 md:right-10 z-40">
+        <Link 
+          href="/create-post"
+          className="w-14 h-14 rounded-2xl shadow-xl flex items-center justify-center text-white bg-[#E50914] transition-all transform hover:scale-105 active:scale-95 hover:shadow-2xl hover:bg-[#cc0812]"
         >
           <Plus size={28} strokeWidth={2.5} />
-        </button>
+        </Link>
       </div>
 
       {/* MOBILE BOTTOM NAVIGATION */}

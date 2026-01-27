@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { 
   LayoutGrid, Users, MessageSquare, Settings, 
-  ChevronLeft, BadgeCheck, Check, Star, Briefcase,
+  ChevronLeft, BadgeCheck, Check, Star,
   Menu, Bell, X, GraduationCap, LayoutDashboard
 } from 'lucide-react';
 
@@ -231,7 +231,7 @@ export default function GetVerificationPage() {
               </button>
 
               <div className="space-y-4">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">What's included</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">What&apos;s included</p>
                 {benefits.personal.map((benefit, index) => (
                   <div key={index} className="flex items-start gap-3">
                     <div className="w-5 h-5 rounded-full bg-[#E50914]/10 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -284,7 +284,7 @@ export default function GetVerificationPage() {
               </button>
 
               <div className="space-y-4">
-                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">What's included</p>
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">What&apos;s included</p>
                 {benefits.business.map((benefit, index) => (
                   <div key={index} className="flex items-start gap-3">
                     <div className="w-5 h-5 rounded-full bg-[#F4A261]/10 flex items-center justify-center flex-shrink-0 mt-0.5">

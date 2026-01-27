@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { 
   LayoutGrid, Users, MessageSquare, Settings, Search, 
   MapPin, Github, Linkedin, MessageCircle, Globe,
-  ChevronLeft, ChevronRight, Menu, X, Bell, UserPlus, UserCheck
+  ChevronLeft, ChevronRight, Menu, Bell, UserPlus, UserCheck
 } from 'lucide-react';
 
 const LOOKING_FOR_OPTIONS = [
@@ -47,7 +47,6 @@ const MOCK_BUILDERS = Array.from({ length: 50 }).map((_, i) => {
 
 export default function BuildersPage() {
   const [currentPage, setCurrentPage] = useState(1);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const itemsPerPage = 6; // Grid 3x2 or List
   
   const totalPages = Math.ceil(MOCK_BUILDERS.length / itemsPerPage);
