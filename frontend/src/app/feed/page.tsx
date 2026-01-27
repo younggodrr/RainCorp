@@ -26,6 +26,7 @@ import {
   X
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 export default function FeedPage() {
@@ -33,6 +34,7 @@ export default function FeedPage() {
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+  const [activeFilter, setActiveFilter] = useState('All');
 
   // Infinite Scroll State
   const [posts, setPosts] = useState<FeedPost[]>([]);
@@ -78,6 +80,15 @@ export default function FeedPage() {
     });
     if (node) observer.current.observe(node);
   }, [loading, hasMore, loadMorePosts]);
+
+  const filteredPosts = posts.filter(post => {
+    if (activeFilter === 'All') return true;
+    if (activeFilter === 'Projects') return post.type === 'project';
+    if (activeFilter === 'Opportunities') return post.type === 'job';
+    if (activeFilter === 'Posts') return post.type === 'post';
+    if (activeFilter === 'Tech News') return post.type === 'tech-news';
+    return true;
+  });
 
   return (
     <div className="min-h-screen bg-[#FDF8F5] font-sans text-[#444444] flex">
@@ -463,16 +474,15 @@ export default function FeedPage() {
 
         {/* Filter Pills */}
         <div className="flex gap-3 mb-8 overflow-x-auto pb-2 scrollbar-hide">
-          <FilterPill label="All" active />
-
-          <FilterPill label="Projects" />
-          <FilterPill label="Opportunities" />
-          <FilterPill label="Posts" />
-          <FilterPill label="Tech News" />
+          <FilterPill label="All" active={activeFilter === 'All'} onClick={() => setActiveFilter('All')} />
+          <FilterPill label="Projects" active={activeFilter === 'Projects'} onClick={() => setActiveFilter('Projects')} />
+          <FilterPill label="Opportunities" active={activeFilter === 'Opportunities'} onClick={() => setActiveFilter('Opportunities')} />
+          <FilterPill label="Posts" active={activeFilter === 'Posts'} onClick={() => setActiveFilter('Posts')} />
+          <FilterPill label="Tech News" active={activeFilter === 'Tech News'} onClick={() => setActiveFilter('Tech News')} />
         </div>
 
-        {posts.map((post, index) => {
-          if (posts.length === index + 1) {
+        {filteredPosts.map((post, index) => {
+          if (filteredPosts.length === index + 1) {
              return (
                <div ref={lastPostElementRef} key={post.id}>
                  <FeedItem post={post} />
@@ -494,7 +504,7 @@ export default function FeedPage() {
           </div>
         )}
         
-        {!hasMore && posts.length > 0 && (
+        {!hasMore && filteredPosts.length > 0 && (
            <div className="py-8 text-center text-gray-400 text-sm font-medium">
               You're all caught up!
            </div>
@@ -783,8 +793,8 @@ function FeedItem({ post }: { post: FeedPost }) {
         <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm mt-6">
           <div className="flex items-start justify-between mb-4">
             <div className="flex gap-3">
-              <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center overflow-hidden">
-                 <img src="/api/placeholder/40/40" alt="User" className="w-full h-full object-cover" />
+              <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center overflow-hidden relative">
+                 <Image src="/api/placeholder/40/40" alt="User" fill sizes="40px" className="object-cover" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -868,10 +878,12 @@ function FeedItem({ post }: { post: FeedPost }) {
           
           {news.imageUrl && (
             <div className="w-full h-48 md:h-64 rounded-xl overflow-hidden bg-gray-100 mb-4 relative group cursor-pointer">
-              <img 
+              <Image 
                 src={news.imageUrl} 
                 alt={news.title} 
-                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                fill
+                sizes="(max-width: 768px) 100vw, 768px"
+                className="object-cover transition-transform duration-700 group-hover:scale-105" 
               />
               <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
             </div>
@@ -905,8 +917,8 @@ function FeedItem({ post }: { post: FeedPost }) {
         <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm mt-6">
           <div className="flex items-start justify-between mb-4">
             <div className="flex gap-3">
-              <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center overflow-hidden">
-                 <img src="/api/placeholder/40/40" alt="User" className="w-full h-full object-cover" />
+              <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center overflow-hidden relative">
+                 <Image src="/api/placeholder/40/40" alt="User" fill sizes="40px" className="object-cover" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -929,8 +941,8 @@ function FeedItem({ post }: { post: FeedPost }) {
             </p>
             
             {regular.image && (
-                <div className="w-full h-64 md:h-80 rounded-xl overflow-hidden bg-gray-100 mb-2 border border-gray-100">
-                   <img src={regular.image} alt="Post Content" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                <div className="w-full h-64 md:h-80 rounded-xl overflow-hidden bg-gray-100 mb-2 border border-gray-100 relative">
+                   <Image src={regular.image} alt="Post Content" fill sizes="(max-width: 768px) 100vw, 768px" className="object-cover hover:scale-105 transition-transform duration-500" />
                 </div>
             )}
           </div>
@@ -986,24 +998,16 @@ function NavItem({ icon, label, badge, active, onClick }: { icon: React.ReactNod
   );
 }
 
-
-
-function ActionButton({ icon, label }: { icon: React.ReactNode; label: string }) {
+function FilterPill({ label, active, onClick }: { label: string; active?: boolean; onClick?: () => void }) {
   return (
-    <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors text-sm font-medium">
-      {icon}
-      <span>{label}</span>
-    </button>
-  );
-}
-
-function FilterPill({ label, active }: { label: string; active?: boolean }) {
-  return (
-    <button className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
+    <button 
+      onClick={onClick}
+      className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
       active
         ? 'bg-[#E50914] text-white shadow-md'
         : 'bg-white text-black hover:bg-gray-50'
-    }`}>
+    }`}
+    >
       {label}
     </button>
   );

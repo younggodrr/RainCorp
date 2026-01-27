@@ -7,6 +7,7 @@ import {
   Image as ImageIcon, X, Loader2
 } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 export default function CreatePostPage() {
@@ -173,7 +174,7 @@ export default function CreatePostPage() {
             {/* Image Preview */}
             {selectedImage && (
               <div className="relative mt-4 rounded-xl overflow-hidden group max-h-[400px]">
-                <img src={selectedImage} alt="Preview" className="w-full h-full object-cover" />
+                <Image src={selectedImage} alt="Preview" fill sizes="100vw" className="object-cover" />
                 <button 
                   onClick={() => setSelectedImage(null)}
                   className="absolute top-2 right-2 p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-all backdrop-blur-sm"

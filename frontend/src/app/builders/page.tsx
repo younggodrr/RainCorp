@@ -2,9 +2,10 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { 
   LayoutGrid, Users, MessageSquare, Settings, Search, 
-  MapPin, Github, Linkedin, MessageCircle, Check, Globe,
+  MapPin, Github, Linkedin, MessageCircle, Globe,
   ChevronLeft, ChevronRight, Menu, X, Bell, UserPlus, UserCheck
 } from 'lucide-react';
 
@@ -134,10 +135,10 @@ export default function BuildersPage() {
               <div key={builder.id} className="bg-white rounded-2xl p-6 border border-black hover:shadow-md transition-all flex flex-col gap-4">
                 {/* Header: Avatar & Info */}
                 <div className="flex gap-4 items-start">
-                  <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0 text-gray-500 font-bold text-xl">
+                  <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0 text-gray-500 font-bold text-xl relative">
                     {/* Placeholder Avatar */}
                     {builder.avatar ? (
-                      <img src={builder.avatar} alt={builder.name} className="w-full h-full object-cover" />
+                      <Image src={builder.avatar} alt={builder.name} fill sizes="56px" className="object-cover" />
                     ) : (
                       builder.name.substring(0, 2).toUpperCase()
                     )}

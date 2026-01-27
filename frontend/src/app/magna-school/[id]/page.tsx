@@ -85,7 +85,7 @@ export default function CourseDetailPage() {
   const params = useParams();
   // Default to course 1 if not found or for demo
   const courseId = params?.id ? Number(params.id) : 1; 
-  const course = COURSE_DETAILS[1]; // Using mock data for ID 1 for all routes in this demo
+  const course = COURSE_DETAILS[courseId as unknown as keyof typeof COURSE_DETAILS] ?? COURSE_DETAILS[1];
   
   const [activeSection, setActiveSection] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
