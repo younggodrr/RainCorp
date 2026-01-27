@@ -3,9 +3,9 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { 
-  LayoutGrid, Users, MessageSquare, Settings, Search, 
-  Bell, Heart, UserPlus, Briefcase, Info, Check, X,
-  ChevronLeft, Menu, MoreHorizontal
+  LayoutGrid, Users, MessageSquare, Settings, 
+  Bell, Heart, UserPlus, Briefcase, Info, X,
+  ChevronLeft
 } from 'lucide-react';
 
 // Mock Notification Data

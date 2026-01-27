@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { 
   LayoutGrid, Users, MessageCircleQuestion, Settings, Search, 
-  Menu, X, FolderKanban, Plus, BadgeCheck, LayoutDashboard, MessageSquare, MapPin, Globe, 
+  Menu, X, FolderKanban, Plus, BadgeCheck, LayoutDashboard, MessageSquare, MapPin, 
   Github, Linkedin, ExternalLink, MoreHorizontal 
 } from 'lucide-react';
 

@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { 
   LayoutGrid, Users, MessageSquare, Settings, 
-  ChevronLeft, Search, Star, Clock, Award,
-  BookOpen, Video, DollarSign, Filter, MoreHorizontal,
+  Search, Star, Clock, Award,
+  BookOpen, Video,
   Bell, LayoutDashboard, Menu, X, GraduationCap, BadgeCheck
 } from 'lucide-react';
 

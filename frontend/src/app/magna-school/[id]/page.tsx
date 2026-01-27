@@ -237,7 +237,7 @@ export default function CourseDetailPage() {
 
           {/* What you'll learn */}
           <div className="bg-white p-6 rounded-2xl border border-gray-100">
-            <h3 className="font-bold text-xl mb-4 text-gray-900">What you'll learn</h3>
+            <h3 className="font-bold text-xl mb-4 text-gray-900">What you&apos;ll learn</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
                 "Build native mobile apps with React Native",
@@ -401,7 +401,7 @@ export default function CourseDetailPage() {
              <div className="bg-black rounded-2xl p-6 text-white relative overflow-hidden">
                 <div className="relative z-10">
                   <h4 className="font-bold text-lg mb-2">Training 5 or more people?</h4>
-                  <p className="text-sm text-gray-400 mb-4">Get your team access to Magna School's top 5,000+ courses anytime, anywhere.</p>
+                  <p className="text-sm text-gray-400 mb-4">Get your team access to Magna School&apos;s top 5,000+ courses anytime, anywhere.</p>
                   <button className="px-4 py-2 bg-white text-black text-sm font-bold rounded-lg hover:bg-gray-200 transition-colors">
                     Get Magna Business
                   </button>

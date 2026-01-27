@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { LayoutGrid, Users, MessageCircleQuestion, Settings, Search, MoreVertical, Filter, ChevronLeft, ChevronRight, Bell, Menu, X, FolderKanban, Briefcase, Plus, BookOpen, GraduationCap, BadgeCheck, LayoutDashboard, MessageSquare } from 'lucide-react';
+import { LayoutGrid, Users, MessageCircleQuestion, Settings, Search, Filter, ChevronLeft, ChevronRight, Menu, X, FolderKanban, Briefcase, Plus, BookOpen, GraduationCap, BadgeCheck, LayoutDashboard, MessageSquare } from 'lucide-react';
 
 // Mock Data
 const MOCK_FRIENDS = Array.from({ length: 50 }).map((_, i) => ({
