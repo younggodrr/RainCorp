@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { 
@@ -9,7 +9,7 @@ import {
   Github, Linkedin, ExternalLink, MoreHorizontal, Edit 
 } from 'lucide-react';
 
-export default function UserProfilePage() {
+function UserProfileContent() {
   const [activeTab, setActiveTab] = useState('Overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -529,5 +529,13 @@ export default function UserProfilePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function UserProfilePage() {
+  return (
+    <Suspense fallback={<div className="h-screen bg-[#FDF8F5] flex items-center justify-center"><div className="w-8 h-8 border-4 border-gray-200 border-t-[#E50914] rounded-full animate-spin"></div></div>}>
+      <UserProfileContent />
+    </Suspense>
   );
 }
