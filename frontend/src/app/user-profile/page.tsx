@@ -2,15 +2,19 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
+import { useSearchParams } from 'next/navigation';
 import { 
   LayoutGrid, Users, MessageCircleQuestion, Settings, Search, 
   Menu, X, FolderKanban, Plus, BadgeCheck, LayoutDashboard, MessageSquare, MapPin, 
-  Github, Linkedin, ExternalLink, MoreHorizontal 
+  Github, Linkedin, ExternalLink, MoreHorizontal, Edit 
 } from 'lucide-react';
 
 export default function UserProfilePage() {
   const [activeTab, setActiveTab] = useState('Overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const isFromNav = searchParams.get('from') === 'nav';
 
   // Mock User Data
   const user = {
@@ -189,9 +193,9 @@ export default function UserProfilePage() {
             <div className="max-w-6xl mx-auto p-4 md:p-8 space-y-6">
                 
                 {/* 1. PROFILE HEADER CARD */}
-                <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 relative overflow-hidden">
+                <div className="bg-white rounded-2xl p-6 md:p-8 shadow-sm border border-gray-100 relative">
                     {/* Background Pattern/Banner (Optional) */}
-                    <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-gray-50 to-gray-100 opacity-50"></div>
+                    <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-gray-50 to-gray-100 opacity-50 rounded-t-2xl"></div>
 
                     <div className="relative flex flex-col md:flex-row gap-6 md:gap-8 items-start md:items-end">
                         {/* Avatar */}
@@ -253,9 +257,34 @@ export default function UserProfilePage() {
                             <button className="flex-1 md:flex-none px-6 py-2.5 bg-white border border-gray-200 text-black rounded-xl font-bold text-sm hover:bg-gray-50 transition-all active:scale-95">
                                 Message
                             </button>
-                            <button className="p-2.5 bg-white border border-gray-200 text-gray-500 rounded-xl hover:bg-gray-50 transition-all">
-                                <MoreHorizontal size={20} />
-                            </button>
+                            {isFromNav && (
+                                <div className="relative">
+                                    <button 
+                                        onClick={() => setIsMenuOpen(!isMenuOpen)}
+                                        className="p-2.5 bg-white border border-gray-200 text-gray-500 rounded-xl hover:bg-gray-50 transition-all"
+                                    >
+                                        <MoreHorizontal size={20} />
+                                    </button>
+                                    
+                                    {isMenuOpen && (
+                                        <>
+                                            <div 
+                                                className="fixed inset-0 z-10" 
+                                                onClick={() => setIsMenuOpen(false)}
+                                            ></div>
+                                            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-lg border border-gray-100 z-20 py-2 animate-in fade-in zoom-in-95 duration-200">
+                                                <Link 
+                                                    href="/settings" 
+                                                    className="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-[#E50914] transition-colors"
+                                                >
+                                                    <Edit size={16} />
+                                                    Edit Details
+                                                </Link>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>
@@ -491,7 +520,7 @@ export default function UserProfilePage() {
             <span className="text-[10px] font-medium">Chat</span>
           </Link>
 
-          <Link href="/user-profile" className="flex flex-col items-center gap-1 text-[#E50914] transition-colors">
+          <Link href="/user-profile?from=nav" className="flex flex-col items-center gap-1 text-[#E50914] transition-colors">
             <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-[10px]">
                JD
             </div>

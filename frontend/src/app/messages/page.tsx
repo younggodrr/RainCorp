@@ -423,7 +423,7 @@ export default function MessagesPage() {
               <span className="text-[10px] font-medium">Chat</span>
             </Link>
 
-        <Link href="/user-profile" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
+        <Link href="/user-profile?from=nav" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-[10px]">
              JD
           </div>

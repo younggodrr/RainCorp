@@ -181,7 +181,7 @@ export default function BuildersPage() {
         <div className="px-4 md:px-10 py-8 pb-24 md:pb-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {currentBuilders.map((builder) => (
-              <div key={builder.id} className="bg-white rounded-2xl p-6 border border-black hover:shadow-md transition-all flex flex-col gap-4">
+              <Link href={`/user-profile?id=${builder.id}`} key={builder.id} className="bg-white rounded-2xl p-6 border border-black hover:shadow-md transition-all flex flex-col gap-4">
                 {/* Header: Avatar & Info */}
                 <div className="flex gap-4 items-start">
                   <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0 text-gray-500 font-bold text-xl relative">
@@ -260,7 +260,7 @@ export default function BuildersPage() {
                       <MessageCircle size={16} className="text-[#25D366] cursor-pointer transition-colors" />
                    </div>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
 
@@ -302,7 +302,7 @@ export default function BuildersPage() {
           <MessageSquare size={24} />
           <span className="text-[10px] font-medium">Chat</span>
         </Link>
-        <Link href="/user-profile" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
+        <Link href="/user-profile?from=nav" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-[10px]">
              JD
           </div>

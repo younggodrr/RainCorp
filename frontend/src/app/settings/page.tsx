@@ -244,7 +244,7 @@ export default function SettingsPage() {
           <MessageSquare size={24} />
           <span className="text-[10px] font-medium">Chat</span>
         </Link>
-        <Link href="/user-profile" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
+        <Link href="/user-profile?from=nav" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-[10px]">
              JD
           </div>
@@ -319,6 +319,29 @@ function AccountSettings() {
               ></textarea>
             </div>
             <InputField label="Location" defaultValue="Nairobi, Kenya" />
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <InputField label="Website (optional)" placeholder="https://yourwebsite.com" />
+                <InputField label="GitHub (optional)" placeholder="https://github.com/username" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <InputField label="LinkedIn (optional)" placeholder="https://linkedin.com/in/username" />
+                <InputField label="Twitter (optional)" placeholder="https://twitter.com/username" />
+            </div>
+            <InputField label="WhatsApp (optional)" placeholder="+254..." />
+
+            <div className="space-y-2">
+              <label className="text-sm font-semibold text-gray-700">Your Availability</label>
+              <div className="relative">
+                <select className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-100 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm appearance-none cursor-pointer">
+                  <option value="available">Available</option>
+                  <option value="unavailable">Unavailable</option>
+                  <option value="break">On Break</option>
+                </select>
+                <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 rotate-90" size={16} />
+              </div>
+            </div>
+
             <div className="pt-4 flex gap-4">
               <Button primary>Save Changes</Button>
               <Button>Cancel</Button>

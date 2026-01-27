@@ -27,7 +27,7 @@ export default function PostDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (params.id) {
+    if (params?.id) {
       // Simulate fetch
       setTimeout(() => {
         const foundPost = getPostById(params.id as string);
@@ -35,7 +35,7 @@ export default function PostDetailPage() {
         setLoading(false);
       }, 500);
     }
-  }, [params.id]);
+  }, [params?.id]);
 
   if (loading) {
     return (
