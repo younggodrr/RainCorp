@@ -482,8 +482,8 @@ export default function UserProfilePage() {
             <span className="text-[10px] font-medium">Feed</span>
           </Link>
 
-          <Link href="/friends" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
-            <Users size={24} />
+          <Link href="/builders" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
+            <Search size={24} />
             <span className="text-[10px] font-medium">Builders</span>
           </Link>
 

@@ -8,14 +8,16 @@ import { Camera, ChevronRight, ChevronLeft, Check, User, MapPin, Briefcase, Awar
 // --- Constants ---
 
 const ROLES = [
-  { id: 'entrepreneur', label: 'Entrepreneur', description: 'Creating and leading innovative ventures' },
   { id: 'visionary', label: 'Visionary', description: 'Turning ideas into reality' },
-  { id: 'software_engineer', label: 'Software Engineer', description: 'Bringing ideas to life through code' },
-  { id: 'ux_ui_specialist', label: 'UX/UI Specialist', description: 'Designing seamless and engaging user interfaces' },
+  { id: 'developer', label: 'Developer', description: 'Bringing ideas to life through code' },
+  { id: 'designer', label: 'Designer', description: 'Designing seamless and engaging user interfaces' },
   { id: 'growth_strategist', label: 'Growth Strategist', description: 'Expanding reach and accelerating product growth' },
   { id: 'seed_investor', label: 'Seed Investor', description: 'Empowering the next generation of startups' },
   { id: 'mentor', label: 'Mentor', description: 'Guiding founders and teams towards success' },
   { id: 'talent_seeker', label: 'Talent Seeker', description: 'Building teams and hiring top talent' },
+  { id: 'research_analyst', label: 'Research/Analyst', description: 'Analyzing data and trends to drive informed decisions' },
+  { id: 'business_strategy', label: 'Business/Strategy', description: 'Leading projects and driving business growth' },
+  { id: 'support', label: 'Support', description: 'Helping users and building strong communities' },
 ];
 
 const GOALS = [
@@ -27,6 +29,107 @@ const GOALS = [
   { id: 'technical_cofounder', label: 'Technical Co-founder', description: 'Partner to build and scale the product' },
   { id: 'design_assistance', label: 'Design Assistance', description: 'UI/UX and product design' },
 ];
+
+const ROLE_SUB_CATEGORIES = {
+    "Developer": [
+      "Frontend Developer", "Backend Developer", "Fullstack Developer", "Mobile App Developer",
+      "DevOps Engineer", "Data Engineer", "AI/ML Engineer", "Blockchain Developer",
+      "Game Developer", "Embedded Systems Developer"
+    ],
+    "Designer": [
+      "UI Designer", "UX Designer", "Product Designer", "Graphic Designer",
+      "Motion Designer", "Web Designer", "Branding/Identity Designer"
+    ],
+    "Research/Analyst": [
+      "Data Scientist", "Data Analyst", "Business Analyst", "Market Researcher",
+      "QA/Test Engineer", "User Researcher", "Security Analyst"
+    ],
+    "Business/Strategy": [
+      "Project Manager", "Product Manager", "Business Development", "Marketing Specialist",
+      "Sales & Partnerships", "Finance & Operations", "Legal/Compliance Advisor"
+    ],
+    "Support": [
+      "Community Manager", "Technical Writer", "Content Creator", "Mentor/Coach",
+      "Customer Support", "Recruiter/Talent Scout", "Educator/Trainer"
+    ],
+    "Visionary": [
+      "Product Innovator", "Tech Futurist", "Social Entrepreneur", "Startup Founder",
+      "Strategic Planner", "Change Maker", "Creative Director", "Industry Disruptor",
+      "Concept Architect", "Impact Leader"
+    ],
+    "Growth Strategist": [
+      "Growth Hacker", "Digital Marketer", "SEO Specialist", "Conversion Rate Optimizer",
+      "User Acquisition Manager", "Retention Specialist", "Brand Strategist", "Go-to-Market Lead",
+      "Sales Funnel Architect", "Revenue Operations"
+    ],
+    "Talent Seeker": [
+      "Technical Recruiter", "HR Manager", "Talent Acquisition Specialist", "Headhunter",
+      "People Operations", "Team Builder", "Culture Specialist", "Hiring Manager",
+      "Staffing Coordinator", "Employer Branding Specialist"
+    ],
+    "Seed Investor": [
+      "Angel Investor", "Venture Capitalist", "Private Equity Investor", "Early-Stage Backer",
+      "Impact Investor", "Tech Investor", "Crowdfunding Backer", "Incubator Partner",
+      "Accelerator Mentor", "Portfolio Manager"
+    ],
+    "Mentor": [
+      "Career Coach", "Technical Mentor", "Leadership Coach", "Startup Advisor",
+      "Life Coach", "Executive Mentor", "Peer Mentor", "Skills Trainer",
+      "Industry Veteran", "Workshop Facilitator"
+    ]
+};
+
+const ROLE_SKILLS = {
+    "Developer": [
+      "JavaScript", "TypeScript", "Python", "Java", "C++", "React", "Node.js", 
+      "AWS", "Docker", "Kubernetes", "SQL", "NoSQL", "Git", "CI/CD", "GraphQL"
+    ],
+    "Designer": [
+      "Figma", "Adobe XD", "Photoshop", "Illustrator", "Sketch", "Prototyping", 
+      "User Research", "Wireframing", "Interaction Design", "Typography", "Color Theory", 
+      "Design Systems", "HTML/CSS", "Animation", "Branding"
+    ],
+    "Research/Analyst": [
+      "Data Analysis", "Python", "R", "SQL", "Excel", "Tableau", "Power BI", 
+      "Statistical Modeling", "Market Research", "Machine Learning", "Data Visualization", 
+      "Business Intelligence", "Qualitative Research", "Quantitative Research", "A/B Testing"
+    ],
+    "Business/Strategy": [
+      "Strategic Planning", "Project Management", "Business Development", "Financial Analysis", 
+      "Market Analysis", "Leadership", "Negotiation", "Risk Management", "Product Management", 
+      "Sales Strategy", "Marketing Strategy", "Operations Management", "Change Management", "Stakeholder Management", "Agile Methodologies"
+    ],
+    "Support": [
+      "Customer Service", "Technical Support", "Communication", "Problem Solving", "CRM Tools", 
+      "Ticket Management", "Documentation", "Empathy", "Conflict Resolution", "Time Management", 
+      "Troubleshooting", "Team Collaboration", "Training", "Feedback Analysis", "Community Management"
+    ],
+    "Visionary": [
+      "Innovation", "Strategic Thinking", "Leadership", "Public Speaking", "Networking", 
+      "Storytelling", "Trend Analysis", "Creative Problem Solving", "Concept Development", 
+      "Vision Planning", "Team Building", "Fundraising", "Risk Assessment", "Decision Making", "Change Leadership"
+    ],
+    "Growth Strategist": [
+      "SEO", "SEM", "Content Marketing", "Social Media Marketing", "Email Marketing", 
+      "Analytics", "A/B Testing", "Conversion Rate Optimization", "Customer Acquisition", 
+      "Retention Strategies", "Viral Marketing", "PPC Advertising", "Copywriting", "Funnel Optimization", "Market Trends"
+    ],
+    "Talent Seeker": [
+      "Recruitment", "Sourcing", "Interviewing", "HR Policies", "Employee Relations", 
+      "Talent Management", "Onboarding", "Performance Management", "Compensation & Benefits", 
+      "Employer Branding", "Negotiation", "Networking", "Candidate Experience", "Diversity & Inclusion", "Labor Laws"
+    ],
+    "Seed Investor": [
+      "Due Diligence", "Financial Modeling", "Valuation", "Market Analysis", "Deal Structuring", 
+      "Risk Assessment", "Portfolio Management", "Networking", "Negotiation", "Investment Strategy", 
+      "Trend Forecasting", "Legal Knowledge", "Mentorship", "Exit Strategies", "Fundraising"
+    ],
+    "Mentor": [
+      "Coaching", "Active Listening", "Feedback", "Goal Setting", "Motivation", 
+      "Career Guidance", "Leadership Development", "Skill Assessment", "Conflict Resolution", 
+      "Emotional Intelligence", "Communication", "Patience", "Empathy", "Networking", "Knowledge Sharing"
+    ]
+};
 
 const SPECIALISATIONS = [
   'Frontend', 'Backend', 'Full-stack', 'Mobile', 'Gaming', 
@@ -62,7 +165,7 @@ type FormData = {
   profilePicture: File | null;
   roles: string[];
   goals: string[];
-  specialisation: string;
+  specialisation: string[];
   skills: string[];
   availability: string[];
   bio: string;
@@ -79,13 +182,14 @@ export default function UserGuidePage() {
     profilePicture: null,
     roles: [],
     goals: [],
-    specialisation: '',
+    specialisation: [],
     skills: [],
     availability: [],
     bio: '',
     country: '',
     county: '',
   });
+  const [customSkill, setCustomSkill] = useState('');
 
   const totalSteps = 6;
 
@@ -101,7 +205,7 @@ export default function UserGuidePage() {
     setFormData(prev => ({ ...prev, [key]: value }));
   };
 
-  const toggleSelection = (key: 'roles' | 'goals' | 'skills' | 'availability', value: string, max?: number) => {
+  const toggleSelection = (key: 'roles' | 'goals' | 'skills' | 'availability' | 'specialisation', value: string, max?: number) => {
     setFormData(prev => {
       const current = prev[key];
       const exists = current.includes(value);
@@ -113,6 +217,23 @@ export default function UserGuidePage() {
         return { ...prev, [key]: [...current, value] };
       }
     });
+  };
+
+  const addCustomSkill = () => {
+    const trimmed = customSkill.trim();
+    if (!trimmed) return;
+    
+    if (formData.skills.includes(trimmed)) {
+        setCustomSkill('');
+        return;
+    }
+
+    if (formData.skills.length >= 6) {
+        return;
+    }
+
+    toggleSelection('skills', trimmed, 6);
+    setCustomSkill('');
   };
 
   const renderStep = () => {
@@ -239,6 +360,18 @@ export default function UserGuidePage() {
         );
 
       case 5:
+        const selectedRoleLabels = formData.roles
+          .map(roleId => ROLES.find(r => r.id === roleId)?.label)
+          .filter((label): label is string => !!label);
+
+        const displaySpecialisations = selectedRoleLabels.length > 0
+          ? Array.from(new Set(selectedRoleLabels.flatMap(label => ROLE_SUB_CATEGORIES[label as keyof typeof ROLE_SUB_CATEGORIES] || [])))
+          : SPECIALISATIONS;
+
+        const displaySkills = selectedRoleLabels.length > 0
+          ? Array.from(new Set(selectedRoleLabels.flatMap(label => ROLE_SKILLS[label as keyof typeof ROLE_SKILLS] || [])))
+          : SKILLS;
+
         return (
           <div className="space-y-8">
             <div className="text-center">
@@ -250,15 +383,15 @@ export default function UserGuidePage() {
             <div>
               <h3 className="font-extrabold mb-3 flex items-center gap-2 text-black">
                 <Briefcase size={18} className="text-[#E50914]" />
-                Specialisation
+                Specialisation <span className="text-xs font-normal text-gray-400 ml-2">(Max 3)</span>
               </h3>
               <div className="flex flex-wrap gap-2">
-                {SPECIALISATIONS.map((spec) => (
+                {displaySpecialisations.map((spec) => (
                   <button
                     key={spec}
-                    onClick={() => updateFormData('specialisation', spec)}
+                    onClick={() => toggleSelection('specialisation', spec, 3)}
                     className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
-                      formData.specialisation === spec
+                      formData.specialisation.includes(spec)
                         ? 'bg-[#E50914] text-white border-[#E50914]'
                         : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
                     }`}
@@ -275,8 +408,8 @@ export default function UserGuidePage() {
                 <Award size={18} className="text-[#F4A261]" />
                 Top Skills <span className="text-xs font-normal text-gray-400 ml-2">(Max 6)</span>
               </h3>
-              <div className="flex flex-wrap gap-2">
-                {SKILLS.map((skill) => (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {displaySkills.map((skill) => (
                   <button
                     key={skill}
                     onClick={() => toggleSelection('skills', skill, 6)}
@@ -289,6 +422,34 @@ export default function UserGuidePage() {
                     {skill}
                   </button>
                 ))}
+                {formData.skills
+                  .filter(skill => !displaySkills.includes(skill))
+                  .map(skill => (
+                    <button
+                      key={skill}
+                      onClick={() => toggleSelection('skills', skill, 6)}
+                      className="px-4 py-2 rounded-full text-sm font-medium border transition-all bg-[#F4A261] text-white border-[#F4A261]"
+                    >
+                      {skill}
+                    </button>
+                  ))}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={customSkill}
+                  onChange={(e) => setCustomSkill(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && addCustomSkill()}
+                  placeholder="Add other skill..."
+                  className="flex-1 px-4 py-2 rounded-full text-sm border border-gray-200 focus:outline-none focus:border-[#F4A261] text-black"
+                />
+                <button
+                  onClick={addCustomSkill}
+                  disabled={!customSkill.trim() || formData.skills.length >= 6}
+                  className="px-4 py-2 rounded-full text-sm font-medium bg-[#F4A261] text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Add
+                </button>
               </div>
             </div>
 

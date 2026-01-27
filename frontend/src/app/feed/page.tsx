@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { 
   LayoutDashboard, 
   Users, 
@@ -22,14 +22,62 @@ import {
   Share2,
   Bell,
   Menu,
+  ChevronRight,
   X
 } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export default function FeedPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isPostModalOpen, setIsPostModalOpen] = useState(false);
+
+  // Infinite Scroll State
+  const [posts, setPosts] = useState<FeedPost[]>([]);
+  const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  // Initial Load
+  useEffect(() => {
+    setLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+        const initialPosts = generateMockPosts(1, 5);
+        setPosts(initialPosts);
+        setLoading(false);
+    }, 1000);
+  }, []);
+
+  // Load More
+  const loadMorePosts = useCallback(() => {
+    if (loading || !hasMore) return;
+    setLoading(true);
+    
+    // Simulate API call
+    setTimeout(() => {
+        const newPosts = generateMockPosts(page + 1, 5);
+        setPosts(prev => [...prev, ...newPosts]);
+        setPage(prev => prev + 1);
+        setLoading(false);
+        if (page > 10) setHasMore(false); // Limit for demo
+    }, 1500);
+  }, [loading, hasMore, page]);
+
+  // Observer
+  const observer = useRef<IntersectionObserver | null>(null);
+  const lastPostElementRef = useCallback((node: HTMLDivElement) => {
+    if (loading) return;
+    if (observer.current) observer.current.disconnect();
+    observer.current = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        loadMorePosts();
+      }
+    });
+    if (node) observer.current.observe(node);
+  }, [loading, hasMore, loadMorePosts]);
 
   return (
     <div className="min-h-screen bg-[#FDF8F5] font-sans text-[#444444] flex">
@@ -109,10 +157,10 @@ export default function FeedPage() {
           <div className="mt-6 hidden lg:block">
             <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 px-2">Quick Actions</h4>
             <div className="space-y-3">
-              <button className="w-full py-2.5 px-4 rounded-full bg-gradient-to-r from-[#F4A261] to-[#E50914] text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
+              <Link href="/create-post" className="w-full py-2.5 px-4 rounded-full bg-gradient-to-r from-[#F4A261] to-[#E50914] text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
                 <Plus size={18} />
                 Create Post
-              </button>
+              </Link>
               <button className="w-full py-2.5 px-4 rounded-full bg-white border border-gray-200 text-black text-sm font-medium hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
                 <Search size={18} />
                 Find Collaborators
@@ -161,9 +209,9 @@ export default function FeedPage() {
                   <p className="text-xs text-gray-600 leading-tight mt-0.5">Upskill with top tech courses</p>
                 </div>
               </div>
-              <button className="w-full py-2 rounded-lg bg-white text-[#2ECC71] text-xs font-bold shadow-sm hover:shadow-md transition-all">
+              <Link href="/magna-school" className="block w-full py-2 rounded-lg bg-white text-[#2ECC71] text-xs font-bold shadow-sm hover:shadow-md transition-all text-center">
                 Start Learning
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -177,9 +225,9 @@ export default function FeedPage() {
               <p className="text-xs text-gray-600 mb-3">
                 Boost your credibility and unlock exclusive features.
               </p>
-              <button className="w-full py-2 rounded-lg bg-[#E50914] text-white text-xs font-bold shadow-sm hover:bg-[#cc0812] transition-all">
+              <Link href="/get-verification" className="block w-full py-2 rounded-lg bg-[#E50914] text-white text-xs font-bold shadow-sm hover:bg-[#cc0812] transition-all text-center">
                 Apply for Verification
-              </button>
+              </Link>
             </div>
           </div>
 
@@ -203,14 +251,14 @@ export default function FeedPage() {
             </button>
 
             {/* Tablet School Icon */}
-            <button className="w-10 h-10 rounded-xl bg-[#2ECC71]/10 text-[#2ECC71] hover:shadow-sm transition-all flex items-center justify-center">
+            <Link href="/magna-school" className="w-10 h-10 rounded-xl bg-[#2ECC71]/10 text-[#2ECC71] hover:shadow-sm transition-all flex items-center justify-center">
               <GraduationCap size={20} />
-            </button>
+            </Link>
 
             {/* Tablet Verification Icon */}
-            <button className="w-10 h-10 rounded-xl bg-[#E50914]/10 text-[#E50914] hover:shadow-sm transition-all flex items-center justify-center">
+            <Link href="/get-verification" className="w-10 h-10 rounded-xl bg-[#E50914]/10 text-[#E50914] hover:shadow-sm transition-all flex items-center justify-center">
               <BadgeCheck size={20} />
-            </button>
+            </Link>
         </div>
 
         {/* Bottom Sidebar - Removed as Settings moved to nav */}
@@ -249,12 +297,12 @@ export default function FeedPage() {
             </div>
 
             {/* Notification Icon */}
-            <button className="relative p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
+            <Link href="/notifications" className="relative p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
               <Bell size={24} />
               <div className="absolute top-1 right-1 w-5 h-5 bg-[#E50914] rounded-full flex items-center justify-center text-white text-[10px] font-bold border-2 border-white shadow-sm">
                 3
               </div>
-            </button>
+            </Link>
             
             {/* Mobile Menu Icon */}
             <button 
@@ -419,147 +467,38 @@ export default function FeedPage() {
 
           <FilterPill label="Projects" />
           <FilterPill label="Opportunities" />
-          <FilterPill label="Designs" />
+          <FilterPill label="Posts" />
+          <FilterPill label="Tech News" />
         </div>
 
-        {/* Feed Card (Job Post Example) */}
-        <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm">
-          {/* Header */}
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm">
-                JD
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-black">John Doe</h3>
-                  <span className="text-sm text-gray-500">CTO at Magna Coders</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
-                  <span>2 days ago</span>
-                  <span>•</span>
-                  <Globe size={12} />
-                </div>
-              </div>
-            </div>
-            <button className="text-gray-400 hover:text-black">
-              <MoreHorizontal size={20} />
-            </button>
+        {posts.map((post, index) => {
+          if (posts.length === index + 1) {
+             return (
+               <div ref={lastPostElementRef} key={post.id}>
+                 <FeedItem post={post} />
+               </div>
+             );
+          } else {
+             return (
+               <div key={post.id}>
+                 <FeedItem post={post} />
+               </div>
+             );
+          }
+        })}
+        
+        {loading && (
+          <div className="py-8 text-center flex flex-col items-center justify-center text-gray-400">
+             <div className="w-8 h-8 border-4 border-gray-200 border-t-[#E50914] rounded-full animate-spin mb-2"></div>
+             <span className="text-sm font-medium">Loading more updates...</span>
           </div>
-
-          {/* Post Body */}
-          <div className="mb-4">
-            <p className="font-bold text-black mb-1">Magna Coders is hiring! Senior Frontend Developer</p>
-            <p className="text-gray-600">We are looking for an experienced Frontend Developer to join our team and build amazing user experiences.</p>
-          </div>
-
-          {/* Embedded Job Card */}
-          <div className="border border-[#2ECC71]/30 rounded-xl p-3 md:p-5 bg-[#2ECC71]/5">
-            <div className="flex items-start gap-3 md:gap-4 mb-4">
-              <div className="w-12 h-12 rounded-lg bg-[#F4A261] flex items-center justify-center text-white shadow-sm flex-shrink-0">
-                <Briefcase size={24} />
-              </div>
-              <div>
-                <h4 className="font-bold text-lg text-black leading-tight">Senior Frontend Developer</h4>
-                <p className="text-sm text-gray-600">Magna Coders</p>
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-4 mb-6 text-sm text-gray-600">
-              <div className="flex items-center gap-1.5">
-                <MapPin size={16} className="text-gray-400" />
-                Nairobi, Kenya (Remote)
-              </div>
-              <div className="flex items-center gap-1.5">
-                <Briefcase size={16} className="text-gray-400" />
-                Full-time
-              </div>
-              <div className="flex items-center gap-1.5">
-                <DollarSign size={16} className="text-gray-400" />
-                Ksh 150,000 – 250,000
-              </div>
-            </div>
-
-            <div className="flex flex-wrap gap-2 mb-6">
-              {['React', 'TypeScript', 'Tailwind CSS', 'Next.js'].map((tag) => (
-                <span key={tag} className="px-3 py-1 rounded-full bg-white text-xs font-medium text-gray-600 border border-gray-100">
-                  {tag}
-                </span>
-              ))}
-            </div>
-
-            <div className="flex gap-2 md:gap-3">
-              <button className="flex-1 py-2 md:py-2.5 rounded-full bg-white border border-gray-200 text-xs md:text-sm font-semibold text-black hover:bg-gray-50 transition-all">
-                View Details
-              </button>
-              <button className="flex-1 py-2 md:py-2.5 rounded-full bg-[#E50914] text-white text-xs md:text-sm font-semibold shadow-md hover:bg-[#cc0812] transition-all">
-                Apply Now
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Project Card */}
-        <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm mt-6">
-          {/* Header */}
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex gap-3">
-              <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center overflow-hidden">
-                 <img src="/api/placeholder/40/40" alt="User" className="w-full h-full object-cover" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-black">John Doe</h3>
-                </div>
-                <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
-                  <span>2 hours ago</span>
-                </div>
-              </div>
-            </div>
-            <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-medium">
-              Project
-            </span>
-          </div>
-
-          {/* Post Body */}
-          <div className="mb-4">
-            <h3 className="font-bold text-lg text-black mb-2">React Native Mobile App</h3>
-            <p className="text-gray-600 leading-relaxed">
-              Looking for a UI/UX designer to join our mobile app project. We're building a social platform for developers.
-            </p>
-          </div>
-
-          {/* Tags */}
-          <div className="flex flex-wrap gap-2 mb-6">
-            {['React Native', 'UI/UX', 'JavaScript'].map((tag) => (
-              <span key={tag} className="px-4 py-1.5 rounded-full bg-[#F4A261] text-white text-xs font-bold">
-                {tag}
-              </span>
-            ))}
-          </div>
-
-          {/* Footer Actions */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-4 border-t border-gray-100 gap-4 sm:gap-0">
-            <div className="flex items-center justify-between sm:justify-start gap-6 w-full sm:w-auto">
-              <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors group">
-                <Heart size={20} className="group-hover:fill-[#E50914]" />
-                <span className="text-sm font-medium">12</span>
-              </button>
-              <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors">
-                <MessageSquare size={20} />
-                <span className="text-sm font-medium">5</span>
-              </button>
-              <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors">
-                <Share2 size={20} />
-                <span className="text-sm font-medium">Share</span>
-              </button>
-            </div>
-            
-            <button className="w-full sm:w-auto px-6 py-2 rounded-full bg-[#E50914] text-white text-sm font-bold shadow-md hover:bg-[#cc0812] transition-all">
-              Join Project
-            </button>
-          </div>
-        </div>
+        )}
+        
+        {!hasMore && posts.length > 0 && (
+           <div className="py-8 text-center text-gray-400 text-sm font-medium">
+              You're all caught up!
+           </div>
+        )}
 
       </main>
 
@@ -568,21 +507,30 @@ export default function FeedPage() {
         {/* Modal Options */}
         {isPostModalOpen && (
           <div className="flex flex-col gap-3 mb-2 origin-bottom-right">
-             <button className="flex items-center gap-3 px-5 py-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all group whitespace-nowrap">
-                <span className="text-sm font-bold text-gray-700 group-hover:text-[#E50914]">Post Project</span>
+             <button 
+                onClick={() => router.push('/create-project')}
+                className="flex items-center gap-3 px-5 py-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all group whitespace-nowrap text-left"
+             >
+                <span className="text-sm font-bold text-gray-700 group-hover:text-[#E50914]">Create Project</span>
                 <div className="w-8 h-8 rounded-full bg-[#F4A261]/10 text-[#F4A261] flex items-center justify-center group-hover:bg-[#E50914] group-hover:text-white transition-all">
                   <FolderKanban size={18} />
                 </div>
              </button>
              
-             <button className="flex items-center gap-3 px-5 py-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all group whitespace-nowrap">
+             <button 
+                onClick={() => router.push('/create-job')}
+                className="flex items-center gap-3 px-5 py-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all group whitespace-nowrap text-left"
+             >
                 <span className="text-sm font-bold text-gray-700 group-hover:text-[#E50914]">Job Opportunity</span>
                 <div className="w-8 h-8 rounded-full bg-[#2ECC71]/10 text-[#2ECC71] flex items-center justify-center group-hover:bg-[#E50914] group-hover:text-white transition-all">
                   <Briefcase size={18} />
                 </div>
              </button>
 
-             <button className="flex items-center gap-3 px-5 py-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all group whitespace-nowrap">
+             <button 
+                onClick={() => router.push('/create-post')}
+                className="flex items-center gap-3 px-5 py-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all group whitespace-nowrap"
+             >
                 <span className="text-sm font-bold text-gray-700 group-hover:text-[#E50914]">Create Post</span>
                 <div className="w-8 h-8 rounded-full bg-[#E50914]/10 text-[#E50914] flex items-center justify-center group-hover:bg-[#E50914] group-hover:text-white transition-all">
                   <ImageIcon size={18} />
@@ -633,6 +581,379 @@ export default function FeedPage() {
 }
 
 // Subcomponents
+
+// Types for Feed
+type PostType = 'job' | 'project' | 'post' | 'tech-news';
+
+interface BasePost {
+  id: string;
+  type: PostType;
+  author: {
+    name: string;
+    avatar: string; // url or color
+    role?: string;
+  };
+  createdAt: string;
+  likes: number;
+  comments: number;
+}
+
+interface JobPost extends BasePost {
+  type: 'job';
+  title: string;
+  company: string;
+  description: string;
+  location: string;
+  salary: string;
+  tags: string[];
+  jobType: string; // Full-time, etc.
+}
+
+interface ProjectPost extends BasePost {
+  type: 'project';
+  title: string;
+  description: string;
+  tags: string[];
+}
+
+interface RegularPost extends BasePost {
+  type: 'post';
+  title: string;
+  content: string;
+  image?: string;
+}
+
+interface TechNewsPost extends BasePost {
+  type: 'tech-news';
+  title: string;
+  summary: string;
+  source: string;
+  url: string;
+  imageUrl?: string;
+}
+
+type FeedPost = JobPost | ProjectPost | RegularPost | TechNewsPost;
+
+// Mock Data Generator
+const generateMockPosts = (page: number, limit: number): FeedPost[] => {
+  return Array.from({ length: limit }).map((_, index) => {
+    const uniqueId = `post-${page}-${index}-${Date.now()}`;
+    const rand = Math.random();
+    let type: PostType = 'post';
+    
+    if (rand > 0.85) type = 'job';
+    else if (rand > 0.70) type = 'project';
+    else if (rand > 0.55) type = 'tech-news';
+    
+    const base = {
+      id: uniqueId,
+      type,
+      author: {
+        name: ['John Doe', 'Sarah Jenkins', 'Mike Ross', 'Emily Chen'][Math.floor(Math.random() * 4)],
+        avatar: '', // handled in component
+        role: ['Full Stack Dev', 'UI/UX Designer', 'Product Manager', 'DevOps Engineer'][Math.floor(Math.random() * 4)]
+      },
+      createdAt: `${Math.floor(Math.random() * 24)} hours ago`,
+      likes: Math.floor(Math.random() * 500),
+      comments: Math.floor(Math.random() * 50),
+    };
+
+    if (type === 'job') {
+      return {
+        ...base,
+        title: ['Senior Frontend Developer', 'Backend Engineer', 'Product Designer', 'DevOps Specialist'][Math.floor(Math.random() * 4)],
+        company: ['Magna Coders', 'Tech Corp', 'Startup Inc', 'Future Systems'][Math.floor(Math.random() * 4)],
+        description: 'We are looking for an experienced professional to join our team and help build the future of tech.',
+        location: 'Remote',
+        salary: '$100k - $150k',
+        tags: ['React', 'TypeScript', 'Node.js'],
+        jobType: 'Full-time'
+      } as JobPost;
+    } else if (type === 'project') {
+      return {
+        ...base,
+        title: ['E-commerce Platform', 'Social Media App', 'AI Dashboard', 'Crypto Wallet'][Math.floor(Math.random() * 4)],
+        description: 'Building a new platform using the latest tech stack. Looking for collaborators!',
+        tags: ['Next.js', 'Tailwind', 'Supabase']
+      } as ProjectPost;
+    } else if (type === 'tech-news') {
+      return {
+        ...base,
+        title: ['The Future of AI in 2026', 'New React Features Announced', 'WebAssembly Takes Over', 'Cybersecurity Trends'][Math.floor(Math.random() * 4)],
+        summary: 'A deep dive into the latest technological advancements and what they mean for developers in the coming year.',
+        source: ['TechCrunch', 'The Verge', 'Hacker News', 'Wired'][Math.floor(Math.random() * 4)],
+        url: '#',
+        imageUrl: '/api/placeholder/800/400'
+      } as TechNewsPost;
+    } else {
+      return {
+        ...base,
+        title: ['Just launched!', 'Working on something new', 'Learning Rust', 'Office vibes'][Math.floor(Math.random() * 4)],
+        content: 'Excited to share my latest progress. What do you guys think about this approach?',
+        image: Math.random() > 0.7 ? '/api/placeholder/800/400' : undefined
+      } as RegularPost;
+    }
+  });
+};
+
+function FeedItem({ post }: { post: FeedPost }) {
+  // Job Post
+  if (post.type === 'job') {
+    const job = post as JobPost;
+    return (
+        <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm mt-6">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm">
+                {post.author.name.charAt(0)}
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-black">{post.author.name}</h3>
+                  <span className="text-sm text-gray-500">{post.author.role}</span>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
+                  <span>{post.createdAt}</span>
+                  <span>•</span>
+                  <Globe size={12} />
+                </div>
+              </div>
+            </div>
+            <button className="text-gray-400 hover:text-black">
+              <MoreHorizontal size={20} />
+            </button>
+          </div>
+
+          <div className="mb-4">
+            <p className="font-bold text-black mb-1">{job.company} is hiring! {job.title}</p>
+            <p className="text-gray-600">{job.description}</p>
+          </div>
+
+          <div className="border border-[#2ECC71]/30 rounded-xl p-3 md:p-5 bg-[#2ECC71]/5">
+            <div className="flex items-start gap-3 md:gap-4 mb-4">
+              <div className="w-12 h-12 rounded-lg bg-[#F4A261] flex items-center justify-center text-white shadow-sm flex-shrink-0">
+                <Briefcase size={24} />
+              </div>
+              <div>
+                <h4 className="font-bold text-lg text-black leading-tight">{job.title}</h4>
+                <p className="text-sm text-gray-600">{job.company}</p>
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-4 mb-6 text-sm text-gray-600">
+              <div className="flex items-center gap-1.5">
+                <MapPin size={16} className="text-gray-400" />
+                {job.location}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <Briefcase size={16} className="text-gray-400" />
+                {job.jobType}
+              </div>
+              <div className="flex items-center gap-1.5">
+                <DollarSign size={16} className="text-gray-400" />
+                {job.salary}
+              </div>
+            </div>
+
+            <div className="flex flex-wrap gap-2 mb-6">
+              {job.tags.map((tag) => (
+                <span key={tag} className="px-3 py-1 rounded-full bg-white text-xs font-medium text-gray-600 border border-gray-100">
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            <div className="flex gap-2 md:gap-3">
+              <button className="flex-1 py-2 md:py-2.5 rounded-full bg-white border border-gray-200 text-xs md:text-sm font-semibold text-black hover:bg-gray-50 transition-all">
+                View Details
+              </button>
+              <button className="flex-1 py-2 md:py-2.5 rounded-full bg-[#E50914] text-white text-xs md:text-sm font-semibold shadow-md hover:bg-[#cc0812] transition-all">
+                Apply Now
+              </button>
+            </div>
+          </div>
+        </div>
+    );
+  }
+
+  // Project Post
+  if (post.type === 'project') {
+    const project = post as ProjectPost;
+    return (
+        <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm mt-6">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex gap-3">
+              <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center overflow-hidden">
+                 <img src="/api/placeholder/40/40" alt="User" className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-black">{post.author.name}</h3>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
+                  <span>{post.createdAt}</span>
+                </div>
+              </div>
+            </div>
+            <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-xs font-medium">
+              Project
+            </span>
+          </div>
+
+          <div className="mb-4">
+            <h3 className="font-bold text-lg text-black mb-2">{project.title}</h3>
+            <p className="text-gray-600 leading-relaxed">
+              {project.description}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-2 mb-6">
+            {project.tags.map((tag) => (
+              <span key={tag} className="px-4 py-1.5 rounded-full bg-[#F4A261] text-white text-xs font-bold">
+                {tag}
+              </span>
+            ))}
+          </div>
+
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-4 border-t border-gray-100 gap-4 sm:gap-0">
+            <div className="flex items-center justify-between sm:justify-start gap-6 w-full sm:w-auto">
+              <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors group">
+                <Heart size={20} className="group-hover:fill-[#E50914]" />
+                <span className="text-sm font-medium">{post.likes}</span>
+              </button>
+              <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors">
+                <MessageSquare size={20} />
+                <span className="text-sm font-medium">{post.comments}</span>
+              </button>
+              <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors">
+                <Share2 size={20} />
+                <span className="text-sm font-medium">Share</span>
+              </button>
+            </div>
+            
+            <button className="w-full sm:w-auto px-6 py-2 rounded-full bg-[#E50914] text-white text-sm font-bold shadow-md hover:bg-[#cc0812] transition-all">
+              Join Project
+            </button>
+          </div>
+        </div>
+    );
+  }
+
+  // Tech News Post
+  if (post.type === 'tech-news') {
+    const news = post as TechNewsPost;
+    return (
+      <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm mt-6 border border-gray-100">
+        <div className="flex items-start justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1 rounded-full bg-gray-900 text-white text-xs font-bold flex items-center gap-1">
+              <Globe size={12} />
+              {news.source}
+            </span>
+            <span className="text-xs text-gray-400">•</span>
+            <span className="text-xs text-gray-400">{post.createdAt}</span>
+          </div>
+          <button className="text-gray-400 hover:text-black">
+            <MoreHorizontal size={20} />
+          </button>
+        </div>
+
+        <div className="mb-4">
+          <h3 className="font-bold text-xl text-black mb-2 leading-tight hover:text-[#E50914] cursor-pointer transition-colors">
+            {news.title}
+          </h3>
+          <p className="text-gray-600 text-sm leading-relaxed mb-4">
+            {news.summary}
+          </p>
+          
+          {news.imageUrl && (
+            <div className="w-full h-48 md:h-64 rounded-xl overflow-hidden bg-gray-100 mb-4 relative group cursor-pointer">
+              <img 
+                src={news.imageUrl} 
+                alt={news.title} 
+                className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+              />
+              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+            </div>
+          )}
+        </div>
+
+        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+          <div className="flex items-center gap-6">
+            <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors group">
+              <Heart size={20} className="group-hover:fill-[#E50914]" />
+              <span className="text-sm font-medium">{post.likes}</span>
+            </button>
+            <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors">
+              <Share2 size={20} />
+              <span className="text-sm font-medium">Share</span>
+            </button>
+          </div>
+          
+          <button className="flex items-center gap-2 text-[#E50914] font-bold text-sm hover:underline">
+            Read Article
+            <ChevronRight size={16} />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Regular Post
+  const regular = post as RegularPost;
+  return (
+        <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm mt-6">
+          <div className="flex items-start justify-between mb-4">
+            <div className="flex gap-3">
+              <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center overflow-hidden">
+                 <img src="/api/placeholder/40/40" alt="User" className="w-full h-full object-cover" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-bold text-black">{post.author.name}</h3>
+                </div>
+                <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
+                  <span>{post.createdAt}</span>
+                </div>
+              </div>
+            </div>
+            <span className="px-3 py-1 rounded-full bg-purple-50 text-purple-600 text-xs font-medium">
+              Post
+            </span>
+          </div>
+
+          <div className="mb-4">
+            <h3 className="font-bold text-lg text-black mb-2">{regular.title}</h3>
+            <p className="text-gray-600 leading-relaxed mb-4">
+              {regular.content}
+            </p>
+            
+            {regular.image && (
+                <div className="w-full h-64 md:h-80 rounded-xl overflow-hidden bg-gray-100 mb-2 border border-gray-100">
+                   <img src={regular.image} alt="Post Content" className="w-full h-full object-cover hover:scale-105 transition-transform duration-500" />
+                </div>
+            )}
+          </div>
+
+          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
+            <div className="flex items-center gap-6">
+              <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors group">
+                <Heart size={20} className="group-hover:fill-[#E50914]" />
+                <span className="text-sm font-medium">{post.likes}</span>
+              </button>
+              <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors">
+                <MessageSquare size={20} />
+                <span className="text-sm font-medium">{post.comments}</span>
+              </button>
+              <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors">
+                <Share2 size={20} />
+                <span className="text-sm font-medium">Share</span>
+              </button>
+            </div>
+          </div>
+        </div>
+  );
+}
 
 function NavItem({ icon, label, badge, active, onClick }: { icon: React.ReactNode; label: string; badge?: string; active?: boolean; onClick?: () => void }) {
   return (

@@ -12,7 +12,6 @@ import {
   Camera,
   Chrome,
   User,
-  Building2,
   Bell,
   Lock,
   Palette,
@@ -25,18 +24,21 @@ import {
   ToggleRight,
   Moon,
   Sun,
-  Monitor
+  Monitor,
+  Menu,
+  X,
+  LogOut,
+  Search
 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function SettingsPage() {
   const [activeModule, setActiveModule] = useState('Account');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const renderModuleContent = () => {
-    switch (activeModule) {
+  const getModuleContent = (moduleId: string) => {
+    switch (moduleId) {
       case 'Account': return <AccountSettings />;
-      case 'Business Profile': return <BusinessProfileSettings />;
-      case 'Job Postings': return <JobPostingsSettings />;
       case 'Notifications': return <NotificationsSettings />;
       case 'Privacy': return <PrivacySettings />;
       case 'Appearance': return <AppearanceSettings />;
@@ -49,8 +51,8 @@ export default function SettingsPage() {
 
   const settingsModules = [
     { id: 'Account', icon: <User size={18} />, label: 'Account' },
-    { id: 'Business Profile', icon: <Building2 size={18} />, label: 'Business Profile' },
-    { id: 'Job Postings', icon: <Briefcase size={18} />, label: 'Job Postings' },
+    { id: 'My Projects', icon: <FolderKanban size={18} />, label: 'My Projects' },
+    { id: 'My Job Opportunities', icon: <Briefcase size={18} />, label: 'My Job Opportunities' },
     { id: 'Notifications', icon: <Bell size={18} />, label: 'Notifications' },
     { id: 'Privacy', icon: <Lock size={18} />, label: 'Privacy' },
     { id: 'Appearance', icon: <Palette size={18} />, label: 'Appearance' },
@@ -60,7 +62,66 @@ export default function SettingsPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#FDF8F5] font-sans text-[#444444] flex">
+    <div className="min-h-screen bg-[#FDF8F5] font-sans text-[#444444] flex flex-col md:flex-row">
+      {/* MOBILE TOP NAV */}
+      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white z-50 px-4 flex items-center justify-between border-b border-gray-100 shadow-sm">
+        <div className="flex items-center gap-3">
+          <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 -ml-2 text-gray-600">
+            <Menu size={24} />
+          </button>
+          <span className="text-lg font-bold">
+            <span className="text-[#F4A261]">Magna</span>
+            <span className="text-[#E50914]">Coders</span>
+          </span>
+        </div>
+        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-xs">
+          JD
+        </div>
+      </div>
+
+      {/* MOBILE DRAWER */}
+      {isMobileMenuOpen && (
+        <div className="fixed inset-0 z-[60] md:hidden">
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsMobileMenuOpen(false)} />
+          <div className="absolute left-0 top-0 bottom-0 w-[280px] bg-white shadow-2xl flex flex-col">
+            <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+              <span className="text-xl font-bold">
+                <span className="text-[#F4A261]">Magna</span>
+                <span className="text-[#E50914]">Coders</span>
+              </span>
+              <button onClick={() => setIsMobileMenuOpen(false)} className="p-2 -mr-2 text-gray-400 hover:text-gray-600">
+                <X size={24} />
+              </button>
+            </div>
+            <div className="p-4 overflow-y-auto flex-1">
+              <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-6">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm">
+                  JD
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-black">John Doe</h3>
+                  <p className="text-xs text-gray-500">Full Stack Dev</p>
+                </div>
+              </div>
+              <nav className="space-y-1">
+                <Link href="/feed" className="block"><NavItem icon={<LayoutDashboard size={20} />} label="Dashboard" /></Link>
+                <Link href="/builders" className="block"><NavItem icon={<Users size={20} />} label="Members" /></Link>
+                <Link href="/my-projects" className="block"><NavItem icon={<FolderKanban size={20} />} label="Projects" badge="3" /></Link>
+                <Link href="/messages" className="block"><NavItem icon={<MessageSquare size={20} />} label="Messages" badge="12" /></Link>
+                <NavItem icon={<Briefcase size={20} />} label="Opportunities" />
+                <NavItem icon={<Settings size={20} />} label="Settings" active={true} />
+              </nav>
+            </div>
+            <div className="p-4 border-t border-gray-100">
+              <button className="flex items-center gap-3 w-full p-3 text-red-500 hover:bg-red-50 rounded-xl transition-colors font-medium text-sm">
+                <LogOut size={20} />
+                Sign Out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* LEFT SIDEBAR - Reused from Feed */}
       <aside className="w-[88px] lg:w-[260px] bg-white h-screen fixed left-0 top-0 border-r border-gray-100 flex flex-col z-20 hidden md:flex transition-all duration-300">
         <div className="p-6">
@@ -112,7 +173,7 @@ export default function SettingsPage() {
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 md:ml-[88px] lg:ml-[260px] p-4 md:p-8 max-w-7xl mx-auto transition-all duration-300 w-full">
+      <main className="flex-1 md:ml-[88px] lg:ml-[260px] p-4 pt-20 md:p-8 max-w-7xl mx-auto transition-all duration-300 w-full mb-20 md:mb-0">
         
         {/* Header */}
         <div className="mb-8">
@@ -128,33 +189,68 @@ export default function SettingsPage() {
                 <h3 className="text-xs font-bold text-gray-400 uppercase mb-2 px-2">General</h3>
                 <nav className="space-y-1">
                   {settingsModules.map((module) => (
-                    <button
-                      key={module.id}
-                      onClick={() => setActiveModule(module.id)}
-                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
-                        activeModule === module.id
-                          ? 'bg-[#E50914]/10 text-[#E50914]'
-                          : 'text-gray-600 hover:bg-gray-50'
-                      }`}
-                    >
-                      {module.icon}
-                      {module.label}
-                      {activeModule === module.id && (
-                        <ChevronRight size={16} className="ml-auto opacity-50" />
-                      )}
-                    </button>
+                    <div key={module.id} className="flex flex-col">
+                      <button
+                        onClick={() => setActiveModule(activeModule === module.id ? '' : module.id)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all ${
+                          activeModule === module.id
+                            ? 'bg-[#E50914]/10 text-[#E50914]'
+                            : 'text-gray-600 hover:bg-gray-50'
+                        }`}
+                      >
+                        {module.icon}
+                        {module.label}
+                        <ChevronRight 
+                          size={16} 
+                          className={`ml-auto opacity-50 transition-transform duration-200 ${
+                            activeModule === module.id ? 'rotate-90 lg:rotate-0' : ''
+                          }`} 
+                        />
+                      </button>
+
+                      {/* Mobile Accordion Content */}
+                      <div className={`lg:hidden grid transition-all duration-300 ease-in-out ${
+                        activeModule === module.id ? 'grid-rows-[1fr] opacity-100 mt-2 mb-4' : 'grid-rows-[0fr] opacity-0'
+                      }`}>
+                        <div className="overflow-hidden">
+                          {activeModule === module.id && getModuleContent(module.id)}
+                        </div>
+                      </div>
+                    </div>
                   ))}
                 </nav>
               </div>
             </div>
           </div>
 
-          {/* Module Content Area */}
-          <div className="flex-1 min-w-0">
-            {renderModuleContent()}
+          {/* Desktop Module Content Area */}
+          <div className="hidden lg:block flex-1 min-w-0">
+            {getModuleContent(activeModule || 'Account')}
           </div>
         </div>
       </main>
+
+      {/* MOBILE BOTTOM NAV */}
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-3 md:hidden z-50 flex justify-between items-center pb-5 pt-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <Link href="/feed" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
+          <LayoutDashboard size={24} />
+          <span className="text-[10px] font-medium">Feed</span>
+        </Link>
+        <Link href="/builders" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
+          <Search size={24} />
+          <span className="text-[10px] font-medium">Builders</span>
+        </Link>
+        <Link href="/messages" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
+          <MessageSquare size={24} />
+          <span className="text-[10px] font-medium">Chat</span>
+        </Link>
+        <Link href="/user-profile" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
+          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-[10px]">
+             JD
+          </div>
+          <span className="text-[10px] font-medium">Profile</span>
+        </Link>
+      </div>
     </div>
   );
 }
@@ -247,80 +343,6 @@ function AccountSettings() {
             Disconnect
           </button>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function BusinessProfileSettings() {
-  return (
-    <div className="bg-white rounded-[24px] p-6 md:p-8 shadow-sm">
-      <h2 className="text-xl font-bold text-black mb-6">Business Profile</h2>
-      <div className="space-y-6">
-        <InputField label="Company Name" placeholder="e.g. Acme Corp" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">Industry</label>
-            <select className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-100 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm">
-              <option>Technology</option>
-              <option>Finance</option>
-              <option>Healthcare</option>
-              <option>Education</option>
-            </select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-semibold text-gray-700">Company Size</label>
-            <select className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-100 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm">
-              <option>1-10 employees</option>
-              <option>11-50 employees</option>
-              <option>50-200 employees</option>
-              <option>200+ employees</option>
-            </select>
-          </div>
-        </div>
-        <InputField label="Website" placeholder="https://example.com" />
-        <div className="space-y-2">
-          <label className="text-sm font-semibold text-gray-700">Description</label>
-          <textarea 
-            rows={4}
-            placeholder="Tell us about your company..."
-            className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-100 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm resize-none"
-          ></textarea>
-        </div>
-        <div className="pt-4">
-          <Button primary>Save Business Profile</Button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function JobPostingsSettings() {
-  return (
-    <div className="bg-white rounded-[24px] p-6 md:p-8 shadow-sm">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-black">Job Postings</h2>
-        <Button primary icon={<Plus size={16} />}>Post a Job</Button>
-      </div>
-      
-      <div className="space-y-4">
-        {[1, 2].map((job) => (
-          <div key={job} className="p-4 rounded-xl border border-gray-100 hover:border-[#F4A261] transition-colors group">
-            <div className="flex justify-between items-start">
-              <div>
-                <h3 className="font-bold text-black">Senior React Developer</h3>
-                <p className="text-sm text-gray-500 mb-2">Remote • Full-time</p>
-                <div className="flex gap-2">
-                  <span className="px-2 py-1 rounded-md bg-green-100 text-green-700 text-xs font-bold">Active</span>
-                  <span className="px-2 py-1 rounded-md bg-gray-100 text-gray-600 text-xs">12 Applicants</span>
-                </div>
-              </div>
-              <button className="p-2 text-gray-400 hover:text-[#E50914] transition-colors">
-                <Settings size={18} />
-              </button>
-            </div>
-          </div>
-        ))}
       </div>
     </div>
   );

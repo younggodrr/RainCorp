@@ -5,25 +5,44 @@ import Link from 'next/link';
 import { 
   LayoutGrid, Users, MessageSquare, Settings, Search, 
   MapPin, Github, Linkedin, MessageCircle, Check, Globe,
-  ChevronLeft, ChevronRight, Menu, X, Bell
+  ChevronLeft, ChevronRight, Menu, X, Bell, UserPlus, UserCheck
 } from 'lucide-react';
 
+const LOOKING_FOR_OPTIONS = [
+  'Team Member',
+  'Accountability Partner',
+  'Mentor',
+  'Networking & Opportunities',
+  'Investment Prospect',
+  'Technical Co-founder',
+  'Design Assistance',
+  'UI/UX and product design'
+];
+
 // Mock Data for Builders
-const MOCK_BUILDERS = Array.from({ length: 50 }).map((_, i) => ({
-  id: i + 1,
-  name: i % 2 === 0 ? 'Ashwa' : 'abdijabar',
-  email: i % 2 === 0 ? 'ashwaashard@gmail.com' : 'abdijabarmadeyteno@gmail.com',
-  bio: i % 2 === 0 
-    ? 'Ux Ui designer| Author | Deep Thinker | Content Creator | Artist 🎨 💻 📽️' 
-    : 'Great mind with ambitions, flowing with destiny with submission.',
-  roles: i % 2 === 0 
-    ? ['UX Designer', 'Designer'] 
-    : ['AI/ML Engineer', 'Backend Developer', 'Developer', 'Research/Analyst'],
-  location: i % 2 === 0 ? 'Nairobi' : 'Mandera, Kenya (Home Address)',
-  status: 'available',
-  connected: i % 3 === 0,
-  avatar: null // Will use initials or placeholder
-}));
+const MOCK_BUILDERS = Array.from({ length: 50 }).map((_, i) => {
+  // Randomly select 1-3 looking for options
+  const numLookingFor = Math.floor(Math.random() * 3) + 1;
+  const shuffled = [...LOOKING_FOR_OPTIONS].sort(() => 0.5 - Math.random());
+  const lookingFor = shuffled.slice(0, numLookingFor);
+
+  return {
+    id: i + 1,
+    name: i % 2 === 0 ? 'Ashwa' : 'abdijabar',
+    email: i % 2 === 0 ? 'ashwaashard@gmail.com' : 'abdijabarmadeyteno@gmail.com',
+    bio: i % 2 === 0 
+      ? 'Ux Ui designer| Author | Deep Thinker | Content Creator | Artist 🎨 💻 📽️' 
+      : 'Great mind with ambitions, flowing with destiny with submission.',
+    roles: i % 2 === 0 
+      ? ['UX Designer', 'Designer'] 
+      : ['AI/ML Engineer', 'Backend Developer', 'Developer', 'Research/Analyst'],
+    lookingFor,
+    location: i % 2 === 0 ? 'Nairobi' : 'Mandera, Kenya (Home Address)',
+    status: 'available',
+    connected: i % 3 === 0,
+    avatar: null // Will use initials or placeholder
+  };
+});
 
 export default function BuildersPage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -98,10 +117,10 @@ export default function BuildersPage() {
            
            {/* Actions */}
            <div className="flex items-center gap-2 ml-4">
-              <button className="relative p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
+              <Link href="/notifications" className="relative p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
                 <Bell size={20} />
                 <div className="absolute top-2 right-2.5 w-2 h-2 bg-[#E50914] rounded-full"></div>
-              </button>
+              </Link>
               <button className="p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
                 <Menu size={20} />
               </button>
@@ -130,18 +149,52 @@ export default function BuildersPage() {
                     <p className="text-xs text-gray-500 truncate">{builder.email}</p>
                     <p className="text-xs text-gray-600 mt-1 line-clamp-2 leading-relaxed">{builder.bio}</p>
                   </div>
-                  <span className="px-2 py-0.5 bg-[#2ECC71]/10 text-[#2ECC71] rounded-full text-[10px] font-medium flex-shrink-0">
-                    {builder.status}
-                  </span>
+                  
+                  {/* Status & Actions Column */}
+                  <div className="flex flex-col items-end gap-3 flex-shrink-0 ml-1">
+                    <span className="px-2 py-0.5 bg-[#2ECC71]/10 text-[#2ECC71] rounded-full text-[10px] font-medium whitespace-nowrap">
+                      {builder.status}
+                    </span>
+                  </div>
                 </div>
 
                 {/* Roles */}
                 <div className="flex flex-wrap gap-2">
-                  {builder.roles.map((role, idx) => (
+                  {builder.roles.slice(0, 2).map((role, idx) => (
                     <span key={idx} className={`px-3 py-1 rounded-full text-[10px] font-medium border ${idx === 0 ? 'bg-[#F4A261]/10 text-[#F4A261] border-[#F4A261]/20' : 'bg-[#E50914]/10 text-[#E50914] border-[#E50914]/20'}`}>
                       {role}
                     </span>
                   ))}
+                  {builder.roles.length > 2 && (
+                    <span className="px-3 py-1 rounded-full text-[10px] font-medium border bg-gray-100 text-gray-600 border-gray-200">
+                      +{builder.roles.length - 2}
+                    </span>
+                  )}
+                </div>
+
+                {/* Looking For */}
+                <div className="flex flex-col gap-2 p-3 bg-gray-50 rounded-xl">
+                  <div className="flex items-center justify-between gap-2">
+                     <div className="flex items-center gap-2 text-xs font-bold text-gray-700">
+                       <span className="text-sm">👀</span>
+                       <span>Looking for:</span>
+                     </div>
+                     <div className="flex items-center gap-2">
+                        <button className={`p-1.5 rounded-full transition-all ${builder.connected ? 'bg-[#F4A261]/10 text-[#F4A261]' : 'bg-black text-white hover:bg-gray-800'}`}>
+                          {builder.connected ? <UserCheck size={16} /> : <UserPlus size={16} />}
+                        </button>
+                        <button className="p-1.5 rounded-full bg-white text-gray-600 border border-gray-200 hover:bg-gray-100 transition-all">
+                          <MessageSquare size={16} />
+                        </button>
+                     </div>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {builder.lookingFor.map((item, idx) => (
+                      <span key={idx} className="px-2 py-0.5 bg-white border border-gray-200 text-gray-600 rounded-md text-[10px] font-medium">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
                 </div>
 
                 {/* Details */}
@@ -156,16 +209,6 @@ export default function BuildersPage() {
                       <Linkedin size={16} className="text-[#0077b5] cursor-pointer transition-colors" />
                       <MessageCircle size={16} className="text-[#25D366] cursor-pointer transition-colors" />
                    </div>
-                </div>
-
-                {/* Actions */}
-                <div className="grid grid-cols-2 gap-3 mt-2">
-                  <button className={`py-2 rounded-xl text-xs font-bold transition-all ${builder.connected ? 'bg-[#F4A261]/10 text-[#F4A261] border border-[#F4A261]/20' : 'bg-[#F4A261] text-white hover:bg-[#e08e4d] shadow-sm'}`}>
-                    {builder.connected ? 'Connected' : 'Connect'}
-                  </button>
-                  <button className="py-2 rounded-xl text-xs font-bold bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 transition-all">
-                    Message
-                  </button>
                 </div>
               </div>
             ))}
