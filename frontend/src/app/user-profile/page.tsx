@@ -14,7 +14,7 @@ export default function UserProfilePage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const searchParams = useSearchParams();
-  const isFromNav = searchParams.get('from') === 'nav';
+  const isFromNav = searchParams?.get('from') === 'nav';
 
   // Mock User Data
   const user = {
