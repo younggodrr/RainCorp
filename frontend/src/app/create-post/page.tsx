@@ -3,7 +3,7 @@
 import React, { useState, useRef } from 'react';
 import { 
   LayoutDashboard, Users, FolderKanban, MessageSquare, Briefcase, Settings, 
-  Plus, Search, BookOpen, GraduationCap, BadgeCheck, ChevronLeft, 
+  Plus, BadgeCheck, ChevronLeft, 
   Image as ImageIcon, X, Loader2
 } from 'lucide-react';
 import Link from 'next/link';

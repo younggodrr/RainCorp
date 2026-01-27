@@ -1,12 +1,11 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Phone, Video, Info, Smile, Paperclip, Mic, Send, Image as ImageIcon, MoreHorizontal, CheckCheck, LayoutDashboard, Search, MessageSquare, Settings, Edit, MoreVertical, Pin, LayoutGrid, Users, MessageCircleQuestion, Menu, X, FolderKanban, Briefcase, Plus, BookOpen, GraduationCap, BadgeCheck, Bell } from 'lucide-react';
+import { Phone, Video, Smile, Paperclip, Mic, Send, MoreHorizontal, CheckCheck, LayoutDashboard, Search, MessageSquare, Settings, Edit, MoreVertical, LayoutGrid, Users, MessageCircleQuestion, Menu, X, FolderKanban, Briefcase, Plus, BookOpen, GraduationCap, BadgeCheck, Bell } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
 export default function MessagesPage() {
-  const [activeTab, setActiveTab] = useState('Messages');
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
@@ -310,7 +309,7 @@ export default function MessagesPage() {
               {['Chats', 'Groups', 'Unread'].map((item) => (
                 <button
                   key={item}
-                  onClick={() => setFilter(item.toLowerCase() as any)}
+                  onClick={() => setFilter(item.toLowerCase() as 'chats' | 'groups' | 'unread')}
                   className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                     filter === item.toLowerCase() 
                       ? 'bg-black text-white shadow-md' 
@@ -410,7 +409,7 @@ export default function MessagesPage() {
             <div className="flex flex-col items-end max-w-[80%] ml-auto">
               <div className="bg-[#E50914] text-white p-4 rounded-2xl rounded-tr-none shadow-md">
                 <p className="text-sm leading-relaxed">
-                  I've got a few sketches already. Thinking of incorporating some sleek animations for the website interface. What do you all think?
+                  I&apos;veI&apos;ve got a few sketches already. Thinking of incorporating some sleek animations for the website interface. What do you all think?
                 </p>
               </div>
               <div className="flex items-center gap-1 mt-1 mr-1">

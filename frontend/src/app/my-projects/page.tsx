@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   LayoutGrid, Users, MessageCircleQuestion, Settings, 
   Menu, X, FolderKanban, Plus, Search, 
-  MessageSquare, LayoutDashboard, Bell
+  MessageSquare, LayoutDashboard, Bell, Calendar
 } from 'lucide-react';
 
 export default function MyProjectsPage() {
