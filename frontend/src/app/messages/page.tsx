@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { Phone, Video, Smile, Paperclip, Mic, Send, MoreHorizontal, CheckCheck, LayoutDashboard, Search, MessageSquare, Settings, Edit, MoreVertical, LayoutGrid, Users, MessageCircleQuestion, Menu, X, FolderKanban, Briefcase, Plus, BookOpen, GraduationCap, BadgeCheck, Bell } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
 
 export default function MessagesPage() {
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
@@ -565,7 +564,18 @@ export default function MessagesPage() {
 
 // --- SUBCOMPONENTS ---
 
-function ConversationItem({ name, message, time, unread, isTyping, readStatus, active, onClick }: any) {
+interface ConversationItemProps {
+  name: string;
+  message: string;
+  time: string;
+  unread?: number;
+  isTyping?: boolean;
+  readStatus?: string;
+  active: boolean;
+  onClick: () => void;
+}
+
+function ConversationItem({ name, message, time, unread, isTyping, readStatus, active, onClick }: ConversationItemProps) {
   return (
     <div 
       onClick={onClick}
@@ -576,7 +586,7 @@ function ConversationItem({ name, message, time, unread, isTyping, readStatus, a
       <div className="relative flex-shrink-0">
         <div className="w-12 h-12 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-sm overflow-hidden">
            {/* Placeholder Avatar */}
-           {name.split(' ').map((n:any) => n[0]).join('').substring(0,2)}
+           {name.split(' ').map((n: string) => n[0]).join('').substring(0,2)}
         </div>
         {isTyping && (
            <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#2ECC71] border-2 border-white rounded-full"></div>
@@ -614,7 +624,15 @@ function ConversationItem({ name, message, time, unread, isTyping, readStatus, a
   )
 }
 
-function MessageBubble({ sender, text, time, avatar, color }: any) {
+interface MessageBubbleProps {
+  sender: string;
+  text: string;
+  time: string;
+  avatar: string;
+  color?: string;
+}
+
+function MessageBubble({ sender, text, time, avatar, color }: MessageBubbleProps) {
   return (
     <div className="flex items-end gap-3 max-w-[80%]">
       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${color || 'bg-gray-200 text-gray-700'}`}>
