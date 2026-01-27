@@ -28,7 +28,9 @@ import {
   Menu,
   X,
   LogOut,
-  Search
+  Search,
+  CreditCard,
+  History
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -39,6 +41,8 @@ export default function SettingsPage() {
   const getModuleContent = (moduleId: string) => {
     switch (moduleId) {
       case 'Account': return <AccountSettings />;
+      case 'Payment Method': return <PaymentMethodSettings />;
+      case 'Payment History': return <PaymentHistorySettings />;
       case 'Notifications': return <NotificationsSettings />;
       case 'Privacy': return <PrivacySettings />;
       case 'Appearance': return <AppearanceSettings />;
@@ -51,6 +55,8 @@ export default function SettingsPage() {
 
   const settingsModules = [
     { id: 'Account', icon: <User size={18} />, label: 'Account' },
+    { id: 'Payment Method', icon: <CreditCard size={18} />, label: 'Payment Method' },
+    { id: 'Payment History', icon: <History size={18} />, label: 'Payment History' },
     { id: 'My Projects', icon: <FolderKanban size={18} />, label: 'My Projects' },
     { id: 'My Job Opportunities', icon: <Briefcase size={18} />, label: 'My Job Opportunities' },
     { id: 'Notifications', icon: <Bell size={18} />, label: 'Notifications' },
@@ -366,6 +372,70 @@ function AccountSettings() {
             Disconnect
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function PaymentMethodSettings() {
+  return (
+    <div className="bg-white rounded-[24px] p-6 md:p-8 shadow-sm">
+      <h2 className="text-xl font-bold text-black mb-6">Payment Method</h2>
+      
+      <div className="space-y-6">
+        <div className="p-4 border border-gray-200 rounded-xl flex items-center justify-between">
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-8 bg-gray-100 rounded flex items-center justify-center text-xs font-bold text-gray-500">VISA</div>
+                <div>
+                    <p className="text-sm font-bold text-gray-800">•••• •••• •••• 4242</p>
+                    <p className="text-xs text-gray-500">Expires 12/24</p>
+                </div>
+            </div>
+            <button className="text-xs font-bold text-red-500 hover:underline">Remove</button>
+        </div>
+
+        <div className="p-4 border border-gray-200 rounded-xl flex items-center justify-between">
+            <div className="flex items-center gap-4">
+                <div className="w-12 h-8 bg-gray-100 rounded flex items-center justify-center text-xs font-bold text-gray-500">MC</div>
+                <div>
+                    <p className="text-sm font-bold text-gray-800">•••• •••• •••• 5555</p>
+                    <p className="text-xs text-gray-500">Expires 10/25</p>
+                </div>
+            </div>
+            <button className="text-xs font-bold text-red-500 hover:underline">Remove</button>
+        </div>
+
+        <button className="w-full py-3 rounded-xl border-2 border-dashed border-gray-200 text-gray-400 font-bold text-sm hover:border-[#E50914] hover:text-[#E50914] transition-colors flex items-center justify-center gap-2">
+            <Plus size={18} />
+            Add New Card
+        </button>
+      </div>
+    </div>
+  );
+}
+
+function PaymentHistorySettings() {
+  return (
+    <div className="bg-white rounded-[24px] p-6 md:p-8 shadow-sm">
+      <h2 className="text-xl font-bold text-black mb-6">Payment History</h2>
+      
+      <div className="space-y-4">
+        {[
+            { date: 'Oct 24, 2023', amount: '$29.00', status: 'Paid', invoice: '#INV-2023-001' },
+            { date: 'Sep 24, 2023', amount: '$29.00', status: 'Paid', invoice: '#INV-2023-002' },
+            { date: 'Aug 24, 2023', amount: '$29.00', status: 'Paid', invoice: '#INV-2023-003' },
+        ].map((item, i) => (
+            <div key={i} className="flex items-center justify-between p-4 bg-gray-50 rounded-xl">
+                <div>
+                    <p className="text-sm font-bold text-gray-800">Pro Plan Subscription</p>
+                    <p className="text-xs text-gray-500">{item.date} • {item.invoice}</p>
+                </div>
+                <div className="text-right">
+                    <p className="text-sm font-bold text-black">{item.amount}</p>
+                    <span className="text-[10px] font-bold text-green-600 bg-green-100 px-2 py-1 rounded-full">{item.status}</span>
+                </div>
+            </div>
+        ))}
       </div>
     </div>
   );
