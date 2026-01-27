@@ -1,12 +1,14 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Phone, Video, Smile, Paperclip, Mic, Send, MoreHorizontal, CheckCheck, LayoutDashboard, Search, MessageSquare, Settings, Edit, MoreVertical, LayoutGrid, Users, MessageCircleQuestion, Menu, X, FolderKanban, Briefcase, Plus, BookOpen, GraduationCap, BadgeCheck, Bell } from 'lucide-react';
+import { Phone, Video, Smile, Paperclip, Mic, Send, MoreHorizontal, CheckCheck, LayoutDashboard, Search, MessageSquare, Settings, Edit, MoreVertical, LayoutGrid, Users, MessageCircleQuestion, Menu, X, FolderKanban, Briefcase, Plus, BookOpen, GraduationCap, BadgeCheck, Bell, FileText } from 'lucide-react';
 import Link from 'next/link';
+import LeftPanel from '@/components/LeftPanel';
 
 export default function MessagesPage() {
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('Messages');
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [filter, setFilter] = useState<'chats' | 'groups' | 'unread'>('chats');
 
@@ -92,141 +94,12 @@ export default function MessagesPage() {
 
               {/* Drawer Scrollable Content */}
               <div className="p-4 space-y-6 pb-20">
-                
-                {/* User Profile Card */}
-                <Link href="/user-profile" className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl">
-                  <div className="relative flex-shrink-0">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm">
-                      JD
-                    </div>
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#2ECC71] border-2 border-white rounded-full"></div>
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h3 className="text-sm font-bold text-black truncate">John Doe</h3>
-                    <p className="text-xs text-gray-500 truncate">Full Stack Dev</p>
-                  </div>
-                </Link>
-
-                {/* Navigation Menu */}
-                <nav className="space-y-1">
-                  <Link href="/feed" className="w-full block">
-                    <div className="flex items-center gap-3 p-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
-                      <LayoutDashboard size={20} />
-                      <span className="text-sm font-medium">Dashboard</span>
-                    </div>
-                  </Link>
-                  <Link href="/friends" className="w-full block">
-                    <div className="flex items-center gap-3 p-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
-                      <Users size={20} />
-                      <span className="text-sm font-medium">Members</span>
-                    </div>
-                  </Link>
-                  <Link href="/projects" className="w-full block">
-                    <div className="flex items-center gap-3 p-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
-                      <FolderKanban size={20} />
-                      <span className="text-sm font-medium">Projects</span>
-                    </div>
-                  </Link>
-                  <Link href="/messages" className="w-full block">
-                    <div className="flex items-center gap-3 p-2 rounded-lg bg-red-50 text-[#E50914] font-medium transition-colors">
-                      <MessageSquare size={20} />
-                      <span className="text-sm">Messages</span>
-                    </div>
-                  </Link>
-                  <Link href="/opportunities" className="w-full block">
-                    <div className="flex items-center gap-3 p-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
-                      <Briefcase size={20} />
-                      <span className="text-sm font-medium">Opportunities</span>
-                    </div>
-                  </Link>
-                </nav>
-
-                {/* Quick Actions */}
-                <div>
-                  <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 px-2">Quick Actions</h4>
-                  <div className="space-y-3">
-                    <button className="w-full py-2.5 px-4 rounded-full bg-gradient-to-r from-[#F4A261] to-[#E50914] text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
-                      <Plus size={18} />
-                      Create Post
-                    </button>
-                    <button className="w-full py-2.5 px-4 rounded-full bg-white border border-gray-200 text-black text-sm font-medium hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
-                      <Search size={18} />
-                      Find Collaborators
-                    </button>
-                    <button className="w-full py-2.5 px-4 rounded-full bg-white border border-gray-200 text-black text-sm font-medium hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
-                      <BookOpen size={18} />
-                      Resources
-                    </button>
-                  </div>
-                </div>
-
-                {/* Groups */}
-                <div>
-                  <div className="flex items-center justify-between mb-3 px-2">
-                    <h4 className="text-xs font-bold text-gray-400 uppercase">Your Groups</h4>
-                    <button className="text-[#E50914] text-xs font-medium hover:underline">See All</button>
-                  </div>
-                  <div className="space-y-1">
-                    {[
-                      { name: 'React Developers', members: '12k members' },
-                      { name: 'Startup Founders', members: '5k members' },
-                      { name: 'UI/UX Designers', members: '8.5k members' }
-                    ].map((group) => (
-                      <button key={group.name} className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-left group">
-                        <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 group-hover:bg-white group-hover:shadow-sm transition-all">
-                          <Users size={16} />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h5 className="text-sm font-medium text-black truncate">{group.name}</h5>
-                          <p className="text-xs text-gray-500 truncate">{group.members}</p>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Magna School */}
-                <div>
-                  <div className="bg-gradient-to-br from-[#2ECC71]/10 to-[#2ECC71]/20 rounded-xl p-4 border border-[#2ECC71]/20">
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className="w-8 h-8 rounded-lg bg-[#2ECC71] flex items-center justify-center text-white shadow-sm">
-                        <GraduationCap size={18} />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-black text-sm">Magna School</h4>
-                        <p className="text-xs text-gray-600 leading-tight mt-0.5">Upskill with top tech courses</p>
-                      </div>
-                    </div>
-                    <button className="w-full py-2 rounded-lg bg-white text-[#2ECC71] text-xs font-bold shadow-sm hover:shadow-md transition-all">
-                      Start Learning
-                    </button>
-                  </div>
-                </div>
-
-                {/* Verification Badge */}
-                <div>
-                  <div className="bg-gradient-to-br from-[#E50914]/5 to-[#F4A261]/10 rounded-xl p-4 border border-[#E50914]/10">
-                    <div className="flex items-center gap-3 mb-2">
-                      <BadgeCheck size={20} className="text-[#E50914]" />
-                      <h4 className="font-bold text-black text-sm">Get Verified</h4>
-                    </div>
-                    <p className="text-xs text-gray-600 mb-3">
-                      Boost your credibility and unlock exclusive features.
-                    </p>
-                    <button className="w-full py-2 rounded-lg bg-[#E50914] text-white text-xs font-bold shadow-sm hover:bg-[#cc0812] transition-all">
-                      Apply for Verification
-                    </button>
-                  </div>
-                </div>
-
-                <nav className="space-y-1">
-                  <Link href="/settings" className="w-full block">
-                    <div className="flex items-center gap-3 p-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
-                      <Settings size={20} />
-                      <span className="text-sm font-medium">Settings</span>
-                    </div>
-                  </Link>
-                </nav>
+                <LeftPanel 
+                  activeTab={activeTab} 
+                  setActiveTab={setActiveTab} 
+                  closeMenu={() => setIsMobileMenuOpen(false)} 
+                  isMobile={true}
+                />
               </div>
             </div>
           </div>
@@ -550,7 +423,7 @@ export default function MessagesPage() {
               <span className="text-[10px] font-medium">Chat</span>
             </Link>
 
-        <Link href="/profile" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
+        <Link href="/user-profile" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
           <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-[10px]">
              JD
           </div>

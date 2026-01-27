@@ -6,8 +6,9 @@ import Image from 'next/image';
 import { 
   LayoutGrid, Users, MessageSquare, Settings, Search, 
   MapPin, Github, Linkedin, MessageCircle, Globe,
-  ChevronLeft, ChevronRight, Menu, Bell, UserPlus, UserCheck
+  ChevronLeft, ChevronRight, Menu, Bell, UserPlus, UserCheck, X
 } from 'lucide-react';
+import LeftPanel from '@/components/LeftPanel';
 
 const LOOKING_FOR_OPTIONS = [
   'Team Member',
@@ -47,6 +48,8 @@ const MOCK_BUILDERS = Array.from({ length: 50 }).map((_, i) => {
 
 export default function BuildersPage() {
   const [currentPage, setCurrentPage] = useState(1);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('Members');
   const itemsPerPage = 6; // Grid 3x2 or List
   
   const totalPages = Math.ceil(MOCK_BUILDERS.length / itemsPerPage);
@@ -121,11 +124,58 @@ export default function BuildersPage() {
                 <Bell size={20} />
                 <div className="absolute top-2 right-2.5 w-2 h-2 bg-[#E50914] rounded-full"></div>
               </Link>
-              <button className="p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
+              <button 
+                className="p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
+                onClick={() => setIsMobileMenuOpen(true)}
+              >
                 <Menu size={20} />
               </button>
            </div>
         </div>
+
+        {/* MOBILE DRAWER (Left Sidebar Content) */}
+        {isMobileMenuOpen && (
+          <div className="fixed inset-0 z-50 md:hidden">
+            {/* Backdrop */}
+            <div 
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
+              onClick={() => setIsMobileMenuOpen(false)}
+            ></div>
+            
+            {/* Drawer Content */}
+            <div className="absolute top-0 left-0 w-full h-full bg-white shadow-2xl flex flex-col overflow-y-auto animate-slide-in-left">
+              <div className="p-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+                <Link href="/" className="flex items-center gap-2">
+                   <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center shadow-sm">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#E50914]">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                      </svg>
+                   </div>
+                   <span className="text-lg font-bold tracking-tight">
+                      <span className="text-[#F4A261]">Magna</span>
+                      <span className="text-[#E50914]">Coders</span>
+                   </span>
+                </Link>
+                <button 
+                  onClick={() => setIsMobileMenuOpen(false)}
+                  className="p-2 rounded-full hover:bg-gray-100 text-gray-500"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+
+              {/* Drawer Scrollable Content */}
+              <div className="p-4 space-y-6 pb-20">
+                <LeftPanel 
+                  activeTab={activeTab} 
+                  setActiveTab={setActiveTab} 
+                  closeMenu={() => setIsMobileMenuOpen(false)} 
+                  isMobile={true}
+                />
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* BUILDERS GRID / LIST */}
         <div className="px-4 md:px-10 py-8 pb-24 md:pb-10">
