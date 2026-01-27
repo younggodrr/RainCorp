@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
-import { Phone, Video, Smile, Paperclip, Mic, Send, MoreHorizontal, CheckCheck, LayoutDashboard, Search, MessageSquare, Settings, Edit, MoreVertical, LayoutGrid, Users, MessageCircleQuestion, Menu, X, FolderKanban, Briefcase, Plus, BookOpen, GraduationCap, BadgeCheck, Bell, FileText } from 'lucide-react';
+import { Phone, Video, Smile, Paperclip, Mic, Send, MoreHorizontal, CheckCheck, LayoutDashboard, Search, MessageSquare, Settings, Edit, MoreVertical, LayoutGrid, Users, MessageCircleQuestion, Menu, X, Plus, Bell } from 'lucide-react';
 import Link from 'next/link';
 import LeftPanel from '@/components/LeftPanel';
 

@@ -1,5 +1,5 @@
 
-import { Globe } from 'lucide-react';
+
 
 // Types for Feed
 export type PostType = 'job' | 'project' | 'post' | 'tech-news';
