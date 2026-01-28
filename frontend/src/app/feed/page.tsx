@@ -316,7 +316,10 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
     e.preventDefault();
     e.stopPropagation();
     setIsApplied(true);
-    onRequestJoin?.(post.author.name); // Reusing the toast callback for simplicity, could rename prop
+    // Add a small delay to ensure the toast shows after state update
+    setTimeout(() => {
+      onRequestJoin?.(post.author.name);
+    }, 100);
   };
 
   const cardClassName = "block bg-white rounded-2xl p-4 md:p-6 shadow-sm mt-6 cursor-pointer hover:shadow-md transition-all text-left w-full";
