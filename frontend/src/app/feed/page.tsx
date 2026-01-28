@@ -195,13 +195,13 @@ export default function FeedPage() {
           if (filteredPosts.length === index + 1) {
              return (
                <div ref={lastPostElementRef} key={post.id}>
-                 <FeedItem post={post} onRequestJoin={(authorName) => showToast(`Request sent. ${authorName} will review your request.`)} />
+                 <FeedItem post={post} onRequestJoin={(authorName) => showToast(post.type === 'job' ? `Application sent to ${authorName}!` : `Request sent. ${authorName} will review your request.`)} />
                </div>
              );
           } else {
              return (
                <div key={post.id}>
-                 <FeedItem post={post} onRequestJoin={(authorName) => showToast(`Request sent. ${authorName} will review your request.`)} />
+                 <FeedItem post={post} onRequestJoin={(authorName) => showToast(post.type === 'job' ? `Application sent to ${authorName}!` : `Request sent. ${authorName} will review your request.`)} />
                </div>
              );
           }
