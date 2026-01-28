@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { 
   LayoutGrid, Users, MessageSquare, Settings, 
   Bell, Heart, UserPlus, Briefcase, Info, X,
-  ChevronLeft
+  ChevronLeft, Menu
 } from 'lucide-react';
 
 // Mock Notification Data

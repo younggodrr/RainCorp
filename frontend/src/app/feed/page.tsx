@@ -25,21 +25,36 @@ import {
   ChevronLeft,
   X,
   FileText,
-  Bot
+  Bot,
+  Send
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { generateMockPosts, FeedPost, JobPost, ProjectPost, TechNewsPost, RegularPost } from '@/utils/mockData';
+import { useRouter } from 'next/navigation';
+import MagnaNewIcon from '@/components/MagnaNewIcon';
+import { generateMockPosts, FeedPost, JobPost, ProjectPost, TechNewsPost, RegularPost, generateMockComments } from '@/utils/mockData';
 import { NavItem } from '@/components/NavItem';
 import LeftPanel from '@/components/LeftPanel';
 import TopNavigation from '@/components/TopNavigation';
+import PostInteractionBar from '@/components/PostInteractionBar';
+import Toast from '@/components/Toast';
 
 export default function FeedPage() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFabOpen, setIsFabOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
+
+  // Toast State
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    setToastVisible(true);
+  };
 
   // Infinite Scroll State
   const [posts, setPosts] = useState<FeedPost[]>([]);
@@ -97,213 +112,19 @@ export default function FeedPage() {
 
   return (
     <div className="min-h-screen bg-[#FDF8F5] font-sans text-[#444444] flex">
-      {/* LEFT SIDEBAR - Fixed Width ~260px on Desktop (Expandable), Icon-only on Tablet */}
-      <aside className={`w-[88px] bg-white h-screen fixed left-0 top-0 border-r border-gray-100 flex flex-col z-20 hidden md:flex transition-all duration-300 overflow-y-auto pb-10 ${isSidebarExpanded ? 'lg:w-[260px]' : 'lg:w-[88px]'}`}>
-        {/* Top Branding */}
-        <div className="p-6 relative">
-          <Link href="/" className={`flex items-center gap-3 justify-center lg:justify-start transition-all duration-300 ${isSidebarExpanded ? 'mb-8' : 'mb-14'}`}>
-            <div className="w-10 h-10 rounded-lg bg-black flex-shrink-0 flex items-center justify-center shadow-sm">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-[#E50914]">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-              </svg>
-            </div>
-            <span className={`text-xl font-bold tracking-tight hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>
-              <span className="text-[#F4A261]">Magna</span>
-              <span className="text-[#E50914]">Coders</span>
-            </span>
-          </Link>
-          
-          {/* Toggle Button */}
-          <button 
-            onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-            className={`absolute w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-[#E50914] shadow-sm z-30 hidden lg:flex transition-all duration-300 ${
-              isSidebarExpanded 
-                ? 'top-8 right-4' 
-                : 'top-20 left-1/2 -translate-x-1/2'
-            }`}
-          >
-            {isSidebarExpanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-          </button>
+      <Toast 
+        message={toastMessage} 
+        isVisible={toastVisible} 
+        onClose={() => setToastVisible(false)} 
+      />
 
-          {/* User Profile Card */}
-          <div className={`flex items-center gap-3 p-0 rounded-xl mb-6 justify-center ${isSidebarExpanded ? 'lg:justify-start lg:p-3 lg:bg-gray-50' : 'lg:justify-center'}`}>
-            <div className="relative flex-shrink-0">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm">
-                JD
-              </div>
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#2ECC71] border-2 border-white rounded-full"></div>
-            </div>
-            <div className={`flex-1 min-w-0 hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>
-              <h3 className="text-sm font-bold text-black truncate">John Doe</h3>
-              <p className="text-xs text-gray-500 truncate">Full Stack Dev</p>
-            </div>
-          </div>
-
-          {/* Navigation Menu */}
-          <nav className="space-y-1">
-            <Link href="/feed">
-              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Dashboard' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                <div className="flex items-center gap-3">
-                  <LayoutDashboard size={20} />
-                  <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Dashboard</span>
-                </div>
-              </div>
-            </Link>
-            <Link href="/builders">
-              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Members' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                <div className="flex items-center gap-3">
-                  <Users size={20} />
-                  <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Members</span>
-                </div>
-              </div>
-            </Link>
-            <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Projects' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => setActiveTab('Projects')}>
-                <div className="flex items-center gap-3">
-                  <FolderKanban size={20} />
-                  <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Projects</span>
-                </div>
-                <span className={`hidden w-5 h-5 bg-[#F4A261] text-white text-[10px] font-bold rounded-full items-center justify-center ${isSidebarExpanded ? 'lg:flex' : ''}`}>3</span>
-            </div>
-            <Link href="/messages">
-              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Messages' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
-                <div className="flex items-center gap-3">
-                  <MessageSquare size={20} />
-                  <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Messages</span>
-                </div>
-                <span className={`hidden w-5 h-5 bg-[#E50914] text-white text-[10px] font-bold rounded-full items-center justify-center ${isSidebarExpanded ? 'lg:flex' : ''}`}>12</span>
-              </div>
-            </Link>
-            <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Opportunities' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => setActiveTab('Opportunities')}>
-                <div className="flex items-center gap-3">
-                  <Briefcase size={20} />
-                  <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Opportunities</span>
-                </div>
-            </div>
-            <Link href="/magna-ai">
-              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Magna AI' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => setActiveTab('Magna AI')}>
-                <div className="flex items-center gap-3">
-                  <Bot size={20} />
-                  <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Magna AI</span>
-                </div>
-              </div>
-            </Link>
-          </nav>
-
-          {/* Quick Actions */}
-          <div className={`mt-6 hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>
-            <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 px-2">Quick Actions</h4>
-            <div className="space-y-3">
-              <Link href="/create-post" className="w-full py-2.5 px-4 rounded-full bg-gradient-to-r from-[#F4A261] to-[#E50914] text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
-                <Plus size={18} />
-                Create Post
-              </Link>
-              <button className="w-full py-2.5 px-4 rounded-full bg-white border border-gray-200 text-black text-sm font-medium hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
-                <Search size={18} />
-                Find Collaborators
-              </button>
-              <button className="w-full py-2.5 px-4 rounded-full bg-white border border-gray-200 text-black text-sm font-medium hover:bg-gray-50 transition-all flex items-center justify-center gap-2">
-                <BookOpen size={18} />
-                Resources
-              </button>
-            </div>
-          </div>
-
-          {/* Groups */}
-          <div className={`mt-6 hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>
-            <div className="flex items-center justify-between mb-3 px-2">
-              <h4 className="text-xs font-bold text-gray-400 uppercase">Your Groups</h4>
-              <button className="text-[#E50914] text-xs font-medium hover:underline">See All</button>
-            </div>
-            <div className="space-y-1">
-              {[
-                { name: 'React Developers', members: '12k members' },
-                { name: 'Startup Founders', members: '5k members' },
-                { name: 'UI/UX Designers', members: '8.5k members' }
-              ].map((group) => (
-                <button key={group.name} className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-left group">
-                  <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 group-hover:bg-white group-hover:shadow-sm transition-all">
-                    <Users size={16} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h5 className="text-sm font-medium text-black truncate">{group.name}</h5>
-                    <p className="text-xs text-gray-500 truncate">{group.members}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Magna School */}
-          <div className={`mt-6 hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>
-            <div className="bg-gradient-to-br from-[#2ECC71]/10 to-[#2ECC71]/20 rounded-xl p-4 border border-[#2ECC71]/20">
-              <div className="flex items-start gap-3 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-[#2ECC71] flex items-center justify-center text-white shadow-sm">
-                  <GraduationCap size={18} />
-                </div>
-                <div>
-                  <h4 className="font-bold text-black text-sm">Magna School</h4>
-                  <p className="text-xs text-gray-600 leading-tight mt-0.5">Upskill with top tech courses</p>
-                </div>
-              </div>
-              <Link href="/magna-school" className="block w-full py-2 rounded-lg bg-white text-[#2ECC71] text-xs font-bold shadow-sm hover:shadow-md transition-all text-center">
-                Start Learning
-              </Link>
-            </div>
-          </div>
-
-          {/* Verification Badge */}
-          <div className={`mt-6 mb-6 hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>
-            <div className="bg-gradient-to-br from-[#E50914]/5 to-[#F4A261]/10 rounded-xl p-4 border border-[#E50914]/10">
-              <div className="flex items-center gap-3 mb-2">
-                <BadgeCheck size={20} className="text-[#E50914]" />
-                <h4 className="font-bold text-black text-sm">Get Verified</h4>
-              </div>
-              <p className="text-xs text-gray-600 mb-3">
-                Boost your credibility and unlock exclusive features.
-              </p>
-              <Link href="/get-verification" className="block w-full py-2 rounded-lg bg-[#E50914] text-white text-xs font-bold shadow-sm hover:bg-[#cc0812] transition-all text-center">
-                Apply for Verification
-              </Link>
-            </div>
-          </div>
-
-          <nav className="space-y-1">
-            <Link href="/settings" className="w-full block">
-              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer text-gray-600 hover:bg-gray-100`}>
-                <div className="flex items-center gap-3">
-                  <Settings size={20} />
-                  <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Settings</span>
-                </div>
-              </div>
-            </Link>
-          </nav>
-        </div>
-
-
-        {/* Tablet Quick Actions (Icons only) */}
-        <div className={`px-2 mt-4 pb-8 flex flex-col items-center gap-4 ${isSidebarExpanded ? 'lg:hidden' : 'lg:flex'}`}>
-            <button className="w-10 h-10 rounded-full bg-gradient-to-r from-[#F4A261] to-[#E50914] text-white flex items-center justify-center shadow-md">
-              <Plus size={20} />
-            </button>
-            
-            {/* Tablet Groups Icon */}
-            <button className="w-10 h-10 rounded-xl bg-gray-50 text-gray-500 hover:text-[#E50914] hover:bg-white hover:shadow-sm transition-all flex items-center justify-center">
-              <Users size={20} />
-            </button>
-
-            {/* Tablet School Icon */}
-            <Link href="/magna-school" className="w-10 h-10 rounded-xl bg-[#2ECC71]/10 text-[#2ECC71] hover:shadow-sm transition-all flex items-center justify-center">
-              <GraduationCap size={20} />
-            </Link>
-
-            {/* Tablet Verification Icon */}
-            <Link href="/get-verification" className="w-10 h-10 rounded-xl bg-[#E50914]/10 text-[#E50914] hover:shadow-sm transition-all flex items-center justify-center">
-              <BadgeCheck size={20} />
-            </Link>
-        </div>
-
-        {/* Bottom Sidebar - Removed as Settings moved to nav */}
-      </aside>
+      {/* LEFT SIDEBAR */}
+      <LeftPanel 
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isSidebarExpanded={isSidebarExpanded}
+        setIsSidebarExpanded={setIsSidebarExpanded}
+      />
 
       {/* MAIN CONTENT AREA */}
       <main className={`flex-1 min-w-0 w-full md:ml-[88px] ${isSidebarExpanded ? 'lg:ml-[260px]' : 'lg:ml-[88px]'} p-4 pt-24 md:p-8 md:pt-24 max-w-5xl mx-auto transition-all duration-300 pb-24 md:pb-8 relative`}>
@@ -374,13 +195,13 @@ export default function FeedPage() {
           if (filteredPosts.length === index + 1) {
              return (
                <div ref={lastPostElementRef} key={post.id}>
-                 <FeedItem post={post} />
+                 <FeedItem post={post} onRequestJoin={(authorName) => showToast(`Request sent. ${authorName} will review your request.`)} />
                </div>
              );
           } else {
              return (
                <div key={post.id}>
-                 <FeedItem post={post} />
+                 <FeedItem post={post} onRequestJoin={(authorName) => showToast(`Request sent. ${authorName} will review your request.`)} />
                </div>
              );
           }
@@ -430,13 +251,25 @@ export default function FeedPage() {
             </Link>
          </div>
 
-        {/* Main FAB */}
-        <button 
-          onClick={() => setIsFabOpen(!isFabOpen)}
-          className={`w-14 h-14 rounded-2xl shadow-xl flex items-center justify-center text-white transition-all transform hover:scale-105 active:scale-95 hover:shadow-2xl ${isFabOpen ? 'bg-gray-800 rotate-45' : 'bg-[#E50914] hover:bg-[#cc0812]'}`}
-        >
-          <Plus size={28} strokeWidth={2.5} />
-        </button>
+        {/* Main FAB Container */}
+        <div className="relative">
+          {/* Main FAB */}
+          <button 
+            onClick={() => setIsFabOpen(!isFabOpen)}
+            className={`w-14 h-14 rounded-2xl shadow-xl flex items-center justify-center text-white transition-all transform hover:scale-105 active:scale-95 hover:shadow-2xl ${isFabOpen ? 'bg-gray-800 rotate-45' : 'bg-[#E50914] hover:bg-[#cc0812]'}`}
+          >
+            <Plus size={28} strokeWidth={2.5} />
+          </button>
+          
+          {/* Tiny Magna Icon Overlay */}
+          <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-50">
+             <Link href="/magna-ai">
+               <button className="w-8 h-8 rounded-lg bg-white text-[#E50914] shadow-md flex items-center justify-center border border-gray-100">
+                  <MagnaNewIcon className="w-5 h-5" />
+               </button>
+             </Link>
+          </div>
+        </div>
       </div>
 
       {/* MOBILE BOTTOM NAVIGATION */}
@@ -467,14 +300,32 @@ export default function FeedPage() {
   );
 }
 
-// Subcomponents
+function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (authorName: string) => void }) {
+  const router = useRouter();
+  const [isRequestSent, setIsRequestSent] = useState(false);
+  const [isApplied, setIsApplied] = useState(false);
 
-function FeedItem({ post }: { post: FeedPost }) {
+  const handleRequestJoin = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsRequestSent(true);
+    onRequestJoin?.(post.author.name);
+  };
+
+  const handleApply = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsApplied(true);
+    onRequestJoin?.(post.author.name); // Reusing the toast callback for simplicity, could rename prop
+  };
+
+  const cardClassName = "block bg-white rounded-2xl p-4 md:p-6 shadow-sm mt-6 cursor-pointer hover:shadow-md transition-all text-left w-full";
+
   // Job Post
   if (post.type === 'job') {
     const job = post as JobPost;
     return (
-        <Link href={`/post/${post.id}`} className="block bg-white rounded-2xl p-4 md:p-6 shadow-sm mt-6 cursor-pointer hover:shadow-md transition-all">
+        <Link href={`/post/${post.id}`} className={cardClassName}>
           <div className="flex items-start justify-between mb-4">
             <div className="flex gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm">
@@ -492,9 +343,9 @@ function FeedItem({ post }: { post: FeedPost }) {
                 </div>
               </div>
             </div>
-            <button className="text-gray-400 hover:text-black">
+            <div role="button" className="text-gray-400 hover:text-black" onClick={e => e.preventDefault()}>
               <MoreHorizontal size={20} />
-            </button>
+            </div>
           </div>
 
           <div className="mb-4">
@@ -537,11 +388,22 @@ function FeedItem({ post }: { post: FeedPost }) {
             </div>
 
             <div className="flex gap-2 md:gap-3">
-              <button className="flex-1 py-2 md:py-2.5 rounded-full bg-white border border-gray-200 text-xs md:text-sm font-semibold text-black hover:bg-gray-50 transition-all">
+              <button 
+                onClick={e => { e.preventDefault(); /* Logic */ }}
+                className="flex-1 py-2 md:py-2.5 rounded-full bg-white border border-gray-200 text-xs md:text-sm font-semibold text-black hover:bg-gray-50 transition-all"
+              >
                 View Details
               </button>
-              <button className="flex-1 py-2 md:py-2.5 rounded-full bg-[#E50914] text-white text-xs md:text-sm font-semibold shadow-md hover:bg-[#cc0812] transition-all">
-                Apply Now
+              <button 
+                onClick={handleApply}
+                disabled={isApplied}
+                className={`flex-1 py-2 md:py-2.5 rounded-full text-white text-xs md:text-sm font-semibold shadow-md transition-all ${
+                  isApplied
+                    ? 'bg-gray-400 cursor-default'
+                    : 'bg-[#E50914] hover:bg-[#cc0812]'
+                }`}
+              >
+                {isApplied ? 'Applied' : 'Apply Now'}
               </button>
             </div>
           </div>
@@ -553,7 +415,7 @@ function FeedItem({ post }: { post: FeedPost }) {
   if (post.type === 'project') {
     const project = post as ProjectPost;
     return (
-        <Link href={`/post/${post.id}`} className="block bg-white rounded-2xl p-4 md:p-6 shadow-sm mt-6 cursor-pointer hover:shadow-md transition-all">
+        <Link href={`/post/${post.id}`} className={cardClassName}>
           <div className="flex items-start justify-between mb-4">
             <div className="flex gap-3">
               <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center overflow-hidden relative">
@@ -588,26 +450,19 @@ function FeedItem({ post }: { post: FeedPost }) {
             ))}
           </div>
 
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between pt-4 border-t border-gray-100 gap-4 sm:gap-0">
-            <div className="flex items-center justify-between sm:justify-start gap-6 w-full sm:w-auto">
-              <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors group">
-                <Heart size={20} className="group-hover:fill-[#E50914]" />
-                <span className="text-sm font-medium">{post.likes}</span>
-              </button>
-              <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors">
-                <MessageSquare size={20} />
-                <span className="text-sm font-medium">{post.comments}</span>
-              </button>
-              <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors">
-                <Share2 size={20} />
-                <span className="text-sm font-medium">Share</span>
-              </button>
-            </div>
-            
-            <button className="w-full sm:w-auto px-6 py-2 rounded-full bg-[#E50914] text-white text-sm font-bold shadow-md hover:bg-[#cc0812] transition-all">
-              Join Project
+          <PostInteractionBar initialLikes={post.likes} initialComments={post.comments} postId={post.id}>
+             <button 
+                onClick={handleRequestJoin}
+                disabled={isRequestSent}
+                className={`w-full sm:w-auto px-6 py-2 rounded-full text-white text-sm font-bold shadow-md transition-all ${
+                  isRequestSent 
+                    ? 'bg-gray-400 cursor-default' 
+                    : 'bg-[#E50914] hover:bg-[#cc0812]'
+                }`}
+             >
+              {isRequestSent ? 'Request Sent' : 'Request to Join'}
             </button>
-          </div>
+          </PostInteractionBar>
         </Link>
     );
   }
@@ -616,7 +471,7 @@ function FeedItem({ post }: { post: FeedPost }) {
   if (post.type === 'tech-news') {
     const news = post as TechNewsPost;
     return (
-      <Link href={`/post/${post.id}`} className="block bg-white rounded-2xl p-4 md:p-6 shadow-sm mt-6 border border-gray-100 cursor-pointer hover:shadow-md transition-all">
+      <Link href={`/post/${post.id}`} className={`${cardClassName} border border-gray-100`}>
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-2">
             <span className="px-3 py-1 rounded-full bg-gray-900 text-white text-xs font-bold flex items-center gap-1">
@@ -626,9 +481,9 @@ function FeedItem({ post }: { post: FeedPost }) {
             <span className="text-xs text-gray-400">•</span>
             <span className="text-xs text-gray-400">{post.createdAt}</span>
           </div>
-          <button className="text-gray-400 hover:text-black">
+          <div role="button" className="text-gray-400 hover:text-black" onClick={e => e.preventDefault()}>
             <MoreHorizontal size={20} />
-          </button>
+          </div>
         </div>
 
         <div className="mb-4">
@@ -653,23 +508,20 @@ function FeedItem({ post }: { post: FeedPost }) {
           )}
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <div className="flex items-center gap-6">
-            <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors group">
-              <Heart size={20} className="group-hover:fill-[#E50914]" />
-              <span className="text-sm font-medium">{post.likes}</span>
-            </button>
-            <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors">
-              <Share2 size={20} />
-              <span className="text-sm font-medium">Share</span>
-            </button>
-          </div>
-          
-          <button className="flex items-center gap-2 text-[#E50914] font-bold text-sm hover:underline">
-            Read Article
-            <ChevronRight size={16} />
-          </button>
-        </div>
+        <PostInteractionBar 
+           initialLikes={post.likes} 
+           initialComments={post.comments} 
+           initialCommentsData={generateMockComments(post.id, post.comments)}
+           postId={post.id}
+        >
+             <button 
+                onClick={e => { e.preventDefault(); router.push(`/post/${post.id}`); }}
+                className="flex items-center gap-2 text-[#E50914] font-bold text-sm hover:underline"
+             >
+                Read Article
+                <ChevronRight size={16} />
+             </button>
+        </PostInteractionBar>
       </Link>
     );
   }
@@ -677,7 +529,7 @@ function FeedItem({ post }: { post: FeedPost }) {
   // Regular Post
   const regular = post as RegularPost;
   return (
-        <Link href={`/post/${post.id}`} className="block bg-white rounded-2xl p-4 md:p-6 shadow-sm mt-6 cursor-pointer hover:shadow-md transition-all">
+        <Link href={`/post/${post.id}`} className={cardClassName}>
           <div className="flex items-start justify-between mb-4">
             <div className="flex gap-3">
               <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center overflow-hidden relative">
@@ -710,27 +562,15 @@ function FeedItem({ post }: { post: FeedPost }) {
             )}
           </div>
 
-          <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-            <div className="flex items-center gap-6">
-              <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors group">
-                <Heart size={20} className="group-hover:fill-[#E50914]" />
-                <span className="text-sm font-medium">{post.likes}</span>
-              </button>
-              <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors">
-                <MessageSquare size={20} />
-                <span className="text-sm font-medium">{post.comments}</span>
-              </button>
-              <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors">
-                <Share2 size={20} />
-                <span className="text-sm font-medium">Share</span>
-              </button>
-            </div>
-          </div>
+          <PostInteractionBar 
+             initialLikes={post.likes} 
+             initialComments={post.comments} 
+             initialCommentsData={generateMockComments(post.id, post.comments)}
+             postId={post.id} 
+          />
         </Link>
   );
 }
-
-
 
 function FilterPill({ label, active, onClick }: { label: string; active?: boolean; onClick?: () => void }) {
   return (

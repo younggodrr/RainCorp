@@ -18,13 +18,28 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
-import { getPostById, FeedPost, JobPost, ProjectPost, TechNewsPost, RegularPost } from '@/utils/mockData';
+import { getPostById, FeedPost, JobPost, ProjectPost, TechNewsPost, RegularPost, generateMockComments } from '@/utils/mockData';
+import LeftPanel from '@/components/LeftPanel';
+import PostInteractionBar from '@/components/PostInteractionBar';
+import Toast from '@/components/Toast';
 
 export default function PostDetailPage() {
   const params = useParams();
   const router = useRouter();
   const [post, setPost] = useState<FeedPost | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+  const [activeTab, setActiveTab] = useState('Dashboard');
+  const [isRequestSent, setIsRequestSent] = useState(false);
+
+  // Toast State
+  const [toastVisible, setToastVisible] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+
+  const showToast = (message: string) => {
+    setToastMessage(message);
+    setToastVisible(true);
+  };
 
   useEffect(() => {
     if (params?.id) {
@@ -56,80 +71,19 @@ export default function PostDetailPage() {
 
   return (
     <div className="min-h-screen bg-[#FDF8F5] font-sans text-[#444444] flex">
-      {/* LEFT SIDEBAR - Reused from Feed */}
-      <aside className="w-[88px] lg:w-[260px] bg-white h-screen fixed left-0 top-0 border-r border-gray-100 flex flex-col z-20 hidden md:flex transition-all duration-300 overflow-y-auto pb-10">
-        <div className="p-6">
-          <Link href="/" className="flex items-center gap-3 mb-8 justify-center lg:justify-start">
-            <div className="w-10 h-10 rounded-lg bg-black flex-shrink-0 flex items-center justify-center shadow-sm">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-[#E50914]">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-              </svg>
-            </div>
-            <span className="text-xl font-bold tracking-tight hidden lg:block">
-              <span className="text-[#F4A261]">Magna</span>
-              <span className="text-[#E50914]">Coders</span>
-            </span>
-          </Link>
+      <Toast 
+        message={toastMessage} 
+        isVisible={toastVisible} 
+        onClose={() => setToastVisible(false)} 
+      />
 
-          {/* User Profile Card */}
-          <div className="flex items-center gap-3 p-0 lg:p-3 lg:bg-gray-50 rounded-xl mb-6 justify-center lg:justify-start">
-            <div className="relative flex-shrink-0">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm">
-                JD
-              </div>
-              <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#2ECC71] border-2 border-white rounded-full"></div>
-            </div>
-            <div className="flex-1 min-w-0 hidden lg:block">
-              <h3 className="text-sm font-bold text-black truncate">John Doe</h3>
-              <p className="text-xs text-gray-500 truncate">Full Stack Dev</p>
-            </div>
-          </div>
-
-          {/* Navigation Menu */}
-          <nav className="space-y-1">
-            <Link href="/feed">
-              <div className="relative w-full flex items-center justify-center lg:justify-between px-2 lg:px-4 py-3 rounded-full transition-all text-sm font-medium cursor-pointer text-gray-600 hover:bg-gray-100">
-                <div className="flex items-center gap-3">
-                  <LayoutDashboard size={20} />
-                  <span className="hidden lg:block">Dashboard</span>
-                </div>
-              </div>
-            </Link>
-            <Link href="/builders">
-              <div className="relative w-full flex items-center justify-center lg:justify-between px-2 lg:px-4 py-3 rounded-full transition-all text-sm font-medium cursor-pointer text-gray-600 hover:bg-gray-100">
-                <div className="flex items-center gap-3">
-                  <Users size={20} />
-                  <span className="hidden lg:block">Members</span>
-                </div>
-              </div>
-            </Link>
-             <Link href="/my-projects">
-              <div className="relative w-full flex items-center justify-center lg:justify-between px-2 lg:px-4 py-3 rounded-full transition-all text-sm font-medium cursor-pointer text-gray-600 hover:bg-gray-100">
-                <div className="flex items-center gap-3">
-                  <FolderKanban size={20} />
-                  <span className="hidden lg:block">Projects</span>
-                </div>
-              </div>
-            </Link>
-            <Link href="/messages">
-              <div className="relative w-full flex items-center justify-center lg:justify-between px-2 lg:px-4 py-3 rounded-full transition-all text-sm font-medium cursor-pointer text-gray-600 hover:bg-gray-100">
-                <div className="flex items-center gap-3">
-                  <MessageSquare size={20} />
-                  <span className="hidden lg:block">Messages</span>
-                </div>
-              </div>
-            </Link>
-             <Link href="/settings">
-              <div className="relative w-full flex items-center justify-center lg:justify-between px-2 lg:px-4 py-3 rounded-full transition-all text-sm font-medium cursor-pointer text-gray-600 hover:bg-gray-100">
-                <div className="flex items-center gap-3">
-                  <Settings size={20} />
-                  <span className="hidden lg:block">Settings</span>
-                </div>
-              </div>
-            </Link>
-          </nav>
-        </div>
-      </aside>
+      {/* LEFT SIDEBAR */}
+      <LeftPanel 
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isSidebarExpanded={isSidebarExpanded}
+        setIsSidebarExpanded={setIsSidebarExpanded}
+      />
 
       {/* MAIN CONTENT */}
       <main className="flex-1 min-w-0 w-full md:ml-[88px] lg:ml-[260px] p-4 md:p-8 max-w-5xl mx-auto transition-all duration-300 pb-24 md:pb-8">
@@ -258,20 +212,22 @@ export default function PostDetailPage() {
                                 ))}
                             </div>
                             
-                            <div className="flex gap-4">
-                                <div className="flex items-center gap-2 text-gray-600">
-                                    <Heart size={20} className="text-[#E50914]" />
-                                    <span className="font-bold">{post.likes}</span> Likes
-                                </div>
-                                <div className="flex items-center gap-2 text-gray-600">
-                                    <MessageSquare size={20} className="text-blue-500" />
-                                    <span className="font-bold">{post.comments}</span> Comments
-                                </div>
-                            </div>
+                            <PostInteractionBar initialLikes={post.likes} initialComments={post.comments} initialCommentsData={generateMockComments(post.id, post.comments)} postId={post.id} />
                         </div>
                         
-                        <button className="w-full py-4 rounded-xl bg-[#E50914] text-white font-bold text-lg shadow-lg hover:bg-[#cc0812] transition-all transform hover:-translate-y-1">
-                            Join Project Team
+                        <button 
+                            onClick={() => {
+                                setIsRequestSent(true);
+                                showToast(`Request sent. ${post.author.name} will review your request.`);
+                            }}
+                            disabled={isRequestSent}
+                            className={`w-full py-4 rounded-xl text-white font-bold text-lg shadow-lg transition-all transform ${
+                                isRequestSent 
+                                    ? 'bg-gray-400 cursor-default' 
+                                    : 'bg-[#E50914] hover:bg-[#cc0812] hover:-translate-y-1'
+                            }`}
+                        >
+                            {isRequestSent ? 'Request Sent' : 'Request to Join'}
                         </button>
                     </div>
                 )}
@@ -297,6 +253,9 @@ export default function PostDetailPage() {
                         <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100 text-gray-600 italic text-lg border-l-4 border-l-[#E50914]">
                             &quot;This is a placeholder for the full article content. In a real application, this would either fetch the full content or redirect to the source.&quot;
                         </div>
+                        
+                        <PostInteractionBar initialLikes={post.likes} initialComments={post.comments} initialCommentsData={generateMockComments(post.id, post.comments)} postId={post.id} />
+
                         <a href={(post as TechNewsPost).url} target="_blank" rel="noopener noreferrer" className="block w-full py-4 rounded-xl bg-black text-white font-bold text-lg shadow-lg hover:bg-gray-800 transition-all text-center transform hover:-translate-y-1">
                             Read Full Article
                         </a>
@@ -318,38 +277,8 @@ export default function PostDetailPage() {
                             </div>
                         )}
                         
-                        <div className="flex items-center justify-between pt-6 border-t border-gray-100">
-                             <div className="flex items-center gap-8">
-                                <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors group">
-                                    <Heart size={24} className="group-hover:fill-[#E50914]" />
-                                    <span className="text-lg font-medium">{post.likes}</span>
-                                </button>
-                                <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors">
-                                    <MessageSquare size={24} />
-                                    <span className="text-lg font-medium">{post.comments}</span>
-                                </button>
-                                <button className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors">
-                                    <Share2 size={24} />
-                                    <span className="text-lg font-medium">Share</span>
-                                </button>
-                            </div>
-                        </div>
+                        <PostInteractionBar initialLikes={post.likes} initialComments={post.comments} initialCommentsData={generateMockComments(post.id, post.comments)} postId={post.id} />
                         
-                        {/* Mock Comments */}
-                        <div className="pt-8 border-t border-gray-100">
-                            <h4 className="font-bold text-xl text-gray-900 mb-6">Comments ({post.comments})</h4>
-                            <div className="space-y-6">
-                                {[1, 2, 3].map((i) => (
-                                    <div key={i} className="flex gap-4">
-                                        <div className="w-10 h-10 rounded-full bg-gray-200 flex-shrink-0"></div>
-                                        <div className="bg-gray-50 p-4 rounded-2xl rounded-tl-none flex-1">
-                                            <div className="font-bold text-sm text-black mb-1">User Name</div>
-                                            <p className="text-gray-600">Great post! Thanks for sharing this insight.</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
                     </div>
                 )}
             </div>
