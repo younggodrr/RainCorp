@@ -6,9 +6,10 @@ import Image from 'next/image';
 import { 
   LayoutGrid, Users, MessageSquare, Settings, Search, 
   MapPin, Github, Linkedin, MessageCircle, Globe,
-  ChevronLeft, ChevronRight, Menu, Bell, UserPlus, UserCheck, X
+  ChevronLeft, ChevronRight, UserPlus, UserCheck, X
 } from 'lucide-react';
 import LeftPanel from '@/components/LeftPanel';
+import TopNavigation from '@/components/TopNavigation';
 
 const LOOKING_FOR_OPTIONS = [
   'Team Member',
@@ -97,41 +98,15 @@ export default function BuildersPage() {
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col h-screen overflow-y-auto">
+      <div className="flex-1 flex flex-col h-screen overflow-y-auto pt-24 relative">
         
-        {/* TOP NAVIGATION BAR (Fixed) */}
-        <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-sm border-b border-gray-100 px-4 py-4 flex items-center justify-between">
-           <div className="flex items-center gap-4 flex-1">
-             {/* Mobile Back */}
-             <Link href="/feed" className="md:hidden text-gray-400">
-               <ChevronLeft size={24} />
-             </Link>
-             
-             {/* Search Bar (Centered) */}
-             <div className="relative w-full md:max-w-lg">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-                <input 
-                  type="text" 
-                  placeholder="Search by name, category, role, location..." 
-                  className="w-full bg-gray-50 border border-gray-100 rounded-full pl-10 pr-4 py-2.5 text-sm focus:outline-none focus:ring-1 focus:ring-[#E50914] transition-all"
-                />
-             </div>
-           </div>
-           
-           {/* Actions */}
-           <div className="flex items-center gap-2 ml-4">
-              <Link href="/notifications" className="relative p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
-                <Bell size={20} />
-                <div className="absolute top-2 right-2.5 w-2 h-2 bg-[#E50914] rounded-full"></div>
-              </Link>
-              <button 
-                className="p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
-                onClick={() => setIsMobileMenuOpen(true)}
-              >
-                <Menu size={20} />
-              </button>
-           </div>
-        </div>
+        {/* TOP NAVIGATION BAR (Reused) */}
+        <TopNavigation 
+          title="Builders" 
+          onMobileMenuOpen={() => setIsMobileMenuOpen(true)}
+          className="md:left-[80px] lg:left-[80px]"
+          searchPlaceholder="Search by name, category, role, location..."
+        />
 
         {/* MOBILE DRAWER (Left Sidebar Content) */}
         {isMobileMenuOpen && (

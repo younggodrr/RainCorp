@@ -22,17 +22,21 @@ import {
   Bell,
   Menu,
   ChevronRight,
+  ChevronLeft,
   X,
-  FileText
+  FileText,
+  Bot
 } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { generateMockPosts, FeedPost, JobPost, ProjectPost, TechNewsPost, RegularPost } from '@/utils/mockData';
 import { NavItem } from '@/components/NavItem';
 import LeftPanel from '@/components/LeftPanel';
+import TopNavigation from '@/components/TopNavigation';
 
 export default function FeedPage() {
   const [activeTab, setActiveTab] = useState('Dashboard');
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFabOpen, setIsFabOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
@@ -93,31 +97,43 @@ export default function FeedPage() {
 
   return (
     <div className="min-h-screen bg-[#FDF8F5] font-sans text-[#444444] flex">
-      {/* LEFT SIDEBAR - Fixed Width ~260px on Desktop, Icon-only on Tablet */}
-      <aside className="w-[88px] lg:w-[260px] bg-white h-screen fixed left-0 top-0 border-r border-gray-100 flex flex-col z-20 hidden md:flex transition-all duration-300 overflow-y-auto pb-10">
+      {/* LEFT SIDEBAR - Fixed Width ~260px on Desktop (Expandable), Icon-only on Tablet */}
+      <aside className={`w-[88px] bg-white h-screen fixed left-0 top-0 border-r border-gray-100 flex flex-col z-20 hidden md:flex transition-all duration-300 overflow-y-auto pb-10 ${isSidebarExpanded ? 'lg:w-[260px]' : 'lg:w-[88px]'}`}>
         {/* Top Branding */}
-        <div className="p-6">
-          <Link href="/" className="flex items-center gap-3 mb-8 justify-center lg:justify-start">
+        <div className="p-6 relative">
+          <Link href="/" className={`flex items-center gap-3 justify-center lg:justify-start transition-all duration-300 ${isSidebarExpanded ? 'mb-8' : 'mb-14'}`}>
             <div className="w-10 h-10 rounded-lg bg-black flex-shrink-0 flex items-center justify-center shadow-sm">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-[#E50914]">
                 <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
               </svg>
             </div>
-            <span className="text-xl font-bold tracking-tight hidden lg:block">
+            <span className={`text-xl font-bold tracking-tight hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>
               <span className="text-[#F4A261]">Magna</span>
               <span className="text-[#E50914]">Coders</span>
             </span>
           </Link>
+          
+          {/* Toggle Button */}
+          <button 
+            onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
+            className={`absolute w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-[#E50914] shadow-sm z-30 hidden lg:flex transition-all duration-300 ${
+              isSidebarExpanded 
+                ? 'top-8 right-4' 
+                : 'top-20 left-1/2 -translate-x-1/2'
+            }`}
+          >
+            {isSidebarExpanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
+          </button>
 
           {/* User Profile Card */}
-          <div className="flex items-center gap-3 p-0 lg:p-3 lg:bg-gray-50 rounded-xl mb-6 justify-center lg:justify-start">
+          <div className={`flex items-center gap-3 p-0 rounded-xl mb-6 justify-center ${isSidebarExpanded ? 'lg:justify-start lg:p-3 lg:bg-gray-50' : 'lg:justify-center'}`}>
             <div className="relative flex-shrink-0">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm">
                 JD
               </div>
               <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#2ECC71] border-2 border-white rounded-full"></div>
             </div>
-            <div className="flex-1 min-w-0 hidden lg:block">
+            <div className={`flex-1 min-w-0 hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>
               <h3 className="text-sm font-bold text-black truncate">John Doe</h3>
               <p className="text-xs text-gray-500 truncate">Full Stack Dev</p>
             </div>
@@ -126,47 +142,55 @@ export default function FeedPage() {
           {/* Navigation Menu */}
           <nav className="space-y-1">
             <Link href="/feed">
-              <div className={`relative w-full flex items-center justify-center lg:justify-between px-2 lg:px-4 py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Dashboard' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Dashboard' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                 <div className="flex items-center gap-3">
                   <LayoutDashboard size={20} />
-                  <span className="hidden lg:block">Dashboard</span>
+                  <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Dashboard</span>
                 </div>
               </div>
             </Link>
             <Link href="/builders">
-              <div className={`relative w-full flex items-center justify-center lg:justify-between px-2 lg:px-4 py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Members' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Members' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                 <div className="flex items-center gap-3">
                   <Users size={20} />
-                  <span className="hidden lg:block">Members</span>
+                  <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Members</span>
                 </div>
               </div>
             </Link>
-            <div className={`relative w-full flex items-center justify-center lg:justify-between px-2 lg:px-4 py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Projects' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => setActiveTab('Projects')}>
+            <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Projects' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => setActiveTab('Projects')}>
                 <div className="flex items-center gap-3">
                   <FolderKanban size={20} />
-                  <span className="hidden lg:block">Projects</span>
+                  <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Projects</span>
                 </div>
-                <span className="hidden lg:flex w-5 h-5 bg-[#F4A261] text-white text-[10px] font-bold rounded-full items-center justify-center">3</span>
+                <span className={`hidden w-5 h-5 bg-[#F4A261] text-white text-[10px] font-bold rounded-full items-center justify-center ${isSidebarExpanded ? 'lg:flex' : ''}`}>3</span>
             </div>
             <Link href="/messages">
-              <div className={`relative w-full flex items-center justify-center lg:justify-between px-2 lg:px-4 py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Messages' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Messages' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
                 <div className="flex items-center gap-3">
                   <MessageSquare size={20} />
-                  <span className="hidden lg:block">Messages</span>
+                  <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Messages</span>
                 </div>
-                <span className="hidden lg:flex w-5 h-5 bg-[#E50914] text-white text-[10px] font-bold rounded-full items-center justify-center">12</span>
+                <span className={`hidden w-5 h-5 bg-[#E50914] text-white text-[10px] font-bold rounded-full items-center justify-center ${isSidebarExpanded ? 'lg:flex' : ''}`}>12</span>
               </div>
             </Link>
-            <div className={`relative w-full flex items-center justify-center lg:justify-between px-2 lg:px-4 py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Opportunities' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => setActiveTab('Opportunities')}>
+            <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Opportunities' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => setActiveTab('Opportunities')}>
                 <div className="flex items-center gap-3">
                   <Briefcase size={20} />
-                  <span className="hidden lg:block">Opportunities</span>
+                  <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Opportunities</span>
                 </div>
             </div>
+            <Link href="/magna-ai">
+              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Magna AI' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => setActiveTab('Magna AI')}>
+                <div className="flex items-center gap-3">
+                  <Bot size={20} />
+                  <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Magna AI</span>
+                </div>
+              </div>
+            </Link>
           </nav>
 
           {/* Quick Actions */}
-          <div className="mt-6 hidden lg:block">
+          <div className={`mt-6 hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>
             <h4 className="text-xs font-bold text-gray-400 uppercase mb-3 px-2">Quick Actions</h4>
             <div className="space-y-3">
               <Link href="/create-post" className="w-full py-2.5 px-4 rounded-full bg-gradient-to-r from-[#F4A261] to-[#E50914] text-white text-sm font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2">
@@ -185,7 +209,7 @@ export default function FeedPage() {
           </div>
 
           {/* Groups */}
-          <div className="mt-6 hidden lg:block">
+          <div className={`mt-6 hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>
             <div className="flex items-center justify-between mb-3 px-2">
               <h4 className="text-xs font-bold text-gray-400 uppercase">Your Groups</h4>
               <button className="text-[#E50914] text-xs font-medium hover:underline">See All</button>
@@ -210,7 +234,7 @@ export default function FeedPage() {
           </div>
 
           {/* Magna School */}
-          <div className="mt-6 hidden lg:block">
+          <div className={`mt-6 hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>
             <div className="bg-gradient-to-br from-[#2ECC71]/10 to-[#2ECC71]/20 rounded-xl p-4 border border-[#2ECC71]/20">
               <div className="flex items-start gap-3 mb-3">
                 <div className="w-8 h-8 rounded-lg bg-[#2ECC71] flex items-center justify-center text-white shadow-sm">
@@ -228,7 +252,7 @@ export default function FeedPage() {
           </div>
 
           {/* Verification Badge */}
-          <div className="mt-6 mb-6 hidden lg:block">
+          <div className={`mt-6 mb-6 hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>
             <div className="bg-gradient-to-br from-[#E50914]/5 to-[#F4A261]/10 rounded-xl p-4 border border-[#E50914]/10">
               <div className="flex items-center gap-3 mb-2">
                 <BadgeCheck size={20} className="text-[#E50914]" />
@@ -245,14 +269,19 @@ export default function FeedPage() {
 
           <nav className="space-y-1">
             <Link href="/settings" className="w-full block">
-              <NavItem icon={<Settings size={20} />} label="Settings" />
+              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer text-gray-600 hover:bg-gray-100`}>
+                <div className="flex items-center gap-3">
+                  <Settings size={20} />
+                  <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Settings</span>
+                </div>
+              </div>
             </Link>
           </nav>
         </div>
 
 
         {/* Tablet Quick Actions (Icons only) */}
-        <div className="px-2 mt-4 pb-8 flex flex-col items-center gap-4 lg:hidden">
+        <div className={`px-2 mt-4 pb-8 flex flex-col items-center gap-4 ${isSidebarExpanded ? 'lg:hidden' : 'lg:flex'}`}>
             <button className="w-10 h-10 rounded-full bg-gradient-to-r from-[#F4A261] to-[#E50914] text-white flex items-center justify-center shadow-md">
               <Plus size={20} />
             </button>
@@ -277,54 +306,14 @@ export default function FeedPage() {
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 min-w-0 w-full md:ml-[88px] lg:ml-[260px] p-4 pt-24 md:p-8 md:pt-24 max-w-5xl mx-auto transition-all duration-300 pb-24 md:pb-8 relative">
+      <main className={`flex-1 min-w-0 w-full md:ml-[88px] ${isSidebarExpanded ? 'lg:ml-[260px]' : 'lg:ml-[88px]'} p-4 pt-24 md:p-8 md:pt-24 max-w-5xl mx-auto transition-all duration-300 pb-24 md:pb-8 relative`}>
         
         {/* TOP NAVIGATION BAR */}
-        <div className="fixed top-0 right-0 z-30 bg-white/90 backdrop-blur-sm border-b border-gray-100 px-4 md:px-8 py-4 flex items-center justify-between transition-all duration-300 left-0 md:left-[88px] lg:left-[260px]">
-          <div>
-            <h1 className="text-xl font-bold text-black hidden md:block">Feed</h1>
-            {/* Mobile Logo */}
-            <Link href="/" className="flex items-center gap-2 md:hidden">
-              <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center shadow-sm">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#E50914]">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-              <span className="text-lg font-bold tracking-tight">
-                <span className="text-[#F4A261]">Magna</span>
-                <span className="text-[#E50914]">Coders</span>
-              </span>
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-4">
-            {/* Search Bar (Desktop) */}
-            <div className="hidden md:flex relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                className="bg-gray-50 border border-gray-100 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#E50914] w-64 transition-all"
-              />
-            </div>
-
-            {/* Notification Icon */}
-            <Link href="/notifications" className="relative p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
-              <Bell size={24} />
-              <div className="absolute top-1 right-1 w-5 h-5 bg-[#E50914] rounded-full flex items-center justify-center text-white text-[10px] font-bold border-2 border-white shadow-sm">
-                3
-              </div>
-            </Link>
-            
-            {/* Mobile Menu Icon */}
-            <button 
-              className="md:hidden p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
-              onClick={() => setIsMobileMenuOpen(true)}
-            >
-              <Menu size={24} />
-            </button>
-          </div>
-        </div>
+        <TopNavigation 
+          title="Feed" 
+          onMobileMenuOpen={() => setIsMobileMenuOpen(true)}
+          className={`md:left-[88px] ${isSidebarExpanded ? 'lg:left-[260px]' : 'lg:left-[88px]'}`}
+        />
 
         {/* MOBILE DRAWER (Left Sidebar Content) */}
         {isMobileMenuOpen && (
@@ -373,7 +362,7 @@ export default function FeedPage() {
 
 
         {/* Filter Pills */}
-        <div className="flex gap-3 mb-8 overflow-x-auto pb-2 scrollbar-hide">
+        <div className="flex gap-3 mb-2 overflow-x-auto pb-2 scrollbar-hide">
           <FilterPill label="All" active={activeFilter === 'All'} onClick={() => setActiveFilter('All')} />
           <FilterPill label="Projects" active={activeFilter === 'Projects'} onClick={() => setActiveFilter('Projects')} />
           <FilterPill label="Opportunities" active={activeFilter === 'Opportunities'} onClick={() => setActiveFilter('Opportunities')} />

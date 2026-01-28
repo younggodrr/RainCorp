@@ -33,6 +33,7 @@ import {
   History
 } from 'lucide-react';
 import Link from 'next/link';
+import TopNavigation from '@/components/TopNavigation';
 
 export default function SettingsPage() {
   const [activeModule, setActiveModule] = useState('Account');
@@ -69,21 +70,12 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-[#FDF8F5] font-sans text-[#444444] flex flex-col md:flex-row">
-      {/* MOBILE TOP NAV */}
-      <div className="md:hidden fixed top-0 left-0 right-0 h-16 bg-white z-50 px-4 flex items-center justify-between border-b border-gray-100 shadow-sm">
-        <div className="flex items-center gap-3">
-          <button onClick={() => setIsMobileMenuOpen(true)} className="p-2 -ml-2 text-gray-600">
-            <Menu size={24} />
-          </button>
-          <span className="text-lg font-bold">
-            <span className="text-[#F4A261]">Magna</span>
-            <span className="text-[#E50914]">Coders</span>
-          </span>
-        </div>
-        <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-xs">
-          JD
-        </div>
-      </div>
+      {/* TOP NAVIGATION BAR */}
+      <TopNavigation 
+        title="Settings" 
+        onMobileMenuOpen={() => setIsMobileMenuOpen(true)}
+        className="md:left-[80px] lg:left-[260px]"
+      />
 
       {/* MOBILE DRAWER */}
       {isMobileMenuOpen && (
@@ -179,7 +171,7 @@ export default function SettingsPage() {
       </aside>
 
       {/* MAIN CONTENT AREA */}
-      <main className="flex-1 md:ml-[88px] lg:ml-[260px] p-4 pt-20 md:p-8 max-w-7xl mx-auto transition-all duration-300 w-full mb-20 md:mb-0">
+      <main className="flex-1 md:ml-[88px] lg:ml-[260px] p-4 pt-20 md:p-8 md:pt-24 max-w-7xl mx-auto transition-all duration-300 w-full mb-20 md:mb-0">
         
         {/* Header */}
         <div className="mb-8">

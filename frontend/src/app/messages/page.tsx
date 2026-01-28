@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { Phone, Video, Smile, Paperclip, Mic, Send, MoreHorizontal, CheckCheck, LayoutDashboard, Search, MessageSquare, Settings, Edit, MoreVertical, LayoutGrid, Users, MessageCircleQuestion, Menu, X, Plus, Bell } from 'lucide-react';
 import Link from 'next/link';
 import LeftPanel from '@/components/LeftPanel';
+import TopNavigation from '@/components/TopNavigation';
 
 export default function MessagesPage() {
   const [selectedChat, setSelectedChat] = useState<string | null>(null);
@@ -11,6 +12,7 @@ export default function MessagesPage() {
   const [activeTab, setActiveTab] = useState('Messages');
   const [isActionModalOpen, setIsActionModalOpen] = useState(false);
   const [filter, setFilter] = useState<'chats' | 'groups' | 'unread'>('chats');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const conversations = [
     { id: '1', name: 'Kretya Studio', message: 'Victor is typing...', time: '4m', unread: 12, isTyping: true, pinned: true, isGroup: false },
@@ -25,41 +27,34 @@ export default function MessagesPage() {
   ];
 
   const filteredConversations = conversations.filter(c => {
-    if (filter === 'groups') return c.isGroup;
-    if (filter === 'unread') return c.unread;
-    return true; // 'chats' shows all
+    // Filter by category
+    const matchesFilter = (() => {
+      if (filter === 'groups') return c.isGroup;
+      if (filter === 'unread') return c.unread;
+      return true; // 'chats' shows all
+    })();
+
+    // Filter by search query
+    const matchesSearch = searchQuery 
+      ? c.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
+        c.message.toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
+
+    return matchesFilter && matchesSearch;
   });
 
   return (
     <div className="h-screen bg-[#FDF8F5] font-sans text-[#444444] flex overflow-hidden">
       
-      {/* MOBILE TOP NAVIGATION */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-sm border-b border-gray-100 px-4 py-4 flex items-center justify-between shadow-sm gap-4">
-           <Link href="/feed" className="flex-shrink-0 flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center shadow-sm">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#E50914]">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-           </Link>
-           
-           {/* Mobile Search Bar */}
-           <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-              <input 
-                type="text" 
-                placeholder="Search messages..." 
-                className="w-full bg-gray-50 border border-gray-100 rounded-full pl-9 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#E50914] transition-all"
-              />
-           </div>
-
-           <button 
-              className="flex-shrink-0 p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
-              onClick={() => setIsMobileMenuOpen(true)}
-           >
-              <Menu size={24} />
-           </button>
-      </div>
+      {/* TOP NAVIGATION BAR */}
+      <TopNavigation 
+        title="Messages" 
+        onMobileMenuOpen={() => setIsMobileMenuOpen(true)}
+        className="md:!left-0 lg:!left-0"
+        searchPlaceholder="Search messages..."
+        searchValue={searchQuery}
+        onSearchChange={(e) => setSearchQuery(e.target.value)}
+      />
 
       {/* MOBILE DRAWER (Left Sidebar Content) */}
       {isMobileMenuOpen && (
@@ -106,74 +101,19 @@ export default function MessagesPage() {
         )}
 
       {/* MESSAGES LAYOUT */}
-      <div className="flex-1 flex overflow-hidden pt-20 md:pt-0">
+      <div className="flex-1 flex overflow-hidden pt-[65px] md:pt-[71px]">
         
-        {/* NEW THIN SIDEBAR - Modules, Groups, Requested, Settings */}
-        <div className="w-[80px] bg-white border-r border-gray-100 flex-col items-center py-6 gap-8 z-20 hidden md:flex">
-          {/* Logo or Top Icon */}
-          <Link href="/feed" className="w-10 h-10 rounded-lg bg-[#E50914] flex items-center justify-center text-white mb-4 shadow-md hover:bg-[#cc0812] transition-colors">
-             <span className="font-bold text-xl">M</span>
-          </Link>
-
-          {/* Menu Items */}
-          <div className="flex flex-col gap-6 w-full items-center">
-            <button className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-              <LayoutGrid size={24} />
-              <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Modules</span>
-            </button>
-            
-            <button className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-              <Users size={24} />
-              <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Groups</span>
-            </button>
-
-            <button className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-              <MessageCircleQuestion size={24} />
-              <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Requested</span>
-            </button>
-          </div>
-
-          {/* Bottom Items */}
-          <div className="mt-auto flex flex-col gap-6 w-full items-center">
-            <Link href="/settings" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-              <Settings size={24} />
-              <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Settings</span>
-            </Link>
-            
-            {/* User Avatar */}
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm cursor-pointer hover:shadow-md transition-all">
-              JD
-            </div>
-          </div>
-        </div>
-
         {/* 1. CONVERSATIONS LIST (Left Panel) */}
         <div className={`w-full md:w-[320px] lg:w-[380px] bg-white border-r border-gray-100 flex flex-col h-full ${selectedChat ? 'hidden md:flex' : 'flex'}`}>
           {/* Header */}
           <div className="p-4 md:p-6 pb-2">
-            <div className="hidden md:flex items-center justify-between mb-6">
-              <h1 className="text-2xl font-bold text-black">Messages</h1>
-              <div className="flex items-center gap-2">
-                <button className="relative p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors">
-                  <Bell size={20} />
-                  <div className="absolute top-2 right-2.5 w-2 h-2 bg-[#E50914] rounded-full"></div>
-                </button>
+            <div className="hidden md:flex items-center justify-end gap-2 mb-4">
                 <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors">
                   <Edit size={20} />
                 </button>
                 <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors">
                   <MoreVertical size={20} />
                 </button>
-              </div>
-            </div>
-            {/* Search */}
-            <div className="hidden md:block relative mb-6">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
-              <input 
-                type="text" 
-                placeholder="Search messages..." 
-                className="w-full bg-gray-50 border border-gray-100 rounded-xl pl-12 pr-4 py-3 text-sm focus:outline-none focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] transition-all"
-              />
             </div>
 
             {/* Filters */}
