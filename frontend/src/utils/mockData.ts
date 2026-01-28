@@ -25,6 +25,8 @@ export interface JobPost extends BasePost {
   salary: string;
   tags: string[];
   jobType: string; // Full-time, etc.
+  deadlineProgress: number; // 0 to 100 percentage of time elapsed
+  timeLeft: string;
 }
 
 export interface ProjectPost extends BasePost {
@@ -32,6 +34,10 @@ export interface ProjectPost extends BasePost {
   title: string;
   description: string;
   tags: string[];
+  membersNeeded: string;
+  requestsSent: number;
+  deadlineProgress: number; // 0 to 100 percentage of time elapsed
+  timeLeft: string;
 }
 
 export interface RegularPost extends BasePost {
@@ -108,25 +114,34 @@ export const generateMockPost = (id: string, seed: number): FeedPost => {
     if (type === 'job') {
       const titles = ['Senior Frontend Developer', 'Backend Engineer', 'Product Designer', 'DevOps Specialist'];
       const companies = ['Magna Coders', 'Tech Corp', 'Startup Inc', 'Future Systems'];
+      const timeLeftRange = ['Apply by Friday', 'Closing soon', '2 days left', '1 week left'];
       
       return {
         ...base,
         title: getRandomItem(titles, seed + 6),
         company: getRandomItem(companies, seed + 7),
-        description: 'We are looking for an experienced professional to join our team and help build the future of tech.',
+        description: 'We are looking for a talented individual to join our team. Competitive salary and great benefits.',
         location: 'Remote',
-        salary: '$100k - $150k',
+        salary: '$120k - $150k',
         tags: ['React', 'TypeScript', 'Node.js'],
-        jobType: 'Full-time'
+        jobType: 'Full-time',
+        deadlineProgress: Math.floor(seededRandom(seed + 15) * 60) + 30, // Random progress between 30% and 90%
+        timeLeft: getRandomItem(timeLeftRange, seed + 16)
       } as JobPost;
     } else if (type === 'project') {
       const titles = ['E-commerce Platform', 'Social Media App', 'AI Dashboard', 'Crypto Wallet'];
+      const membersRange = ['2-3', '3-4', '1-2', '4-5'];
+      const timeLeftRange = ['2 days left', '5 days left', '1 week left', 'Ending soon'];
       
       return {
         ...base,
         title: getRandomItem(titles, seed + 8),
         description: 'Building a new platform using the latest tech stack. Looking for collaborators!',
-        tags: ['Next.js', 'Tailwind', 'Supabase']
+        tags: ['Next.js', 'Tailwind', 'Supabase'],
+        membersNeeded: getRandomItem(membersRange, seed + 13),
+        requestsSent: Math.floor(seededRandom(seed + 14) * 20) + 5, // Random number between 5 and 25
+        deadlineProgress: Math.floor(seededRandom(seed + 15) * 60) + 30, // Random progress between 30% and 90%
+        timeLeft: getRandomItem(timeLeftRange, seed + 16)
       } as ProjectPost;
     } else if (type === 'tech-news') {
       const titles = ['The Future of AI in 2026', 'New React Features Announced', 'WebAssembly Takes Over', 'Cybersecurity Trends'];

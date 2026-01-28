@@ -324,6 +324,21 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
   // Job Post
   if (post.type === 'job') {
     const job = post as JobPost;
+    
+    // Simulating real-time progress bar for deadline
+    const [progress, setProgress] = useState(job.deadlineProgress);
+
+    useEffect(() => {
+        // Slowly increase progress bar
+        const interval = setInterval(() => {
+             if (Math.random() > 0.5 && progress < 100) {
+                setProgress(prev => Math.min(prev + 0.5, 100));
+            }
+        }, 5000);
+        
+        return () => clearInterval(interval);
+    }, [progress]);
+
     return (
         <Link href={`/post/${post.id}`} className={cardClassName}>
           <div className="flex items-start justify-between mb-4">
@@ -362,6 +377,19 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
                 <h4 className="font-bold text-lg text-black leading-tight">{job.title}</h4>
                 <p className="text-sm text-gray-600">{job.company}</p>
               </div>
+            </div>
+
+            <div className="mb-4">
+                <div className="flex justify-between items-center mb-1">
+                    <span className="text-[10px] font-semibold text-gray-500 uppercase tracking-wider">Application Deadline</span>
+                    <span className="text-[10px] font-bold text-[#E50914]">{job.timeLeft}</span>
+                </div>
+                <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                    <div 
+                        className="h-full bg-gradient-to-r from-[#F4A261] to-[#E50914] transition-all duration-1000 ease-out"
+                        style={{ width: `${progress}%` }}
+                    />
+                </div>
             </div>
 
             <div className="flex flex-wrap gap-4 mb-6 text-sm text-gray-600">
@@ -411,9 +439,23 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
     );
   }
 
-  // Project Post
   if (post.type === 'project') {
     const project = post as ProjectPost;
+    
+    // Simulating real-time updates for requests sent
+    const [liveRequests, setLiveRequests] = useState(project.requestsSent);
+
+    useEffect(() => {
+        // Randomly increment requests sent count every 3-10 seconds
+        const interval = setInterval(() => {
+            if (Math.random() > 0.7) {
+                setLiveRequests(prev => prev + 1);
+            }
+        }, 5000);
+        
+        return () => clearInterval(interval);
+    }, []);
+
     return (
         <Link href={`/post/${post.id}`} className={cardClassName}>
           <div className="flex items-start justify-between mb-4">
@@ -440,6 +482,20 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
             <p className="text-gray-600 leading-relaxed">
               {project.description}
             </p>
+          </div>
+
+          <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-600">
+             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-50 border border-gray-100">
+                <Users size={16} className="text-[#F4A261]" />
+                <span className="font-medium text-gray-700">{project.membersNeeded} builders needed</span>
+             </div>
+             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-50 border border-gray-100">
+                <Send size={16} className="text-[#E50914]" />
+                <span className="font-medium text-gray-700">
+                   {liveRequests} requests sent
+                </span>
+                <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse ml-1"></span>
+             </div>
           </div>
 
           <div className="flex flex-wrap gap-2 mb-6">
