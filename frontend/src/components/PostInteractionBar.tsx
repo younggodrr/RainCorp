@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useMemo, useRef, useCallback, useEffect } from 'react';
-import { Heart, MessageSquare, Share2, Send, ChevronDown, Edit2, Trash2, Reply } from 'lucide-react';
+import React, { useState, useMemo, useRef, useCallback } from 'react';
+import { Heart, MessageSquare, Share2, Send, Edit2, Trash2, Reply } from 'lucide-react';
 import { Comment } from '@/utils/mockData';
+import Image from 'next/image';
 
 interface PostInteractionBarProps {
   initialLikes: number;
@@ -41,9 +42,9 @@ function CommentItem({ comment, onLike, onDelete, onEdit, onReply }: CommentItem
 
   return (
     <div className="flex gap-3">
-      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 relative overflow-hidden">
           {comment.author.avatar ? (
-              <img src={comment.author.avatar} alt={comment.author.name} className="w-full h-full rounded-full object-cover" />
+              <Image src={comment.author.avatar} alt={comment.author.name} fill sizes="32px" className="object-cover" />
           ) : (
               comment.author.name.charAt(0)
           )}
@@ -192,7 +193,7 @@ export default function PostInteractionBar({
     });
   };
   
-  const handleAddComment = (e: React.MouseEvent) => {
+  const handleAddComment = (e: React.MouseEvent | React.KeyboardEvent) => {
     e.preventDefault();
     if (!commentText.trim()) return;
     
@@ -205,7 +206,10 @@ export default function PostInteractionBar({
         content: commentText,
         createdAt: 'Just now',
         timestamp: Date.now(),
-        likes: 0
+        likes: 0,
+        isLiked: false,
+        isOwner: true,
+        replies: []
     };
 
     setComments([newComment, ...comments]); // Add to top
@@ -296,7 +300,7 @@ export default function PostInteractionBar({
   };
 
   const sortedComments = useMemo(() => {
-      let sorted = [...comments];
+      const sorted = [...comments];
       if (sortOrder === 'recent') {
           sorted.sort((a, b) => b.timestamp - a.timestamp);
       } else {
@@ -433,7 +437,7 @@ export default function PostInteractionBar({
                     placeholder="Add a comment..."
                     className="flex-1 bg-gray-50 border border-gray-200 rounded-full px-4 py-2 text-sm focus:outline-none focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914]"
                     onKeyDown={(e) => {
-                        if(e.key === 'Enter') handleAddComment(e as any);
+                        if(e.key === 'Enter') handleAddComment(e);
                     }}
                  />
                  <button 

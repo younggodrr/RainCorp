@@ -60,6 +60,11 @@ export interface Comment {
   };
   content: string;
   createdAt: string;
+  timestamp: number;
+  likes: number;
+  isLiked?: boolean;
+  isOwner?: boolean;
+  replies?: Comment[];
 }
 
 // Simple seeded random number generator

@@ -31,6 +31,7 @@ export default function PostDetailPage() {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [isRequestSent, setIsRequestSent] = useState(false);
+  const [isApplied, setIsApplied] = useState(false);
 
   // Toast State
   const [toastVisible, setToastVisible] = useState(false);
@@ -177,8 +178,19 @@ export default function PostDetailPage() {
                                 ))}
                             </div>
                         </div>
-                        <button className="w-full py-4 rounded-xl bg-[#E50914] text-white font-bold text-lg shadow-lg hover:bg-[#cc0812] transition-all transform hover:-translate-y-1">
-                            Apply for this Position
+                        <button 
+                            onClick={() => {
+                                setIsApplied(true);
+                                showToast(`Application sent to ${post.author.name}!`);
+                            }}
+                            disabled={isApplied}
+                            className={`w-full py-4 rounded-xl text-white font-bold text-lg shadow-lg transition-all transform ${
+                                isApplied 
+                                    ? 'bg-gray-400 cursor-default' 
+                                    : 'bg-[#E50914] hover:bg-[#cc0812] hover:-translate-y-1'
+                            }`}
+                        >
+                            {isApplied ? 'Applied' : 'Apply for this Position'}
                         </button>
                     </div>
                 )}
