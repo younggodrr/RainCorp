@@ -240,13 +240,15 @@ export default function DiscoverGroupsModal({
         </div>
       </div>
 
-      <GroupDetailsModal
-        isOpen={!!selectedGroup}
-        onClose={() => setSelectedGroup(null)}
-        group={selectedGroup as any}
-        onJoin={handleJoinFromDetails}
-        isDarkMode={isDarkMode}
-      />
+      {selectedGroup && (
+        <GroupDetailsModal
+          isOpen={!!selectedGroup}
+          onClose={() => setSelectedGroup(null)}
+          group={selectedGroup}
+          onJoin={handleJoinFromDetails}
+          isDarkMode={isDarkMode}
+        />
+      )}
     </>
   );
 }

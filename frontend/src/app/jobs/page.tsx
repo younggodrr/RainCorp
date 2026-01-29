@@ -289,17 +289,17 @@ export default function JobsPage() {
                   </p>
 
                   {/* Expiration Status for Saved Jobs */}
-                  {activeFilterTab === 'Saved jobs' && (job as any).category === 'saved' && (
+                  {activeFilterTab === 'Saved jobs' && job.category === 'saved' && (
                     <div className="mb-4">
                       <div className="flex justify-between items-center mb-1">
-                        <span className={`text-xs font-semibold uppercase tracking-wider ${(job as any).isExpired ? 'text-red-500' : 'text-gray-500'}`}>
-                          {(job as any).isExpired ? 'Application Expired' : 'Application Deadline'}
+                        <span className={`text-xs font-semibold uppercase tracking-wider ${job.isExpired ? 'text-red-500' : 'text-gray-500'}`}>
+                          {job.isExpired ? 'Application Expired' : 'Application Deadline'}
                         </span>
-                        <span className={`text-xs font-bold ${(job as any).isExpired ? 'text-red-500' : 'text-[#E50914]'}`}>
-                          {(job as any).timeLeft}
+                        <span className={`text-xs font-bold ${job.isExpired ? 'text-red-500' : 'text-[#E50914]'}`}>
+                          {job.timeLeft}
                         </span>
                       </div>
-                      {!(job as any).isExpired && (
+                      {!job.isExpired && (
                         <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
                           <div 
                             className="h-full bg-gradient-to-r from-[#F4A261] to-[#E50914]"

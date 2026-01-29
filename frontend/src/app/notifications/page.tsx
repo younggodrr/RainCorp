@@ -245,7 +245,7 @@ export default function NotificationsPage() {
             <div className={`flex gap-4 overflow-x-auto mb-6 p-2 ${isDarkMode ? '' : ''}`}>
               <button
                 onClick={() => setFilter('all')}
-                className={`relative flex items-center gap-2 px-4 h-10 rounded-full text-xs font-bold transition-all shadow-sm border ${
+                className={`relative overflow-visible flex items-center gap-2 px-4 h-10 rounded-full text-xs font-bold transition-all shadow-sm border ${
                   filter === 'all' 
                     ? isDarkMode ? 'bg-white text-black border-white' : 'bg-white text-black border-gray-200 ring-1 ring-gray-200' 
                     : isDarkMode ? 'bg-[#222] text-gray-400 hover:bg-[#333] hover:text-white border-gray-700' : 'bg-gray-50 text-gray-500 hover:bg-white hover:text-black border-transparent hover:border-gray-200'
@@ -253,12 +253,12 @@ export default function NotificationsPage() {
               >
                 All
                 {hasUnread('all') && (
-                  <span className="absolute top-0 right-0 -mt-1 -mr-1 w-2.5 h-2.5 bg-[#E50914] rounded-full"></span>
+                  <span className="absolute top-0 right-0 -mt-1 -mr-1 w-2.5 h-2.5 bg-[#E50914] rounded-full z-10"></span>
                 )}
               </button>
               <button
                 onClick={() => setFilter('job_opportunities')}
-                className={`relative flex items-center gap-2 px-4 h-10 rounded-full text-xs font-bold transition-all shadow-sm border ${
+                className={`relative overflow-visible flex items-center gap-2 px-4 h-10 rounded-full text-xs font-bold transition-all shadow-sm border ${
                   filter === 'job_opportunities' 
                     ? isDarkMode ? 'bg-white text-black border-white' : 'bg-white text-black border-gray-200 ring-1 ring-gray-200' 
                     : isDarkMode ? 'bg-[#222] text-gray-400 hover:bg-[#333] hover:text-white border-gray-700' : 'bg-gray-50 text-gray-500 hover:bg-white hover:text-black border-transparent hover:border-gray-200'
@@ -267,12 +267,12 @@ export default function NotificationsPage() {
                 <Briefcase size={16} />
                 <span>Jobs</span>
                 {hasUnread('job_opportunities') && (
-                  <span className="absolute top-0 right-0 -mt-1 -mr-1 w-2.5 h-2.5 bg-[#E50914] rounded-full"></span>
+                  <span className="absolute top-0 right-0 -mt-1 -mr-1 w-2.5 h-2.5 bg-[#E50914] rounded-full z-10"></span>
                 )}
               </button>
               <button
                 onClick={() => setFilter('projects')}
-                className={`relative flex items-center gap-2 px-4 h-10 rounded-full text-xs font-bold transition-all shadow-sm border ${
+                className={`relative overflow-visible flex items-center gap-2 px-4 h-10 rounded-full text-xs font-bold transition-all shadow-sm border ${
                   filter === 'projects' 
                     ? isDarkMode ? 'bg-white text-black border-white' : 'bg-white text-black border-gray-200 ring-1 ring-gray-200' 
                     : isDarkMode ? 'bg-[#222] text-gray-400 hover:bg-[#333] hover:text-white border-gray-700' : 'bg-gray-50 text-gray-500 hover:bg-white hover:text-black border-transparent hover:border-gray-200'
@@ -281,7 +281,7 @@ export default function NotificationsPage() {
                 <FolderKanban size={16} />
                 <span>Projects</span>
                 {hasUnread('projects') && (
-                  <span className="absolute top-0 right-0 -mt-1 -mr-1 w-2.5 h-2.5 bg-[#E50914] rounded-full"></span>
+                  <span className="absolute top-0 right-0 -mt-1 -mr-1 w-2.5 h-2.5 bg-[#E50914] rounded-full z-10"></span>
                 )}
               </button>
             </div>

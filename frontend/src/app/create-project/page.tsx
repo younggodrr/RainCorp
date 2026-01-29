@@ -257,8 +257,8 @@ export default function CreateProjectPage() {
                       <FolderKanban size={20} />
                     </div>
                     <div className="text-left">
-                      <h4 className="text-sm font-bold text-black">Group's Project will be created</h4>
-                      <p className="text-xs text-gray-500">User will be added to the project's chat group automatically once approved by you</p>
+                      <h4 className="text-sm font-bold text-black">Group&apos;s Project will be created</h4>
+                      <p className="text-xs text-gray-500">User will be added to the project&apos;s chat group automatically once approved by you</p>
                     </div>
                   </div>
                   

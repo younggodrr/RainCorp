@@ -393,7 +393,7 @@ export default function MessagesPage() {
     }
   };
 
-  const handleUpdateGroup = (id: string, updates: any) => {
+  const handleUpdateGroup = (id: string, updates: Partial<Conversation>) => {
     setConversations(prev => prev.map(c => {
       if (c.id === id) {
         return { ...c, ...updates };
