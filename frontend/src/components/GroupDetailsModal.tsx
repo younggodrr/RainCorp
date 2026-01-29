@@ -24,13 +24,15 @@ interface GroupDetailsModalProps {
   onClose: () => void;
   group: GroupDetails;
   onJoin: () => void;
+  isDarkMode?: boolean;
 }
 
 export default function GroupDetailsModal({ 
   isOpen, 
   onClose, 
   group,
-  onJoin
+  onJoin,
+  isDarkMode = false
 }: GroupDetailsModalProps) {
   if (!isOpen) return null;
 
@@ -43,7 +45,7 @@ export default function GroupDetailsModal({
       />
 
       {/* Modal Content */}
-      <div className="bg-white md:rounded-3xl shadow-none md:shadow-2xl w-full md:max-w-md h-full md:h-auto md:max-h-[85vh] overflow-hidden relative flex flex-col animate-in fade-in zoom-in duration-200">
+      <div className={`md:rounded-3xl shadow-none md:shadow-2xl w-full md:max-w-md h-full md:h-auto md:max-h-[85vh] overflow-hidden relative flex flex-col animate-in fade-in zoom-in duration-200 ${isDarkMode ? 'bg-[#111] border border-[#E70008]/20' : 'bg-white'}`}>
         
         {/* Header Image/Banner Area */}
         <div className={`h-32 ${group.avatarColor} relative flex items-center justify-center`}>
@@ -59,10 +61,10 @@ export default function GroupDetailsModal({
         </div>
 
         {/* Content Container */}
-        <div className="flex-1 overflow-y-auto bg-white -mt-6 rounded-t-3xl relative px-6 pb-6">
+        <div className={`flex-1 overflow-y-auto -mt-6 rounded-t-3xl relative px-6 pb-6 ${isDarkMode ? 'bg-[#111]' : 'bg-white'}`}>
             {/* Header Info */}
             <div className="text-center mb-6 pt-4">
-                <h2 className="text-2xl font-bold text-black mb-1">{group.name}</h2>
+                <h2 className={`text-2xl font-bold mb-1 ${isDarkMode ? 'text-white' : 'text-black'}`}>{group.name}</h2>
                 <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
                     <span className="flex items-center gap-1">
                         <Users size={14} />
@@ -79,39 +81,39 @@ export default function GroupDetailsModal({
             {/* Description */}
             <div className="mb-8">
                 <h3 className="text-xs font-bold text-gray-400 uppercase mb-2">About</h3>
-                <p className="text-sm text-gray-600 leading-relaxed">
+                <p className={`text-sm leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                     {group.description}
                 </p>
             </div>
 
             {/* Stats Grid */}
             <div className="grid grid-cols-2 gap-3 mb-8">
-                <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                <div className={`p-3 rounded-xl border ${isDarkMode ? 'bg-[#222] border-gray-700' : 'bg-gray-50 border-gray-100'}`}>
                     <div className="flex items-center gap-2 mb-1 text-gray-500">
                         <BarChart2 size={16} />
                         <span className="text-xs font-medium">Activity</span>
                     </div>
-                    <p className="text-lg font-bold text-black">{group.messagesPerDay}</p>
+                    <p className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-black'}`}>{group.messagesPerDay}</p>
                     <p className="text-[10px] text-gray-400">msgs/day</p>
                 </div>
-                <div className="p-3 bg-gray-50 rounded-xl border border-gray-100">
+                <div className={`p-3 rounded-xl border ${isDarkMode ? 'bg-[#222] border-gray-700' : 'bg-gray-50 border-gray-100'}`}>
                     <div className="flex items-center gap-2 mb-1 text-gray-500">
                         <Activity size={16} />
                         <span className="text-xs font-medium">Active</span>
                     </div>
-                    <p className="text-lg font-bold text-black">{group.activeMembers}</p>
+                    <p className={`text-lg font-bold ${isDarkMode ? 'text-white' : 'text-black'}`}>{group.activeMembers}</p>
                     <p className="text-[10px] text-gray-400">members now</p>
                 </div>
             </div>
 
             {/* Admin Info */}
-             <div className="flex items-center justify-between p-3 rounded-xl border border-gray-100 mb-8">
+             <div className={`flex items-center justify-between p-3 rounded-xl border mb-8 ${isDarkMode ? 'border-gray-700 bg-[#222]' : 'border-gray-100'}`}>
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 font-bold text-xs">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs ${isDarkMode ? 'bg-[#333] text-gray-400' : 'bg-gray-200 text-gray-500'}`}>
                         {group.adminName.substring(0,2).toUpperCase()}
                     </div>
                     <div>
-                        <p className="text-sm font-bold text-black">{group.adminName}</p>
+                        <p className={`text-sm font-bold ${isDarkMode ? 'text-white' : 'text-black'}`}>{group.adminName}</p>
                         <p className="text-xs text-gray-500">Group Admin</p>
                     </div>
                 </div>
@@ -121,13 +123,13 @@ export default function GroupDetailsModal({
         </div>
 
         {/* Footer Action */}
-        <div className="p-4 border-t border-gray-100 bg-white sticky bottom-0 z-10">
+        <div className={`p-4 border-t sticky bottom-0 z-10 ${isDarkMode ? 'bg-[#111] border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
             <button 
                 onClick={onJoin}
                 className={`w-full py-3.5 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg hover:shadow-xl transform active:scale-[0.98] ${
                     group.accessType === 'paid' 
                     ? 'bg-[#F4A261] text-white hover:bg-[#e08e4d]' 
-                    : 'bg-black text-white hover:bg-gray-800'
+                    : isDarkMode ? 'bg-[#E50914] text-white hover:bg-[#cc0812]' : 'bg-black text-white hover:bg-gray-800'
                 }`}
             >
                 {group.accessType === 'paid' ? (

@@ -353,7 +353,7 @@ function FeedItem({ post, onRequestJoin, isDarkMode }: { post: FeedPost, onReque
     }, 100);
   };
 
-  const cardClassName = `block rounded-2xl p-4 md:p-6 shadow-sm mt-6 cursor-pointer hover:shadow-md transition-all text-left w-full ${isDarkMode ? 'bg-[#111] border border-[#E70008]/20 shadow-[0_0_15px_rgba(231,0,8,0.1)]' : 'bg-white'}`;
+  const cardClassName = `block rounded-2xl p-4 md:p-6 shadow-sm mt-6 cursor-pointer hover:shadow-md transition-all text-left w-full ${isDarkMode ? 'bg-[#111] border border-[#E70008]/20 shadow-[0_0_15px_rgba(231,0,8,0.1)] text-[#F4A261]' : 'bg-white'}`;
 
   // Job Post
   if (post.type === 'job') {
@@ -384,8 +384,8 @@ function FeedItem({ post, onRequestJoin, isDarkMode }: { post: FeedPost, onReque
           </div>
 
           <div className="mb-4">
-            <p className={`font-bold mb-1 ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>{job.company} is hiring! {job.title}</p>
-            <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>{job.description}</p>
+            <p className={`font-bold mb-1 ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>{job.company} is hiring! {job.title}</p>
+            <p className={isDarkMode ? 'text-[#F4A261]' : 'text-gray-600'}>{job.description}</p>
           </div>
 
           <div className={`border rounded-xl p-3 md:p-5 ${isDarkMode ? 'border-[#2ECC71]/20 bg-[#2ECC71]/5' : 'border-[#2ECC71]/30 bg-[#2ECC71]/5'}`}>
@@ -394,8 +394,8 @@ function FeedItem({ post, onRequestJoin, isDarkMode }: { post: FeedPost, onReque
                 <Briefcase size={24} />
               </div>
               <div>
-                <h4 className={`font-bold text-lg leading-tight ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>{job.title}</h4>
-                <p className="text-sm text-gray-600">{job.company}</p>
+                <h4 className={`font-bold text-lg leading-tight ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>{job.title}</h4>
+                <p className={`text-sm ${isDarkMode ? 'text-[#F4A261]' : 'text-gray-600'}`}>{job.company}</p>
               </div>
             </div>
 
@@ -412,24 +412,24 @@ function FeedItem({ post, onRequestJoin, isDarkMode }: { post: FeedPost, onReque
                 </div>
             </div>
 
-            <div className={`flex flex-wrap gap-4 mb-6 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <div className={`flex flex-wrap gap-4 mb-6 text-sm ${isDarkMode ? 'text-[#F4A261]' : 'text-gray-600'}`}>
               <div className="flex items-center gap-1.5">
-                <MapPin size={16} className="text-gray-400" />
+                <MapPin size={16} className={`text-gray-400 ${isDarkMode ? 'text-[#F4A261]' : ''}`} />
                 {job.location}
               </div>
               <div className="flex items-center gap-1.5">
-                <Briefcase size={16} className="text-gray-400" />
+                <Briefcase size={16} className={`text-gray-400 ${isDarkMode ? 'text-[#F4A261]' : ''}`} />
                 {job.jobType}
               </div>
               <div className="flex items-center gap-1.5">
-                <DollarSign size={16} className="text-gray-400" />
+                <DollarSign size={16} className={`text-gray-400 ${isDarkMode ? 'text-[#F4A261]' : ''}`} />
                 {job.salary}
               </div>
             </div>
 
             <div className="flex flex-wrap gap-2 mb-6">
               {job.tags.map((tag) => (
-                <span key={tag} className={`px-3 py-1 rounded-full text-xs font-medium border ${isDarkMode ? 'bg-[#222] text-gray-300 border-gray-700' : 'bg-white text-gray-600 border-gray-100'}`}>
+                <span key={tag} className={`px-3 py-1 rounded-full text-xs font-medium border ${isDarkMode ? 'bg-[#222] text-[#F4A261] border-gray-700' : 'bg-white text-gray-600 border-gray-100'}`}>
                   {tag}
                 </span>
               ))}
@@ -438,7 +438,7 @@ function FeedItem({ post, onRequestJoin, isDarkMode }: { post: FeedPost, onReque
             <div className="flex gap-2 md:gap-3">
               <button 
                 onClick={e => { e.preventDefault(); /* Logic */ }}
-                className={`flex-1 py-2 md:py-2.5 rounded-full border text-xs md:text-sm font-semibold transition-all ${isDarkMode ? 'bg-transparent border-gray-700 text-gray-300 hover:bg-white/10' : 'bg-white border-gray-200 text-black hover:bg-gray-50'}`}
+                className={`flex-1 py-2 md:py-2.5 rounded-full border text-xs md:text-sm font-semibold transition-all ${isDarkMode ? 'bg-transparent border-gray-700 text-[#F4A261] hover:bg-white/10' : 'bg-white border-gray-200 text-black hover:bg-gray-50'}`}
               >
                 View Details
               </button>
@@ -484,20 +484,20 @@ function FeedItem({ post, onRequestJoin, isDarkMode }: { post: FeedPost, onReque
           </div>
 
           <div className="mb-4">
-            <h3 className={`font-bold text-lg mb-2 ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>{project.title}</h3>
-            <p className={`leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <h3 className={`font-bold text-lg mb-2 ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>{project.title}</h3>
+            <p className={`leading-relaxed ${isDarkMode ? 'text-[#F4A261]' : 'text-gray-600'}`}>
               {project.description}
             </p>
           </div>
 
-          <div className={`flex flex-wrap gap-4 mb-4 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          <div className={`flex flex-wrap gap-4 mb-4 text-sm ${isDarkMode ? 'text-[#F4A261]' : 'text-gray-600'}`}>
              <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border ${isDarkMode ? 'bg-[#222] border-gray-700' : 'bg-gray-50 border-gray-100'}`}>
                 <Users size={16} className="text-[#F4A261]" />
-                <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{project.membersNeeded} builders needed</span>
+                <span className={`font-medium ${isDarkMode ? 'text-[#F4A261]' : 'text-gray-700'}`}>{project.membersNeeded} builders needed</span>
              </div>
              <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border ${isDarkMode ? 'bg-[#222] border-gray-700' : 'bg-gray-50 border-gray-100'}`}>
                 <Send size={16} className="text-[#E50914]" />
-                <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                <span className={`font-medium ${isDarkMode ? 'text-[#F4A261]' : 'text-gray-700'}`}>
                    {liveRequests} requests sent
                 </span>
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse ml-1"></span>
@@ -549,10 +549,10 @@ function FeedItem({ post, onRequestJoin, isDarkMode }: { post: FeedPost, onReque
         </div>
 
         <div className="mb-4">
-          <h3 className={`font-bold text-xl mb-2 leading-tight hover:text-[#E50914] cursor-pointer transition-colors ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>
+          <h3 className={`font-bold text-xl mb-2 leading-tight hover:text-[#E50914] cursor-pointer transition-colors ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>
             {news.title}
           </h3>
-          <p className={`text-sm leading-relaxed mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+          <p className={`text-sm leading-relaxed mb-4 ${isDarkMode ? 'text-[#F4A261]' : 'text-gray-600'}`}>
             {news.summary}
           </p>
           
@@ -612,8 +612,8 @@ function FeedItem({ post, onRequestJoin, isDarkMode }: { post: FeedPost, onReque
           </div>
 
           <div className="mb-4">
-            <h3 className={`font-bold text-lg mb-2 ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>{regular.title}</h3>
-            <p className={`leading-relaxed mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+            <h3 className={`font-bold text-lg mb-2 ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>{regular.title}</h3>
+            <p className={`leading-relaxed mb-4 ${isDarkMode ? 'text-[#F4A261]' : 'text-gray-600'}`}>
               {regular.content}
             </p>
             

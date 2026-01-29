@@ -1,15 +1,18 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { 
-  Phone, Video, Smile, Paperclip, Mic, Send, MoreHorizontal, CheckCheck, 
+  Phone, Video, CheckCheck, 
   LayoutDashboard, Search, MessageSquare, Settings, Edit, MoreVertical, 
   LayoutGrid, Users, MessageCircleQuestion, Menu, X, Plus, Bell,
-  Trash2, Archive, FileText, Image as ImageIcon, Download, ChevronLeft
+  FileText, Image as ImageIcon, Download, Trash2
 } from 'lucide-react';
 import Link from 'next/link';
 import LeftPanel from '@/components/LeftPanel';
 import TopNavigation from '@/components/TopNavigation';
+import ChatHeader from '@/components/ChatHeader';
+import ChatInput from '@/components/ChatInput';
 import CreateGroupModal from '@/components/CreateGroupModal';
 import GroupInfoModal from '@/components/GroupInfoModal';
 import StartChatModal from '@/components/StartChatModal';
@@ -156,6 +159,7 @@ const INITIAL_CONVERSATIONS: Conversation[] = [
 ];
 
 export default function MessagesPage() {
+  const searchParams = useSearchParams();
   // State
   const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
@@ -172,6 +176,7 @@ export default function MessagesPage() {
   const [isContactInfoModalOpen, setIsContactInfoModalOpen] = useState(false);
   const [isAttachmentModalOpen, setIsAttachmentModalOpen] = useState(false);
   const [isDiscoverGroupsModalOpen, setIsDiscoverGroupsModalOpen] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -179,6 +184,67 @@ export default function MessagesPage() {
 
   // Derived State
   const selectedChat = conversations.find(c => c.id === selectedChatId);
+
+  // Handle URL Params for starting chat
+  useEffect(() => {
+    if (!searchParams) return;
+    
+    const action = searchParams.get('action');
+    const name = searchParams.get('name');
+    const initials = searchParams.get('initials');
+
+    if (action === 'start_chat' && name) {
+      // Check if chat already exists
+      const existingChat = conversations.find(c => c.name === name && !c.isGroup);
+      
+      if (existingChat) {
+        setSelectedChatId(existingChat.id);
+      } else {
+        // Create new chat
+        const newChat: Conversation = {
+          id: `new-chat-${Date.now()}`,
+          name: name,
+          lastMessage: 'I have accepted your job application.',
+          time: 'Now',
+          unread: 0,
+          isTyping: false,
+          pinned: false,
+          isGroup: false,
+          archived: false,
+          avatarColor: 'bg-indigo-100 text-indigo-600',
+          messages: [
+            {
+              id: `msg-init-${Date.now()}`,
+              sender: 'Me',
+              text: 'I have accepted your job application. Let\'s discuss the details.',
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              avatar: 'ME',
+              isMe: true,
+              type: 'text',
+              read: true
+            }
+          ]
+        };
+        
+        setConversations(prev => [newChat, ...prev]);
+        setSelectedChatId(newChat.id);
+      }
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    localStorage.setItem('theme', newMode ? 'dark' : 'light');
+    window.dispatchEvent(new Event('themeChanged'));
+  };
 
   const filteredConversations = conversations.filter(c => {
     // 1. Archive Filter
@@ -461,7 +527,7 @@ export default function MessagesPage() {
   };
 
   return (
-    <div className="h-screen bg-[#FDF8F5] font-sans text-[#444444] flex overflow-hidden">
+    <div className={`h-screen font-sans flex overflow-hidden transition-colors duration-300 ${isDarkMode ? 'bg-black text-[#F9E4AD]' : 'bg-[#FDF8F5] text-[#444444]'}`}>
       
       {/* TOP NAVIGATION BAR */}
       <div className={`${selectedChatId ? 'hidden md:block' : 'block'}`}>
@@ -472,6 +538,7 @@ export default function MessagesPage() {
           searchPlaceholder="Search messages..."
           searchValue={searchQuery}
           onSearchChange={(e) => setSearchQuery(e.target.value)}
+          isDarkMode={isDarkMode}
         />
       </div>
 
@@ -483,8 +550,8 @@ export default function MessagesPage() {
               onClick={() => setIsMobileMenuOpen(false)}
             ></div>
             
-            <div className="absolute top-0 left-0 w-full h-full bg-white shadow-2xl flex flex-col overflow-y-auto animate-slide-in-left">
-              <div className="p-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+            <div className={`absolute top-0 left-0 w-full h-full shadow-2xl flex flex-col overflow-y-auto animate-slide-in-left ${isDarkMode ? 'bg-black border-r border-[#E70008]/20' : 'bg-white'}`}>
+              <div className={`p-4 border-b flex items-center justify-between sticky top-0 z-10 ${isDarkMode ? 'bg-black border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
                 <Link href="/" className="flex items-center gap-2">
                    <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center shadow-sm">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#E50914]">
@@ -498,7 +565,7 @@ export default function MessagesPage() {
                 </Link>
                 <button 
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2 rounded-full hover:bg-gray-100 text-gray-500"
+                  className={`p-2 rounded-full hover:bg-gray-100 ${isDarkMode ? 'text-gray-400 hover:bg-[#E70008]/10' : 'text-gray-500 hover:bg-gray-100'}`}
                 >
                   <X size={24} />
                 </button>
@@ -510,6 +577,8 @@ export default function MessagesPage() {
                   setActiveTab={setActiveTab} 
                   closeMenu={() => setIsMobileMenuOpen(false)} 
                   isMobile={true}
+                  isDarkMode={isDarkMode}
+                  toggleTheme={toggleTheme}
                 />
               </div>
             </div>
@@ -520,17 +589,17 @@ export default function MessagesPage() {
       <div className={`flex-1 flex overflow-hidden ${selectedChatId ? 'pt-0 md:pt-[71px]' : 'pt-[65px] md:pt-[71px]'}`}>
         
         {/* 1. CONVERSATIONS LIST (Left Panel) */}
-        <div className={`w-full md:w-[320px] lg:w-[380px] bg-white border-r border-gray-100 flex flex-col h-full ${selectedChatId ? 'hidden md:flex' : 'flex'}`}>
+        <div className={`w-full md:w-[320px] lg:w-[380px] border-r flex flex-col h-full ${selectedChatId ? 'hidden md:flex' : 'flex'} ${isDarkMode ? 'bg-[#111] border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
           {/* Header */}
           <div className="p-4 md:p-6 pb-2">
             <div className="flex md:flex items-center justify-between mb-4">
-                <h2 className="font-bold text-xl md:block hidden">Chats</h2>
-                <h2 className="font-bold text-xl md:hidden">Messages</h2>
+                <h2 className={`font-bold text-xl md:block hidden ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>Chats</h2>
+                <h2 className={`font-bold text-xl md:hidden ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>Messages</h2>
                 <div className="flex gap-2">
-                  <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors hidden md:block">
+                  <button className={`p-2 rounded-full transition-colors hidden md:block ${isDarkMode ? 'hover:bg-[#222] text-gray-400' : 'hover:bg-gray-100 text-gray-500'}`}>
                     <Edit size={20} />
                   </button>
-                  <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors hidden md:block">
+                  <button className={`p-2 rounded-full transition-colors hidden md:block ${isDarkMode ? 'hover:bg-[#222] text-gray-400' : 'hover:bg-gray-100 text-gray-500'}`}>
                     <MoreVertical size={20} />
                   </button>
                 </div>
@@ -545,7 +614,7 @@ export default function MessagesPage() {
                   className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
                     (filter === 'groups' && item === 'My Groups') || filter === item.toLowerCase()
                       ? 'bg-black text-white shadow-md' 
-                      : 'bg-white border border-gray-200 text-gray-500 hover:bg-gray-50'
+                      : isDarkMode ? 'bg-[#222] border border-gray-700 text-gray-400 hover:bg-[#333]' : 'bg-white border border-gray-200 text-gray-500 hover:bg-gray-50'
                   }`}
                 >
                   {item}
@@ -553,7 +622,7 @@ export default function MessagesPage() {
               ))}
               <button
                 onClick={() => setIsDiscoverGroupsModalOpen(true)}
-                className="px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all bg-white border border-[#E50914] text-[#E50914] hover:bg-[#E50914] hover:text-white flex items-center gap-1.5"
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all border flex items-center gap-1.5 ${isDarkMode ? 'bg-[#222] border-[#E50914] text-[#E50914] hover:bg-[#E50914] hover:text-white' : 'bg-white border-[#E50914] text-[#E50914] hover:bg-[#E50914] hover:text-white'}`}
               >
                 <Users size={12} />
                 Discover Groups
@@ -579,6 +648,7 @@ export default function MessagesPage() {
                   active={selectedChatId === chat.id}
                   avatarColor={chat.avatarColor}
                   onClick={() => setSelectedChatId(chat.id)}
+                  isDarkMode={isDarkMode}
                 />
               ))
             )}
@@ -586,89 +656,24 @@ export default function MessagesPage() {
         </div>
 
         {/* 2. CHAT WINDOW (Middle Panel) */}
-        <div className={`flex-1 flex flex-col bg-[#FDF8F5] h-full pb-20 md:pb-0 ${!selectedChatId ? 'hidden md:flex' : 'flex'}`}>
+        <div className={`flex-1 flex flex-col h-full md:pb-0 ${!selectedChatId ? 'hidden md:flex' : 'flex'} ${isDarkMode ? 'bg-black' : 'bg-[#FDF8F5]'}`}>
           {selectedChat ? (
             <>
               {/* Chat Header */}
-              <div className="bg-white px-6 py-4 border-b border-gray-100 flex items-center justify-between shadow-sm z-10">
-                <div 
-                  className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity"
-                  onClick={() => {
-                    if (selectedChat.isGroup) {
-                      setIsGroupInfoModalOpen(true);
-                    } else {
-                      setIsContactInfoModalOpen(true);
-                    }
-                  }}
-                >
-                  <button 
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectedChatId(null);
-                    }} 
-                    className="md:hidden text-gray-500"
-                  >
-                      <ChevronLeft size={24} />
-                  </button>
-                  
-                  <div className="relative">
-                    <div className={`w-10 h-10 rounded-full ${selectedChat.avatarColor} flex items-center justify-center font-bold text-sm`}>
-                      {selectedChat.name.substring(0, 2).toUpperCase()}
-                    </div>
-                    <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#2ECC71] border-2 border-white rounded-full"></div>
-                  </div>
-                  <div>
-                    <h2 className="font-bold text-black text-lg leading-tight">{selectedChat.name}</h2>
-                    {selectedChat.isTyping ? (
-                      <p className="text-xs text-[#2ECC71] font-medium">typing...</p>
-                    ) : selectedChat.isGroup ? (
-                      <p className="text-xs text-gray-500">Tap for group info</p>
-                    ) : (
-                      <p className="text-xs text-gray-500">Tap for contact info</p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 md:gap-4 relative">
-                  <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors">
-                    <Video size={22} />
-                  </button>
-                  <button className="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors">
-                    <Phone size={22} />
-                  </button>
-                  <button 
-                    className="p-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors"
-                    onClick={() => setShowChatOptions(!showChatOptions)}
-                  >
-                    <MoreHorizontal size={22} />
-                  </button>
-
-                  {/* Chat Options Dropdown */}
-                  {showChatOptions && (
-                    <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 z-50 overflow-hidden">
-                      <button 
-                        onClick={() => handleArchiveConversation(selectedChat.id)}
-                        className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-2"
-                      >
-                        <Archive size={16} />
-                        {selectedChat.archived ? 'Unarchive' : 'Archive Chat'}
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteConversation(selectedChat.id)}
-                        className="w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-2"
-                      >
-                        <Trash2 size={16} />
-                        Delete Chat
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
+              <ChatHeader 
+                selectedChat={selectedChat}
+                isDarkMode={isDarkMode}
+                onBack={() => setSelectedChatId(null)}
+                onOpenGroupInfo={() => setIsGroupInfoModalOpen(true)}
+                onOpenContactInfo={() => setIsContactInfoModalOpen(true)}
+                onArchiveChat={handleArchiveConversation}
+                onDeleteChat={handleDeleteConversation}
+              />
 
               {/* Chat Content */}
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
                 <div className="flex justify-center my-4">
-                  <span className="bg-gray-200 text-gray-500 text-xs px-3 py-1 rounded-full font-medium">Today</span>
+                  <span className={`text-xs px-3 py-1 rounded-full font-medium ${isDarkMode ? 'bg-[#222] text-gray-400' : 'bg-gray-200 text-gray-500'}`}>Today</span>
                 </div>
 
                 {selectedChat.messages.map((msg) => (
@@ -676,62 +681,29 @@ export default function MessagesPage() {
                     key={msg.id}
                     message={msg}
                     onDelete={() => handleDeleteMessage(selectedChat.id, msg.id)}
+                    isDarkMode={isDarkMode}
                   />
                 ))}
                 <div ref={messagesEndRef} />
               </div>
 
               {/* Input Area */}
-              <div className="p-4 bg-white border-t border-gray-100">
-                <form 
-                  onSubmit={handleSendMessage}
-                  className="flex items-center gap-2 bg-gray-50 p-2 rounded-2xl border border-gray-200 focus-within:border-[#E50914] focus-within:ring-1 focus-within:ring-[#E50914] transition-all"
-                >
-                  <button type="button" className="p-2 text-gray-400 hover:text-[#E50914] transition-colors">
-                    <Smile size={24} />
-                  </button>
-                  
-                  <input 
-                    type="file" 
-                    ref={fileInputRef} 
-                    className="hidden" 
-                    onChange={handleFileUpload} 
-                  />
-                  <button 
-                    type="button" 
-                    className="p-2 text-gray-400 hover:text-[#E50914] transition-colors"
-                    onClick={() => setIsAttachmentModalOpen(true)}
-                  >
-                    <Paperclip size={24} />
-                  </button>
-                  
-                  <input 
-                    type="text" 
-                    value={messageInput}
-                    onChange={(e) => setMessageInput(e.target.value)}
-                    placeholder="Type a message..." 
-                    className="flex-1 bg-transparent border-none focus:ring-0 text-sm text-black placeholder-gray-400 focus:outline-none"
-                  />
-
-                  <button type="button" className="p-2 text-gray-400 hover:text-[#E50914] transition-colors">
-                    <Mic size={24} />
-                  </button>
-                  <button 
-                    type="submit" 
-                    disabled={!messageInput.trim()}
-                    className="p-2 bg-[#E50914] text-white rounded-xl hover:bg-[#cc0812] transition-colors shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    <Send size={20} className="ml-0.5" />
-                  </button>
-                </form>
-              </div>
+              <ChatInput 
+                isDarkMode={isDarkMode}
+                messageInput={messageInput}
+                setMessageInput={setMessageInput}
+                onSendMessage={handleSendMessage}
+                onAttachClick={() => setIsAttachmentModalOpen(true)}
+                onFileSelect={handleFileUpload}
+                fileInputRef={fileInputRef}
+              />
             </>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-gray-400 p-8 text-center">
-              <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+              <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-6 ${isDarkMode ? 'bg-[#222]' : 'bg-gray-100'}`}>
                 <MessageSquare size={40} className="text-gray-300" />
               </div>
-              <h2 className="text-xl font-bold text-gray-700 mb-2">Select a Conversation</h2>
+              <h2 className={`text-xl font-bold mb-2 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Select a Conversation</h2>
               <p className="max-w-xs">Choose a chat from the left to start messaging or create a new group.</p>
             </div>
           )}
@@ -739,9 +711,9 @@ export default function MessagesPage() {
 
         {/* 3. GROUP INFO (Right Panel) - Hidden on smaller screens */}
         {selectedChat && (
-          <div className="w-[300px] bg-white border-l border-gray-100 hidden xl:flex flex-col h-full overflow-y-auto">
-            <div className="p-6 border-b border-gray-100">
-              <h3 className="font-bold text-black text-lg">
+          <div className={`w-[300px] border-l hidden xl:flex flex-col h-full overflow-y-auto ${isDarkMode ? 'bg-[#111] border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
+            <div className={`p-6 border-b ${isDarkMode ? 'border-[#E70008]/20' : 'border-gray-100'}`}>
+              <h3 className={`font-bold text-lg ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>
                 {selectedChat.isGroup ? 'Group Info' : 'Contact Info'}
               </h3>
             </div>
@@ -750,20 +722,20 @@ export default function MessagesPage() {
               <div className={`w-24 h-24 rounded-2xl ${selectedChat.avatarColor} flex items-center justify-center text-2xl font-bold mb-4 shadow-lg`}>
                 {selectedChat.name.substring(0, 2).toUpperCase()}
               </div>
-              <h2 className="text-xl font-bold text-black mb-1">{selectedChat.name}</h2>
+              <h2 className={`text-xl font-bold mb-1 ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>{selectedChat.name}</h2>
               <p className="text-sm text-gray-500 mb-6">
                 {selectedChat.isGroup ? 'Group • 12 Members' : 'Online'}
               </p>
               
               <div className="flex gap-4 w-full">
-                <button className="flex-1 py-2 rounded-lg bg-gray-50 text-gray-600 font-medium text-xs hover:bg-gray-100 transition-colors flex flex-col items-center gap-1">
-                   <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
+                <button className={`flex-1 py-2 rounded-lg font-medium text-xs transition-colors flex flex-col items-center gap-1 ${isDarkMode ? 'bg-[#222] text-gray-300 hover:bg-[#333]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}>
+                   <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-sm ${isDarkMode ? 'bg-[#333]' : 'bg-white'}`}>
                      <Phone size={16} />
                    </div>
                    Audio
                 </button>
-                <button className="flex-1 py-2 rounded-lg bg-gray-50 text-gray-600 font-medium text-xs hover:bg-gray-100 transition-colors flex flex-col items-center gap-1">
-                   <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center shadow-sm">
+                <button className={`flex-1 py-2 rounded-lg font-medium text-xs transition-colors flex flex-col items-center gap-1 ${isDarkMode ? 'bg-[#222] text-gray-300 hover:bg-[#333]' : 'bg-gray-50 text-gray-600 hover:bg-gray-100'}`}>
+                   <div className={`w-8 h-8 rounded-full flex items-center justify-center shadow-sm ${isDarkMode ? 'bg-[#333]' : 'bg-white'}`}>
                      <Video size={16} />
                    </div>
                    Video
@@ -774,7 +746,7 @@ export default function MessagesPage() {
             <div className="p-6 pt-0 space-y-6">
               <div>
                  <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">Description</h4>
-                 <p className="text-sm text-gray-600 leading-relaxed">
+                 <p className={`text-sm leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                    Where Creativity Meets Strategy. Elevating brands through innovative design and captivating storytelling.
                  </p>
               </div>
@@ -784,9 +756,9 @@ export default function MessagesPage() {
                    Media <span className="text-[#E50914] cursor-pointer">See All</span>
                  </h4>
                  <div className="grid grid-cols-3 gap-2">
-                   <div className="aspect-square bg-gray-200 rounded-lg"></div>
-                   <div className="aspect-square bg-gray-200 rounded-lg"></div>
-                   <div className="aspect-square bg-gray-200 rounded-lg"></div>
+                   <div className={`aspect-square rounded-lg ${isDarkMode ? 'bg-[#222]' : 'bg-gray-200'}`}></div>
+                   <div className={`aspect-square rounded-lg ${isDarkMode ? 'bg-[#222]' : 'bg-gray-200'}`}></div>
+                   <div className={`aspect-square rounded-lg ${isDarkMode ? 'bg-[#222]' : 'bg-gray-200'}`}></div>
                  </div>
               </div>
             </div>
@@ -802,20 +774,20 @@ export default function MessagesPage() {
           <div className="flex flex-col gap-3 mb-2 origin-bottom-right">
              <button 
                 onClick={() => setIsCreateGroupModalOpen(true)}
-                className="flex items-center gap-3 px-5 py-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all group whitespace-nowrap"
+                className={`flex items-center gap-3 px-5 py-3 rounded-full shadow-lg border transition-all group whitespace-nowrap ${isDarkMode ? 'bg-[#111] border-[#E70008]/20 hover:bg-[#222]' : 'bg-white border-gray-100 hover:bg-gray-50'}`}
              >
-                <span className="text-sm font-bold text-gray-700 group-hover:text-[#E50914]">Create Group</span>
-                <div className="w-8 h-8 rounded-full bg-[#F4A261]/10 text-[#F4A261] flex items-center justify-center group-hover:bg-[#E50914] group-hover:text-white transition-all">
+                <span className={`text-sm font-bold group-hover:text-[#E50914] ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Create Group</span>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center group-hover:bg-[#E50914] group-hover:text-white transition-all ${isDarkMode ? 'bg-[#F4A261]/20 text-[#F4A261]' : 'bg-[#F4A261]/10 text-[#F4A261]'}`}>
                   <Users size={18} />
                 </div>
              </button>
              
              <button 
                 onClick={() => setIsStartChatModalOpen(true)}
-                className="flex items-center gap-3 px-5 py-3 rounded-full bg-white shadow-lg border border-gray-100 hover:bg-gray-50 transition-all group whitespace-nowrap"
+                className={`flex items-center gap-3 px-5 py-3 rounded-full shadow-lg border transition-all group whitespace-nowrap ${isDarkMode ? 'bg-[#111] border-[#E70008]/20 hover:bg-[#222]' : 'bg-white border-gray-100 hover:bg-gray-50'}`}
              >
-                <span className="text-sm font-bold text-gray-700 group-hover:text-[#E50914]">Start Chat</span>
-                <div className="w-8 h-8 rounded-full bg-[#E50914]/10 text-[#E50914] flex items-center justify-center group-hover:bg-[#E50914] group-hover:text-white transition-all">
+                <span className={`text-sm font-bold group-hover:text-[#E50914] ${isDarkMode ? 'text-white' : 'text-gray-700'}`}>Start Chat</span>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center group-hover:bg-[#E50914] group-hover:text-white transition-all ${isDarkMode ? 'bg-[#E50914]/20 text-[#E50914]' : 'bg-[#E50914]/10 text-[#E50914]'}`}>
                   <MessageSquare size={18} />
                 </div>
              </button>
@@ -839,12 +811,14 @@ export default function MessagesPage() {
         isOpen={isCreateGroupModalOpen} 
         onClose={() => setIsCreateGroupModalOpen(false)} 
         onCreateGroup={handleCreateGroup} 
+        isDarkMode={isDarkMode}
       />
 
       <StartChatModal
         isOpen={isStartChatModalOpen}
         onClose={() => setIsStartChatModalOpen(false)}
         onStartChat={handleStartChat}
+        isDarkMode={isDarkMode}
       />
 
       {selectedChat && selectedChat.isGroup && (
@@ -862,6 +836,7 @@ export default function MessagesPage() {
           onLeaveGroup={handleLeaveGroup}
           onRemoveMember={handleRemoveMember}
           onPromoteMember={handlePromoteMember}
+          isDarkMode={isDarkMode}
         />
       )}
 
@@ -870,6 +845,7 @@ export default function MessagesPage() {
           isOpen={isContactInfoModalOpen}
           onClose={() => setIsContactInfoModalOpen(false)}
           contact={getContactInfo(selectedChat)}
+          isDarkMode={isDarkMode}
         />
       )}
 
@@ -883,6 +859,7 @@ export default function MessagesPage() {
         isOpen={isDiscoverGroupsModalOpen}
         onClose={() => setIsDiscoverGroupsModalOpen(false)}
         onJoinGroup={handleJoinGroup}
+        isDarkMode={isDarkMode}
       />
 
     </div>
@@ -899,15 +876,18 @@ interface ConversationItemProps {
   isTyping?: boolean;
   active: boolean;
   avatarColor: string;
+  isDarkMode?: boolean;
   onClick: () => void;
 }
 
-function ConversationItem({ name, message, time, unread, isTyping, active, avatarColor, onClick }: ConversationItemProps) {
+function ConversationItem({ name, message, time, unread, isTyping, active, avatarColor, onClick, isDarkMode }: ConversationItemProps) {
   return (
     <div 
       onClick={onClick}
       className={`flex items-start gap-3 p-3 rounded-xl cursor-pointer transition-all ${
-        active ? 'bg-[#FDF8F5] border border-[#E50914]/10' : 'hover:bg-gray-50 border border-transparent'
+        active 
+          ? isDarkMode ? 'bg-[#222] border border-[#E50914]/40' : 'bg-[#FDF8F5] border border-[#E50914]/10' 
+          : isDarkMode ? 'hover:bg-[#1a1a1a] border border-transparent' : 'hover:bg-gray-50 border border-transparent'
       }`}
     >
       <div className="relative flex-shrink-0">
@@ -920,15 +900,25 @@ function ConversationItem({ name, message, time, unread, isTyping, active, avata
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex justify-between items-baseline mb-1">
-          <h4 className={`text-sm truncate ${active ? 'font-bold text-black' : 'font-semibold text-gray-800'}`}>
+          <h4 className={`text-sm truncate ${
+            active 
+              ? isDarkMode ? 'font-bold text-[#F4A261]' : 'font-bold text-black' 
+              : isDarkMode ? 'font-semibold text-[#F4A261]' : 'font-semibold text-gray-800'
+          }`}>
             {name}
           </h4>
-          <span className={`text-[10px] ${unread ? 'font-bold text-[#E50914]' : 'text-gray-400'}`}>
+          <span className={`text-[10px] ${unread ? 'font-bold text-[#E50914]' : isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
             {time}
           </span>
         </div>
         <div className="flex justify-between items-center">
-          <p className={`text-xs truncate max-w-[80%] ${isTyping ? 'text-[#2ECC71] font-medium' : unread ? 'text-black font-semibold' : 'text-gray-500'}`}>
+          <p className={`text-xs truncate max-w-[80%] ${
+            isTyping 
+              ? 'text-[#2ECC71] font-medium' 
+              : unread 
+                ? isDarkMode ? 'text-[#F4A261] font-semibold' : 'text-black font-semibold' 
+                : isDarkMode ? 'text-gray-400' : 'text-gray-500'
+          }`}>
             {message}
           </p>
           
@@ -946,9 +936,10 @@ function ConversationItem({ name, message, time, unread, isTyping, active, avata
 interface MessageBubbleProps {
   message: Message;
   onDelete: () => void;
+  isDarkMode?: boolean;
 }
 
-function MessageBubble({ message, onDelete }: MessageBubbleProps) {
+function MessageBubble({ message, onDelete, isDarkMode }: MessageBubbleProps) {
   const [showActions, setShowActions] = useState(false);
 
   return (
@@ -957,13 +948,13 @@ function MessageBubble({ message, onDelete }: MessageBubbleProps) {
       onMouseEnter={() => setShowActions(true)}
       onMouseLeave={() => setShowActions(false)}
     >
-      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${message.isMe ? 'bg-black text-white' : 'bg-gray-200 text-gray-700'}`}>
+      <div className={`w-8 h-8 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0 ${message.isMe ? (isDarkMode ? 'bg-[#E50914] text-white' : 'bg-black text-white') : (isDarkMode ? 'bg-[#222] text-gray-300' : 'bg-gray-200 text-gray-700')}`}>
         {message.avatar}
       </div>
       
       <div className={`flex flex-col gap-1 ${message.isMe ? 'items-end' : 'items-start'}`}>
         <div className="flex items-baseline gap-2 mx-1">
-          <span className="text-xs font-bold text-gray-700">{message.sender}</span>
+          <span className={`text-xs font-bold ${!message.isMe ? 'text-[#F4A261]' : isDarkMode ? 'text-gray-400' : 'text-gray-700'}`}>{message.sender}</span>
           {showActions && message.isMe && (
             <button 
               onClick={onDelete}
@@ -978,7 +969,9 @@ function MessageBubble({ message, onDelete }: MessageBubbleProps) {
         <div className={`p-4 rounded-2xl shadow-sm border ${
           message.isMe 
             ? 'bg-[#E50914] text-white rounded-tr-none border-[#E50914]' 
-            : 'bg-white text-gray-700 rounded-tl-none border-gray-100'
+            : isDarkMode 
+              ? 'bg-[#222] text-[#F9E4AD] rounded-tl-none border-[#E70008]/20' 
+              : 'bg-black text-[#F4A261] rounded-tl-none border-[#F4A261]'
         }`}>
           {message.type === 'text' && (
             <p className="text-sm leading-relaxed">{message.text}</p>

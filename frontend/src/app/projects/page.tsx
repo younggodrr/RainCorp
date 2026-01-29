@@ -9,12 +9,14 @@ import {
   Sun, Moon
 } from 'lucide-react';
 import LeftPanel from '@/components/LeftPanel';
+import TopNavigation from '@/components/TopNavigation';
 
 export default function ProjectsPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Projects');
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -91,29 +93,15 @@ export default function ProjectsPage() {
       {/* MAIN CONTENT */}
       <div className={`flex-1 flex flex-col h-full overflow-hidden relative md:ml-[88px] ${isSidebarExpanded ? 'lg:ml-[260px]' : 'lg:ml-[88px]'} transition-all duration-300`}>
         
-        {/* TOP NAVIGATION BAR (Mobile Only) */}
-        <div className={`md:hidden fixed top-0 left-0 right-0 z-30 backdrop-blur-sm border-b px-4 py-4 flex items-center justify-between shadow-sm gap-4 ${
-          isDarkMode ? 'bg-black/90 border-[#E70008]/20' : 'bg-white/90 border-gray-100'
-        }`}>
-           <Link href="/feed" className="flex-shrink-0 flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-[#E70008] flex items-center justify-center shadow-[0_0_10px_rgba(231,0,8,0.4)]">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-white">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-           </Link>
-           
-           <div className={`flex-1 text-center font-bold text-lg ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>Projects</div>
-
-           <button 
-              className={`flex-shrink-0 p-2 rounded-full transition-colors ${
-                isDarkMode ? 'hover:bg-[#E70008]/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'
-              }`}
-              onClick={() => setIsMobileMenuOpen(true)}
-           >
-              <Menu size={24} />
-           </button>
-        </div>
+        {/* TOP NAVIGATION BAR */}
+        <TopNavigation 
+          title="Projects" 
+          onMobileMenuOpen={() => setIsMobileMenuOpen(true)}
+          searchPlaceholder="Search projects, stacks, categories..."
+          searchValue={searchQuery}
+          onSearchChange={(e) => setSearchQuery(e.target.value)}
+          isDarkMode={isDarkMode}
+        />
 
         {/* MOBILE DRAWER */}
         {isMobileMenuOpen && (
@@ -155,6 +143,7 @@ export default function ProjectsPage() {
                   closeMenu={() => setIsMobileMenuOpen(false)} 
                   isMobile={true}
                   isDarkMode={isDarkMode}
+                  toggleTheme={toggleTheme}
                 />
               </div>
             </div>
@@ -162,7 +151,7 @@ export default function ProjectsPage() {
         )}
 
         {/* SCROLLABLE CONTENT AREA */}
-        <div className="flex-1 overflow-y-auto pt-20 md:pt-0">
+        <div className="flex-1 overflow-y-auto pt-[65px] md:pt-[80px]">
           <div className="max-w-6xl mx-auto p-4 md:p-8">
             
             {/* HEADER */}

@@ -16,7 +16,8 @@ import {
   BookOpen,
   Bot,
   Sun,
-  Moon
+  Moon,
+  Coins
 } from 'lucide-react';
 import { NavItem } from './NavItem';
 
@@ -61,40 +62,48 @@ export default function LeftPanel({
             isDarkMode={isDarkMode}
             onClick={() => handleNavClick('Dashboard')} 
           />
-          <NavItem 
-            icon={<Users size={20} />} 
-            label="Builders" 
-            active={activeTab === 'Buiilders'} 
-            isMobile={isMobile} 
-            isDarkMode={isDarkMode}
-            onClick={() => handleNavClick('Builders')} 
-          />
-          <NavItem 
-            icon={<FolderKanban size={20} />} 
-            label="Projects" 
-            badge="3" 
-            active={activeTab === 'Projects'} 
-            isMobile={isMobile} 
-            isDarkMode={isDarkMode}
-            onClick={() => handleNavClick('Projects')} 
-          />
-          <NavItem 
-            icon={<MessageSquare size={20} />} 
-            label="Messages" 
-            badge="12" 
-            active={activeTab === 'Messages'} 
-            isMobile={isMobile} 
-            isDarkMode={isDarkMode}
-            onClick={() => handleNavClick('Messages')} 
-          />
-          <NavItem 
-            icon={<Briefcase size={20} />} 
-            label="Opportunities" 
-            active={activeTab === 'Opportunities'} 
-            isMobile={isMobile} 
-            isDarkMode={isDarkMode}
-            onClick={() => handleNavClick('Opportunities')} 
-          />
+          <Link href="/builders" className="block">
+            <NavItem 
+              icon={<Users size={20} />} 
+              label="Builders" 
+              active={activeTab === 'Buiilders'} 
+              isMobile={isMobile} 
+              isDarkMode={isDarkMode}
+              onClick={() => handleNavClick('Builders')} 
+            />
+          </Link>
+          <Link href="/projects" className="block">
+            <NavItem 
+              icon={<FolderKanban size={20} />} 
+              label="Projects" 
+              badge="3" 
+              active={activeTab === 'Projects'} 
+              isMobile={isMobile} 
+              isDarkMode={isDarkMode}
+              onClick={() => handleNavClick('Projects')} 
+            />
+          </Link>
+          <Link href="/messages" className="block">
+            <NavItem 
+              icon={<MessageSquare size={20} />} 
+              label="Messages" 
+              badge="12" 
+              active={activeTab === 'Messages'} 
+              isMobile={isMobile} 
+              isDarkMode={isDarkMode}
+              onClick={() => handleNavClick('Messages')} 
+            />
+          </Link>
+          <Link href="/jobs" className="block">
+            <NavItem 
+              icon={<Briefcase size={20} />} 
+              label="Opportunities" 
+              active={activeTab === 'Opportunities'} 
+              isMobile={isMobile} 
+              isDarkMode={isDarkMode}
+              onClick={() => handleNavClick('Opportunities')} 
+            />
+          </Link>
           <NavItem 
             icon={<Bot size={20} />} 
             label="Magna AI" 
@@ -103,6 +112,16 @@ export default function LeftPanel({
             isDarkMode={isDarkMode}
             onClick={() => handleNavClick('Magna AI')} 
           />
+          <Link href="/magna-coin" className="block">
+            <NavItem 
+              icon={<Coins size={20} />} 
+              label="Magna Coin" 
+              active={activeTab === 'Magna Coin'} 
+              isMobile={isMobile} 
+              isDarkMode={isDarkMode}
+              onClick={() => handleNavClick('Magna Coin')} 
+            />
+          </Link>
         </nav>
 
         {/* Groups */}
@@ -269,13 +288,15 @@ export default function LeftPanel({
                 </div>
               </div>
             </Link>
-            <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Projects' ? 'bg-[#E50914] text-white shadow-md' : isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => handleNavClick('Projects')}>
+            <Link href="/projects">
+              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Projects' ? 'bg-[#E50914] text-white shadow-md' : isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'}`}>
                 <div className="flex items-center gap-3">
                   <FolderKanban size={20} />
                   <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Projects</span>
                 </div>
                 <span className={`hidden w-5 h-5 bg-[#F4A261] text-white text-[10px] font-bold rounded-full items-center justify-center ${isSidebarExpanded ? 'lg:flex' : ''}`}>3</span>
-            </div>
+              </div>
+            </Link>
             <Link href="/messages">
               <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Messages' ? 'bg-[#E50914] text-white shadow-md' : isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'}`}>
                 <div className="flex items-center gap-3">
@@ -285,17 +306,27 @@ export default function LeftPanel({
                 <span className={`hidden w-5 h-5 bg-[#E50914] text-white text-[10px] font-bold rounded-full items-center justify-center ${isSidebarExpanded ? 'lg:flex' : ''}`}>12</span>
               </div>
             </Link>
-            <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Opportunities' ? 'bg-[#E50914] text-white shadow-md' : isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => handleNavClick('Opportunities')}>
+            <Link href="/jobs">
+              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Opportunities' ? 'bg-[#E50914] text-white shadow-md' : isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'}`}>
                 <div className="flex items-center gap-3">
                   <Briefcase size={20} />
                   <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Opportunities</span>
                 </div>
-            </div>
+              </div>
+            </Link>
             <Link href="/magna-ai">
               <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Magna AI' ? 'bg-[#E50914] text-white shadow-md' : isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => handleNavClick('Magna AI')}>
                 <div className="flex items-center gap-3">
                   <Bot size={20} />
                   <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Magna AI</span>
+                </div>
+              </div>
+            </Link>
+            <Link href="/magna-coin">
+              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Magna Coin' ? 'bg-[#E50914] text-white shadow-md' : isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => handleNavClick('Magna Coin')}>
+                <div className="flex items-center gap-3">
+                  <Coins size={20} />
+                  <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Magna Coin</span>
                 </div>
               </div>
             </Link>

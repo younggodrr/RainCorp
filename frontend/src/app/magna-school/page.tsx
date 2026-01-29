@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   LayoutGrid, Users, MessageSquare, Settings, 
@@ -9,6 +9,7 @@ import {
   Bell, LayoutDashboard, Menu, X, GraduationCap, BadgeCheck
 } from 'lucide-react';
 import TopNavigation from '@/components/TopNavigation';
+import LeftPanel from '@/components/LeftPanel';
 
 // Mock Data for Courses
 const COURSES = [
@@ -110,6 +111,22 @@ export default function MagnaSchoolPage() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('Magna School');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    localStorage.setItem('theme', newMode ? 'dark' : 'light');
+    window.dispatchEvent(new Event('themeChanged'));
+  };
 
   const filteredCourses = COURSES.filter(course => {
     const matchesCategory = selectedCategory === "All" || course.category === selectedCategory;
@@ -119,61 +136,34 @@ export default function MagnaSchoolPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#FDF8F5] font-sans text-[#444444] flex overflow-hidden">
+    <div className={`h-screen font-sans flex overflow-hidden transition-colors duration-300 ${isDarkMode ? 'bg-black text-[#F9E4AD]' : 'bg-[#FDF8F5] text-[#444444]'}`}>
       
-      {/* DESKTOP SIDEBAR */}
-      <div className="w-[80px] bg-white border-r border-gray-100 flex-col items-center py-6 gap-8 z-20 hidden md:flex">
-        <Link href="/feed" className="w-10 h-10 rounded-lg bg-[#E50914] flex items-center justify-center text-white mb-4 shadow-md hover:bg-[#cc0812] transition-colors">
-           <span className="font-bold text-xl">M</span>
-        </Link>
-
-        <div className="flex flex-col gap-6 w-full items-center">
-          <Link href="/feed" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-            <LayoutGrid size={24} />
-            <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Feed</span>
-          </Link>
-          
-          <Link href="/builders" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-            <Users size={24} />
-             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Builders</span>
-          </Link>
-
-          <Link href="/messages" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-            <MessageSquare size={24} />
-             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Messages</span>
-          </Link>
-          
-          <Link href="/notifications" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-            <Bell size={24} />
-             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Notifications</span>
-          </Link>
-        </div>
-
-        <div className="mt-auto flex flex-col gap-6 w-full items-center">
-          <Link href="/settings" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-            <Settings size={24} />
-             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Settings</span>
-          </Link>
-          
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm cursor-pointer hover:shadow-md transition-all">
-            JD
-          </div>
-        </div>
+      {/* LEFT PANEL (Desktop) */}
+      <div className={`w-[240px] border-r hidden md:block flex-shrink-0 ${isDarkMode ? 'bg-[#111] border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
+         <div className="p-6 h-full overflow-y-auto">
+            <LeftPanel 
+               activeTab={activeTab} 
+               setActiveTab={setActiveTab}
+               isDarkMode={isDarkMode}
+               toggleTheme={toggleTheme}
+            />
+         </div>
       </div>
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col h-screen overflow-y-auto">
+      <div className="flex-1 flex flex-col h-full overflow-hidden relative">
         
         {/* HEADER */}
         <TopNavigation 
           title="Magna School" 
           onMobileMenuOpen={() => setIsMobileMenuOpen(true)}
-          className="md:left-[80px] lg:left-[80px]"
+          className="md:!left-0 lg:!left-0"
           searchPlaceholder="Search courses, mentors, skills..."
+          isDarkMode={isDarkMode}
         />
 
         {/* CONTENT */}
-        <div className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full pb-24 md:pb-8">
+        <div className="flex-1 p-4 md:p-8 max-w-7xl mx-auto w-full pb-24 md:pb-8 overflow-y-auto pt-[65px] md:pt-[71px]">
           
           {/* Categories */}
           <div className="flex gap-2 overflow-x-auto pb-6 no-scrollbar">
@@ -184,7 +174,9 @@ export default function MagnaSchoolPage() {
                 className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
                   selectedCategory === category
                     ? 'bg-[#E50914] text-white shadow-md'
-                    : 'bg-white text-gray-600 border border-gray-100 hover:bg-gray-50'
+                    : isDarkMode 
+                      ? 'bg-[#222] text-gray-300 border border-gray-700 hover:bg-[#333]' 
+                      : 'bg-white text-gray-600 border border-gray-100 hover:bg-gray-50'
                 }`}
               >
                 {category}
@@ -196,10 +188,12 @@ export default function MagnaSchoolPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredCourses.map(course => (
               <Link href={`/magna-school/${course.id}`} key={course.id} className="block h-full">
-              <div className="bg-white rounded-2xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all group cursor-pointer flex flex-col h-full">
+              <div className={`rounded-2xl border overflow-hidden hover:shadow-lg transition-all group cursor-pointer flex flex-col h-full ${
+                isDarkMode ? 'bg-[#111] border-[#E70008]/20' : 'bg-white border-gray-100'
+              }`}>
                 {/* Thumbnail */}
-                <div className="aspect-video bg-gray-100 relative overflow-hidden">
-                  <div className="absolute inset-0 flex items-center justify-center text-gray-300 bg-gray-200">
+                <div className={`aspect-video relative overflow-hidden ${isDarkMode ? 'bg-[#222]' : 'bg-gray-100'}`}>
+                  <div className={`absolute inset-0 flex items-center justify-center ${isDarkMode ? 'text-gray-600 bg-[#222]' : 'text-gray-300 bg-gray-200'}`}>
                     <Video size={48} />
                   </div>
                   {/* Overlay Badges */}
@@ -215,7 +209,7 @@ export default function MagnaSchoolPage() {
                 {/* Content */}
                 <div className="p-5 flex-1 flex flex-col">
                   <div className="flex items-start justify-between gap-2 mb-2">
-                    <h3 className="font-bold text-gray-900 line-clamp-2 leading-tight group-hover:text-[#E50914] transition-colors">
+                    <h3 className={`font-bold line-clamp-2 leading-tight group-hover:text-[#E50914] transition-colors ${isDarkMode ? 'text-[#F9E4AD]' : 'text-gray-900'}`}>
                       {course.title}
                     </h3>
                   </div>
@@ -239,9 +233,9 @@ export default function MagnaSchoolPage() {
                     </div>
                   </div>
 
-                  <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between">
+                  <div className={`mt-auto pt-4 border-t flex items-center justify-between ${isDarkMode ? 'border-[#E70008]/20' : 'border-gray-50'}`}>
                     <div className="flex flex-col">
-                      <span className={`text-lg font-bold ${course.price === 0 ? 'text-[#2ECC71]' : 'text-black'}`}>
+                      <span className={`text-lg font-bold ${course.price === 0 ? 'text-[#2ECC71]' : isDarkMode ? 'text-white' : 'text-black'}`}>
                         {course.price === 0 ? 'Free' : `KES ${course.price.toLocaleString()}`}
                       </span>
                       {course.certificate && (
@@ -251,7 +245,7 @@ export default function MagnaSchoolPage() {
                         </div>
                       )}
                     </div>
-                    <button className="px-4 py-2 rounded-lg bg-gray-900 text-white text-xs font-bold hover:bg-[#E50914] transition-colors shadow-sm">
+                    <button className="px-4 py-2 rounded-lg bg-[#E50914] text-white text-xs font-bold hover:bg-[#cc0812] transition-colors shadow-sm">
                       Enroll
                     </button>
                   </div>
@@ -270,18 +264,16 @@ export default function MagnaSchoolPage() {
 
         </div>
 
-        {/* MOBILE DRAWER (Left Sidebar Content) */}
+        {/* MOBILE DRAWER */}
         {isMobileMenuOpen && (
           <div className="fixed inset-0 z-50 md:hidden">
-            {/* Backdrop */}
             <div 
               className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
               onClick={() => setIsMobileMenuOpen(false)}
             ></div>
             
-            {/* Drawer Content */}
-            <div className="absolute top-0 left-0 w-full h-full bg-white shadow-2xl flex flex-col overflow-y-auto animate-slide-in-left">
-              <div className="p-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+            <div className={`absolute top-0 left-0 w-full h-full shadow-2xl flex flex-col overflow-y-auto animate-slide-in-left ${isDarkMode ? 'bg-black border-r border-[#E70008]/20' : 'bg-white'}`}>
+              <div className={`p-4 border-b flex items-center justify-between sticky top-0 z-10 ${isDarkMode ? 'bg-black border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
                 <Link href="/" className="flex items-center gap-2">
                    <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center shadow-sm">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#E50914]">
@@ -295,33 +287,21 @@ export default function MagnaSchoolPage() {
                 </Link>
                 <button 
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2 rounded-full hover:bg-gray-100 text-gray-500"
+                  className={`p-2 rounded-full hover:bg-gray-100 ${isDarkMode ? 'text-gray-400 hover:bg-[#E70008]/10' : 'text-gray-500 hover:bg-gray-100'}`}
                 >
                   <X size={24} />
                 </button>
               </div>
 
-              {/* Drawer Scrollable Content */}
               <div className="p-4 space-y-6 pb-20">
-                 {/* Navigation Links */}
-                 <div className="space-y-1">
-                    <Link href="/feed" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium">
-                      <LayoutDashboard size={20} />
-                      Dashboard
-                    </Link>
-                    <Link href="/builders" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium">
-                      <Users size={20} />
-                      Find Builders
-                    </Link>
-                    <Link href="/magna-school" className="flex items-center gap-3 px-4 py-3 bg-[#E50914]/5 text-[#E50914] rounded-xl font-medium">
-                      <GraduationCap size={20} />
-                      Magna School
-                    </Link>
-                    <Link href="/get-verification" className="flex items-center gap-3 px-4 py-3 text-gray-600 hover:bg-gray-50 rounded-xl font-medium">
-                      <BadgeCheck size={20} />
-                      Get Verified
-                    </Link>
-                 </div>
+                <LeftPanel 
+                  activeTab={activeTab} 
+                  setActiveTab={setActiveTab} 
+                  closeMenu={() => setIsMobileMenuOpen(false)} 
+                  isMobile={true}
+                  isDarkMode={isDarkMode}
+                  toggleTheme={toggleTheme}
+                />
               </div>
             </div>
           </div>

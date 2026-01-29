@@ -41,7 +41,7 @@ export default function BottomNavigation() {
 
   const navItems = [
     {
-      label: 'Dashboard',
+      label: 'Feed',
       href: '/feed',
       icon: LayoutDashboard,
     },
@@ -71,10 +71,10 @@ export default function BottomNavigation() {
           <Link 
             key={item.href} 
             href={item.href} 
-            className={`flex flex-col items-center gap-1 transition-colors ${isDarkMode ? (isActive ? 'text-[#E50914]' : 'text-gray-400 hover:text-white') : 'text-black'}`}
+            className={`flex flex-col items-center gap-1 transition-colors ${isDarkMode ? (isActive ? 'text-[#E50914]' : 'text-[#F4A261] hover:text-white') : 'text-black'}`}
           >
-            <item.icon size={24} color={isDarkMode ? (isActive ? '#E50914' : '#9CA3AF') : 'black'} strokeWidth={isActive ? 2.5 : 2} />
-            <span className={`text-[10px] font-medium ${isActive ? 'font-bold' : ''} ${isDarkMode ? (isActive ? 'text-[#E50914]' : 'text-gray-400') : 'text-black'}`}>
+            <item.icon size={24} color={isDarkMode ? (isActive ? '#E50914' : '#F4A261') : 'black'} strokeWidth={isActive ? 2.5 : 2} />
+            <span className={`text-[10px] font-medium ${isActive ? 'font-bold' : ''} ${isDarkMode ? (isActive ? 'text-[#E50914]' : 'text-[#F4A261]') : 'text-black'}`}>
               {item.label}
             </span>
           </Link>

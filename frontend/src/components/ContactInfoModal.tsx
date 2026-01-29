@@ -28,12 +28,14 @@ interface ContactInfoModalProps {
   isOpen: boolean;
   onClose: () => void;
   contact: ContactInfo;
+  isDarkMode?: boolean;
 }
 
 export default function ContactInfoModal({ 
   isOpen, 
   onClose, 
-  contact
+  contact,
+  isDarkMode = false
 }: ContactInfoModalProps) {
 
   if (!isOpen) return null;
@@ -47,14 +49,14 @@ export default function ContactInfoModal({
       />
 
       {/* Modal Content */}
-      <div className="bg-white md:rounded-3xl shadow-none md:shadow-2xl w-full md:max-w-md h-full md:h-auto md:max-h-[85vh] overflow-hidden relative flex flex-col animate-in fade-in zoom-in duration-200">
+      <div className={`md:rounded-3xl shadow-none md:shadow-2xl w-full md:max-w-md h-full md:h-auto md:max-h-[85vh] overflow-hidden relative flex flex-col animate-in fade-in zoom-in duration-200 ${isDarkMode ? 'bg-[#111] border border-[#E70008]/20' : 'bg-white'}`}>
         
         {/* Header */}
-        <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white z-10">
-          <h2 className="font-bold text-lg text-black">Contact Info</h2>
+        <div className={`p-4 border-b flex items-center justify-between z-10 ${isDarkMode ? 'bg-[#111] border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
+          <h2 className={`font-bold text-lg ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>Contact Info</h2>
           <button 
             onClick={onClose}
-            className="p-2 rounded-full hover:bg-gray-100 text-gray-400 transition-colors"
+            className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-gray-400' : 'hover:bg-gray-100 text-gray-400'}`}
           >
             <X size={20} />
           </button>
@@ -75,7 +77,7 @@ export default function ContactInfoModal({
               </div>
               <div className="flex-1 min-w-0 pt-1">
                 <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-black text-xl truncate">{contact.name}</h3>
+                  <h3 className={`font-bold text-xl truncate ${isDarkMode ? 'text-white' : 'text-black'}`}>{contact.name}</h3>
                 </div>
                 <div className="flex items-center gap-1 text-gray-500 text-sm mt-0.5">
                   <Mail size={12} />
@@ -90,7 +92,7 @@ export default function ContactInfoModal({
 
             {/* Bio */}
             <div>
-              <p className="text-sm text-gray-600 leading-relaxed">{contact.bio}</p>
+              <p className={`text-sm leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{contact.bio}</p>
             </div>
 
             {/* Roles */}
@@ -106,16 +108,16 @@ export default function ContactInfoModal({
             </div>
 
             {/* Looking For */}
-            <div className="flex flex-col gap-3 p-4 bg-gray-50 rounded-xl">
+            <div className={`flex flex-col gap-3 p-4 rounded-xl ${isDarkMode ? 'bg-[#222]' : 'bg-gray-50'}`}>
               <div className="flex items-center justify-between gap-2">
-                 <div className="flex items-center gap-2 text-xs font-bold text-gray-700">
+                 <div className={`flex items-center gap-2 text-xs font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                    <span className="text-sm">👀</span>
                    <span>Looking for:</span>
                  </div>
               </div>
               <div className="flex flex-wrap gap-1.5">
                 {contact.lookingFor.map((item, idx) => (
-                  <span key={idx} className="px-2 py-0.5 bg-white border border-gray-200 text-gray-600 rounded-md text-[10px] font-medium">
+                  <span key={idx} className={`px-2 py-0.5 border rounded-md text-[10px] font-medium ${isDarkMode ? 'bg-[#333] border-gray-700 text-gray-300' : 'bg-white border-gray-200 text-gray-600'}`}>
                     {item}
                   </span>
                 ))}
@@ -127,7 +129,7 @@ export default function ContactInfoModal({
               <h4 className="text-xs font-bold text-gray-400 uppercase mb-2">Socials</h4>
               <div className="flex items-center gap-4 text-gray-400">
                 <Globe size={20} className="text-[#F4A261] cursor-pointer hover:opacity-80 transition-colors" />
-                <Github size={20} className="text-black cursor-pointer hover:opacity-80 transition-colors" />
+                <Github size={20} className={`cursor-pointer hover:opacity-80 transition-colors ${isDarkMode ? 'text-white' : 'text-black'}`} />
                 <Linkedin size={20} className="text-[#0077b5] cursor-pointer hover:opacity-80 transition-colors" />
                 <MessageCircle size={20} className="text-[#25D366] cursor-pointer hover:opacity-80 transition-colors" />
               </div>

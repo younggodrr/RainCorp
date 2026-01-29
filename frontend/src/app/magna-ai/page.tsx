@@ -665,7 +665,7 @@ export default function MagnaAIPage() {
                   <MagnaNewIcon className="w-8 h-8 text-[#E50914]" />
                   <span className="font-bold">Hi <span className="text-[#E50914]">John</span></span>
                 </h1>
-                <p className="text-2xl md:text-4xl font-medium text-[#F4A261] leading-snug break-words max-w-full">
+                <p className={`text-2xl md:text-4xl font-medium leading-snug break-words max-w-full ${isDarkMode ? 'text-[#F4A261]' : 'text-[#E50914]'}`}>
                   I help you solve technical problems, design systems, write code, and turn ideas into working software — fast.
                 </p>
             </div>
@@ -673,22 +673,22 @@ export default function MagnaAIPage() {
             {/* Desktop Input Area */}
             <div className="hidden md:block w-full">
                <div className={`relative flex items-end rounded-[28px] px-4 py-2 shadow-sm border transition-colors ${isDarkMode ? 'bg-[#111] border-[#333]' : 'bg-[#F0F4F9] border-transparent hover:border-gray-200'}`}>
-                  <button className={`p-2 rounded-full transition-colors mr-2 flex-shrink-0 mb-1 ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-200 text-[#F4A261]'}`}>
+                  <button className={`p-2 rounded-full transition-colors mr-2 flex-shrink-0 mb-1 ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-200 text-[#E50914]'}`}>
                      <Plus size={24} />
                   </button>
                   <textarea 
                     ref={desktopInputRef}
                     placeholder="Ask Magna AI" 
-                    className={`flex-1 bg-transparent border-none focus:outline-none text-base min-w-0 resize-none py-3 overflow-hidden ${isDarkMode ? 'text-gray-200 placeholder-[#F4A261]' : 'text-gray-700 placeholder-[#F4A261]'}`}
+                    className={`flex-1 bg-transparent border-none focus:outline-none text-base min-w-0 resize-none py-3 overflow-hidden ${isDarkMode ? 'text-gray-200 placeholder-[#F4A261]' : 'text-gray-700 placeholder-[#E50914]'}`}
                     rows={1}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                   />
                   <div className="flex items-center gap-2 flex-shrink-0 mb-1">
-                     <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-200 text-[#F4A261]'}`}>
+                     <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-200 text-[#E50914]'}`}>
                         <ImageIcon size={20} />
                      </button>
-                     <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-200 text-[#F4A261]'}`}>
+                     <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-200 text-[#E50914]'}`}>
                         <Mic size={20} />
                      </button>
                      <button 
@@ -711,7 +711,7 @@ export default function MagnaAIPage() {
                       onClick={() => handleServiceClick('Job Opportunities')}
                       className={`flex items-center gap-3 px-5 py-2 rounded-full transition-colors w-fit md:w-auto min-h-[48px] shadow-sm bg-[#E50914] hover:bg-[#cc0812]`}
                     >
-                      <div className={`flex items-center justify-center flex-shrink-0 text-white`}>
+                      <div className={`w-8 h-8 flex items-center justify-center flex-shrink-0 ${isDarkMode ? 'rounded-full bg-black text-[#F4A261]' : 'text-black'}`}>
                         <Briefcase size={18} />
                       </div>
                       <span className={`font-medium text-sm text-black`}>Job Opportunities</span>
@@ -724,7 +724,7 @@ export default function MagnaAIPage() {
                       onClick={() => handleServiceClick('Search Builders & Collabs')}
                       className={`flex items-center gap-3 px-5 py-2 rounded-full transition-colors w-fit md:w-auto min-h-[48px] shadow-sm bg-[#E50914] hover:bg-[#cc0812]`}
                     >
-                      <div className={`flex items-center justify-center flex-shrink-0 text-white`}>
+                      <div className={`w-8 h-8 flex items-center justify-center flex-shrink-0 ${isDarkMode ? 'rounded-full bg-black text-[#F4A261]' : 'text-black'}`}>
                         <Users size={18} />
                       </div>
                       <span className={`font-medium text-sm text-black`}>Search Builders & Collabs</span>
@@ -737,7 +737,7 @@ export default function MagnaAIPage() {
                       onClick={() => handleServiceClick('Debug Code')}
                       className={`flex items-center gap-3 px-5 py-2 rounded-full transition-colors w-fit md:w-auto min-h-[48px] shadow-sm bg-[#E50914] hover:bg-[#cc0812]`}
                     >
-                      <div className={`flex items-center justify-center flex-shrink-0 text-white`}>
+                      <div className={`w-8 h-8 flex items-center justify-center flex-shrink-0 ${isDarkMode ? 'rounded-full bg-black text-[#F4A261]' : 'text-black'}`}>
                         <Bug size={18} />
                       </div>
                       <span className={`font-medium text-sm text-black`}>Debug Code</span>
@@ -752,13 +752,13 @@ export default function MagnaAIPage() {
             <div className="hidden md:block absolute bottom-6 left-0 right-0 px-8 z-20">
               <div className="max-w-4xl mx-auto w-full">
                 <div className={`relative flex items-end rounded-[28px] px-4 py-2 shadow-lg border transition-colors ${isDarkMode ? 'bg-[#111] border-[#333]' : 'bg-white border-gray-100'}`}>
-                  <button className={`p-2 rounded-full transition-colors mr-2 flex-shrink-0 mb-1 ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-100 text-[#F4A261]'}`}>
+                  <button className={`p-2 rounded-full transition-colors mr-2 flex-shrink-0 mb-1 ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-100 text-[#E50914]'}`}>
                      <Plus size={24} />
                   </button>
                   <textarea 
                   ref={desktopInputRef}
                   placeholder="Ask Magna AI" 
-                  className={`flex-1 bg-transparent border-none focus:outline-none text-base min-w-0 resize-none py-3 overflow-hidden ${isDarkMode ? 'text-gray-200 placeholder-[#F4A261]' : 'text-gray-700 placeholder-[#F4A261]'}`}
+                  className={`flex-1 bg-transparent border-none focus:outline-none text-base min-w-0 resize-none py-3 overflow-hidden ${isDarkMode ? 'text-gray-200 placeholder-[#F4A261]' : 'text-gray-700 placeholder-[#E50914]'}`}
                   rows={1}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -770,10 +770,10 @@ export default function MagnaAIPage() {
                     }}
                   />
                   <div className="flex items-center gap-2 flex-shrink-0 mb-1">
-                     <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-100 text-[#F4A261]'}`}>
+                     <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-100 text-[#E50914]'}`}>
                         <ImageIcon size={20} />
                      </button>
-                     <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-100 text-[#F4A261]'}`}>
+                     <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-100 text-[#E50914]'}`}>
                         <Mic size={20} />
                      </button>
                      <button 
@@ -795,13 +795,13 @@ export default function MagnaAIPage() {
           <div className={`fixed bottom-[80px] left-0 right-0 p-4 bg-transparent pb-0 md:hidden ${isHistoryOpen ? 'z-0' : 'z-[60]'}`}>
             <div className="max-w-4xl mx-auto w-full">
                <div className={`relative flex items-end rounded-[28px] px-4 py-2 shadow-sm transition-colors ${isDarkMode ? 'bg-[#111] border border-[#333]' : 'bg-[#F0F4F9]'}`}>
-                  <button className={`p-2 rounded-full transition-colors mr-2 flex-shrink-0 mb-1 ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-200 text-[#F4A261]'}`}>
+                  <button className={`p-2 rounded-full transition-colors mr-2 flex-shrink-0 mb-1 ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-200 text-[#E50914]'}`}>
                      <Plus size={24} />
                   </button>
                   <textarea 
                     ref={mobileInputRef}
                     placeholder="Ask Magna AI" 
-                    className={`flex-1 bg-transparent border-none focus:outline-none text-base min-w-0 resize-none py-3 overflow-hidden ${isDarkMode ? 'text-gray-200 placeholder-[#F4A261]' : 'text-gray-700 placeholder-[#F4A261]'}`}
+                    className={`flex-1 bg-transparent border-none focus:outline-none text-base min-w-0 resize-none py-3 overflow-hidden ${isDarkMode ? 'text-gray-200 placeholder-[#F4A261]' : 'text-gray-700 placeholder-[#E50914]'}`}
                     rows={1}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -813,10 +813,10 @@ export default function MagnaAIPage() {
                     }}
                   />
                   <div className="flex items-center gap-2 flex-shrink-0 mb-1">
-                     <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-200 text-[#F4A261]'}`}>
+                     <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-200 text-[#E50914]'}`}>
                         <ImageIcon size={20} />
                      </button>
-                     <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-200 text-[#F4A261]'}`}>
+                     <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-[#F4A261]' : 'hover:bg-gray-200 text-[#E50914]'}`}>
                         <Mic size={20} />
                      </button>
                      <button 

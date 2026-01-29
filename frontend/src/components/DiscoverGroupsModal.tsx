@@ -28,6 +28,7 @@ interface DiscoverGroupsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onJoinGroup: (groupId: string, type: 'request' | 'paid', cost?: number) => void;
+  isDarkMode?: boolean;
 }
 
 // --- MOCK GROUPS DATA ---
@@ -99,7 +100,8 @@ const MOCK_GROUPS: Group[] = [
 export default function DiscoverGroupsModal({ 
   isOpen, 
   onClose, 
-  onJoinGroup
+  onJoinGroup,
+  isDarkMode = false
 }: DiscoverGroupsModalProps) {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedGroup, setSelectedGroup] = useState<Group | null>(null);
@@ -138,16 +140,16 @@ export default function DiscoverGroupsModal({
         />
 
         {/* Modal Content */}
-        <div className="bg-white md:rounded-3xl shadow-none md:shadow-2xl w-full md:max-w-md h-full md:h-auto md:max-h-[85vh] overflow-hidden relative flex flex-col animate-in fade-in zoom-in duration-200">
-          
-          {/* Header */}
-          <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white z-10">
+      <div className={`md:rounded-3xl shadow-none md:shadow-2xl w-full md:max-w-md h-full md:h-auto md:max-h-[85vh] overflow-hidden relative flex flex-col animate-in fade-in zoom-in duration-200 ${isDarkMode ? 'bg-[#111] border border-[#E70008]/20' : 'bg-white'}`}>
+        
+        {/* Header */}
+          <div className={`p-4 border-b flex items-center justify-between z-10 ${isDarkMode ? 'bg-[#111] border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
             <div className="flex items-center gap-3">
-              <h2 className="font-bold text-lg text-black">Discover Groups</h2>
+              <h2 className={`font-bold text-lg ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>Discover Groups</h2>
             </div>
             <button 
               onClick={onClose}
-              className="p-2 rounded-full hover:bg-gray-100 text-gray-400 transition-colors"
+              className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-gray-400' : 'hover:bg-gray-100 text-gray-400'}`}
             >
               <X size={20} />
             </button>
@@ -164,7 +166,7 @@ export default function DiscoverGroupsModal({
                   placeholder="Search groups..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#E50914] text-sm"
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#E50914] text-sm ${isDarkMode ? 'bg-[#222] border border-gray-700 text-white placeholder-gray-500' : 'bg-gray-50 border border-gray-100 text-black'}`}
                 />
               </div>
             </div>
@@ -181,7 +183,7 @@ export default function DiscoverGroupsModal({
                   <div 
                     key={group.id}
                     onClick={() => handleGroupClick(group)}
-                    className="p-4 rounded-xl border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all bg-white cursor-pointer group"
+                    className={`p-4 rounded-xl border transition-all cursor-pointer group ${isDarkMode ? 'bg-[#1a1a1a] border-gray-800 hover:border-[#E50914]/40 hover:bg-[#222]' : 'bg-white border-gray-100 hover:border-gray-200 hover:shadow-sm'}`}
                   >
                     <div className="flex items-start gap-4">
                       <div className={`w-12 h-12 rounded-xl ${group.avatarColor} flex items-center justify-center font-bold text-lg flex-shrink-0`}>
@@ -190,16 +192,16 @@ export default function DiscoverGroupsModal({
                       
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-1">
-                          <h3 className="font-bold text-black truncate pr-2 group-hover:text-[#E50914] transition-colors">{group.name}</h3>
+                          <h3 className={`font-bold truncate pr-2 group-hover:text-[#E50914] transition-colors ${isDarkMode ? 'text-white' : 'text-black'}`}>{group.name}</h3>
                           <span className="text-xs text-gray-400 font-medium whitespace-nowrap flex items-center gap-1">
                             <Users size={12} />
                             {group.memberCount.toLocaleString()}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-500 line-clamp-2 mb-3">{group.description}</p>
+                        <p className={`text-xs line-clamp-2 mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{group.description}</p>
                         
                         <div className="flex items-center justify-between mt-2">
-                          <span className="text-[10px] text-gray-400 bg-gray-50 px-2 py-1 rounded-md border border-gray-100 flex items-center gap-1">
+                          <span className={`text-[10px] text-gray-400 px-2 py-1 rounded-md border flex items-center gap-1 ${isDarkMode ? 'bg-[#222] border-gray-700' : 'bg-gray-50 border-gray-100'}`}>
                              <Info size={10} />
                              Tap for details
                           </span>
@@ -243,6 +245,7 @@ export default function DiscoverGroupsModal({
         onClose={() => setSelectedGroup(null)}
         group={selectedGroup as any}
         onJoin={handleJoinFromDetails}
+        isDarkMode={isDarkMode}
       />
     </>
   );

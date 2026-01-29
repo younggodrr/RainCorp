@@ -21,6 +21,7 @@ interface CreateGroupModalProps {
   onClose: () => void;
   onCreateGroup: (name: string, members: string[], avatar?: File) => void;
   existingFriends?: Friend[]; // In a real app, this would come from a prop or context
+  isDarkMode?: boolean;
 }
 
 // --- MOCK FRIENDS DATA (If not provided) ---
@@ -39,7 +40,8 @@ export default function CreateGroupModal({
   isOpen, 
   onClose, 
   onCreateGroup,
-  existingFriends = MOCK_FRIENDS
+  existingFriends = MOCK_FRIENDS,
+  isDarkMode = false
 }: CreateGroupModalProps) {
   // Steps: 'select-members' -> 'group-details'
   const [step, setStep] = useState<'select-members' | 'group-details'>('select-members');
@@ -121,26 +123,26 @@ export default function CreateGroupModal({
       />
 
       {/* Modal Content */}
-      <div className="bg-white md:rounded-3xl shadow-none md:shadow-2xl w-full md:max-w-md h-full md:h-auto md:max-h-[85vh] overflow-hidden relative flex flex-col animate-in fade-in zoom-in duration-200">
+      <div className={`md:rounded-3xl shadow-none md:shadow-2xl w-full md:max-w-md h-full md:h-auto md:max-h-[85vh] overflow-hidden relative flex flex-col animate-in fade-in zoom-in duration-200 ${isDarkMode ? 'bg-[#111] border border-[#E70008]/20' : 'bg-white'}`}>
         
         {/* Header */}
-        <div className="p-4 border-b border-gray-100 flex items-center justify-between bg-white z-10">
+        <div className={`p-4 border-b flex items-center justify-between z-10 ${isDarkMode ? 'bg-[#111] border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
           <div className="flex items-center gap-3">
             {step === 'group-details' && (
               <button 
                 onClick={handleBackStep}
-                className="p-2 -ml-2 rounded-full hover:bg-gray-100 text-gray-500 transition-colors"
+                className={`p-2 -ml-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-gray-400' : 'hover:bg-gray-100 text-gray-500'}`}
               >
                 <ArrowLeft size={20} />
               </button>
             )}
-            <h2 className="font-bold text-lg text-black">
+            <h2 className={`font-bold text-lg ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>
               {step === 'select-members' ? 'New Group' : 'Group Details'}
             </h2>
           </div>
           <button 
             onClick={handleClose}
-            className="p-2 rounded-full hover:bg-gray-100 text-gray-400 transition-colors"
+            className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-gray-400' : 'hover:bg-gray-100 text-gray-400'}`}
           >
             <X size={20} />
           </button>
@@ -152,13 +154,13 @@ export default function CreateGroupModal({
             {/* Search Bar */}
             <div className="p-4 pb-2">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <Search className={`absolute left-3 top-1/2 -translate-y-1/2 ${isDarkMode ? 'text-[#F4A261]' : 'text-gray-400'}`} size={18} />
                 <input 
                   type="text" 
                   placeholder="Search friends..." 
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#E50914] text-sm"
+                  className={`w-full pl-10 pr-4 py-2.5 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#E50914] text-sm ${isDarkMode ? 'bg-black border border-[#F4A261]/30 text-[#F4A261] placeholder-[#F4A261]/50' : 'bg-gray-50 border border-gray-100 text-black'}`}
                 />
               </div>
             </div>
@@ -170,7 +172,7 @@ export default function CreateGroupModal({
                   const friend = existingFriends.find(f => f.id === id);
                   if (!friend) return null;
                   return (
-                    <div key={id} className="flex items-center gap-1 pl-1 pr-2 py-1 bg-black text-white rounded-full text-xs font-medium whitespace-nowrap animate-in zoom-in duration-200">
+                    <div key={id} className={`flex items-center gap-1 pl-1 pr-2 py-1 rounded-full text-xs font-medium whitespace-nowrap animate-in zoom-in duration-200 ${isDarkMode ? 'bg-black text-[#F4A261] border border-[#F4A261]/40' : 'bg-black text-white'}`}>
                       <div className={`w-5 h-5 rounded-full ${friend.avatarColor} flex items-center justify-center text-[8px] font-bold`}>
                         {friend.initials}
                       </div>
@@ -188,7 +190,7 @@ export default function CreateGroupModal({
             )}
 
             {/* Friends List */}
-            <div className="flex-1 overflow-y-auto p-2">
+            <div className={`flex-1 overflow-y-auto p-2 ${isDarkMode ? 'bg-[#111]' : ''}`}>
               <div className="px-2 pb-2 text-xs font-bold text-gray-400 uppercase tracking-wider">Suggested</div>
               {filteredFriends.map(friend => {
                 const isSelected = selectedMembers.includes(friend.id);
@@ -197,7 +199,9 @@ export default function CreateGroupModal({
                     key={friend.id}
                     onClick={() => handleToggleMember(friend.id)}
                     className={`flex items-center justify-between p-3 rounded-xl cursor-pointer transition-all ${
-                      isSelected ? 'bg-[#FDF8F5] border border-[#E50914]/10' : 'hover:bg-gray-50 border border-transparent'
+                      isSelected 
+                        ? isDarkMode ? 'bg-black border border-[#F4A261]' : 'bg-[#FDF8F5] border border-[#E50914]/10' 
+                        : isDarkMode ? 'hover:bg-[#222] border border-transparent' : 'hover:bg-gray-50 border border-transparent'
                     }`}
                   >
                     <div className="flex items-center gap-3">
@@ -210,7 +214,7 @@ export default function CreateGroupModal({
                         )}
                       </div>
                       <div className="flex flex-col">
-                        <span className={`text-sm ${isSelected ? 'font-bold text-black' : 'font-medium text-gray-700'}`}>
+                        <span className={`text-sm ${isSelected ? isDarkMode ? 'font-bold text-[#F4A261]' : 'font-bold text-black' : isDarkMode ? 'font-medium text-gray-300' : 'font-medium text-gray-700'}`}>
                           {friend.name}
                         </span>
                         <span className="text-xs text-gray-400">
@@ -221,8 +225,8 @@ export default function CreateGroupModal({
                     
                     <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
                       isSelected 
-                        ? 'bg-[#E50914] border-[#E50914] text-white' 
-                        : 'border-gray-300'
+                        ? isDarkMode ? 'bg-[#F4A261] border-[#F4A261] text-black' : 'bg-[#E50914] border-[#E50914] text-white' 
+                        : isDarkMode ? 'border-gray-600' : 'border-gray-300'
                     }`}>
                       {isSelected && <Check size={14} strokeWidth={3} />}
                     </div>
@@ -232,7 +236,7 @@ export default function CreateGroupModal({
             </div>
 
             {/* Footer */}
-            <div className="p-4 border-t border-gray-100 bg-white">
+            <div className={`p-4 border-t ${isDarkMode ? 'bg-[#111] border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
               <button 
                 onClick={handleNextStep}
                 disabled={selectedMembers.length === 0}
@@ -253,13 +257,13 @@ export default function CreateGroupModal({
               {/* Avatar Upload */}
               <div className="relative group">
                 <div 
-                  className="w-24 h-24 rounded-3xl bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center cursor-pointer overflow-hidden relative"
+                  className={`w-24 h-24 rounded-3xl border-2 border-dashed flex items-center justify-center cursor-pointer overflow-hidden relative ${isDarkMode ? 'bg-black border-[#F4A261]/30' : 'bg-gray-100 border-gray-300'}`}
                   onClick={() => fileInputRef.current?.click()}
                 >
                   {previewUrl ? (
                     <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="flex flex-col items-center gap-1 text-gray-400">
+                    <div className={`flex flex-col items-center gap-1 ${isDarkMode ? 'text-[#F4A261]' : 'text-gray-400'}`}>
                       <Camera size={24} />
                       <span className="text-[10px] font-medium uppercase">Add Photo</span>
                     </div>
@@ -287,7 +291,7 @@ export default function CreateGroupModal({
                   value={groupName}
                   onChange={(e) => setGroupName(e.target.value)}
                   placeholder="e.g. Project Alpha Team"
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E50914]/20 focus:border-[#E50914] text-sm font-medium transition-all"
+                  className={`w-full px-4 py-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-[#E50914]/20 focus:border-[#E50914] text-sm font-medium transition-all ${isDarkMode ? 'bg-black border-[#F4A261]/30 text-[#F4A261] placeholder-[#F4A261]/50' : 'bg-gray-50 border-gray-200'}`}
                   autoFocus
                 />
               </div>
@@ -300,13 +304,13 @@ export default function CreateGroupModal({
                     Edit
                   </button>
                 </div>
-                <div className="bg-gray-50 rounded-xl p-3 max-h-[150px] overflow-y-auto">
+                <div className={`rounded-xl p-3 max-h-[150px] overflow-y-auto ${isDarkMode ? 'bg-[#222]' : 'bg-gray-50'}`}>
                   <div className="flex flex-wrap gap-2">
                     {selectedMembers.map(id => {
                       const friend = existingFriends.find(f => f.id === id);
                       if (!friend) return null;
                       return (
-                        <div key={id} className="flex items-center gap-1.5 px-2 py-1 bg-white border border-gray-200 rounded-lg text-xs font-medium text-gray-700">
+                        <div key={id} className={`flex items-center gap-1.5 px-2 py-1 border rounded-lg text-xs font-medium ${isDarkMode ? 'bg-black border-[#F4A261]/40 text-[#F4A261]' : 'bg-white border-gray-200 text-gray-700'}`}>
                           <div className={`w-4 h-4 rounded-full ${friend.avatarColor} flex items-center justify-center text-[8px] font-bold`}>
                             {friend.initials}
                           </div>
@@ -321,7 +325,7 @@ export default function CreateGroupModal({
             </div>
 
             {/* Footer */}
-            <div className="mt-auto p-4 border-t border-gray-100 bg-white">
+            <div className={`mt-auto p-4 border-t ${isDarkMode ? 'bg-[#111] border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
               <button 
                 onClick={handleCreate}
                 disabled={!groupName.trim()}

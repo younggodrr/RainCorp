@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { 
   LayoutGrid, Users, MessageCircleQuestion, Settings, 
@@ -8,82 +8,49 @@ import {
   LayoutDashboard, Briefcase, Upload
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import LeftPanel from '@/components/LeftPanel';
+import TopNavigation from '@/components/TopNavigation';
 
 export default function CreateJobPage() {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState('Jobs');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    localStorage.setItem('theme', newMode ? 'dark' : 'light');
+    window.dispatchEvent(new Event('themeChanged'));
+  };
 
   return (
-    <div className="h-screen bg-[#FDF8F5] font-sans text-[#444444] flex overflow-hidden">
+    <div className={`h-screen font-sans flex overflow-hidden transition-colors duration-300 ${isDarkMode ? 'bg-black text-[#F9E4AD]' : 'bg-[#FDF8F5] text-[#444444]'}`}>
       
-      {/* THIN SIDEBAR (Desktop) */}
-      <div className="w-[80px] bg-white border-r border-gray-100 flex-col items-center py-6 gap-8 z-20 hidden md:flex">
-        <Link href="/feed" className="w-10 h-10 rounded-lg bg-[#E50914] flex items-center justify-center text-white mb-4 shadow-md hover:bg-[#cc0812] transition-colors">
-           <span className="font-bold text-xl">M</span>
-        </Link>
+      {/* TOP NAVIGATION BAR */}
+      <TopNavigation 
+        title="Post Job" 
+        onMobileMenuOpen={() => setIsMobileMenuOpen(true)}
+        isDarkMode={isDarkMode}
+      />
 
-        <div className="flex flex-col gap-6 w-full items-center">
-          <Link href="/feed" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-            <LayoutGrid size={24} />
-             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Feed</span>
-          </Link>
-          
-          <Link href="/friends" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-            <Users size={24} />
-             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Friends</span>
-          </Link>
-
-          <Link href="/messages" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-            <MessageCircleQuestion size={24} />
-             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Messages</span>
-          </Link>
-        </div>
-
-        <div className="mt-auto flex flex-col gap-6 w-full items-center">
-          <Link href="/settings" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-            <Settings size={24} />
-             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Settings</span>
-          </Link>
-          
-          <Link href="/user-profile" className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm cursor-pointer hover:shadow-md transition-all">
-            JD
-          </Link>
-        </div>
-      </div>
-
-      {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden relative">
-        
-        {/* TOP NAVIGATION BAR (Mobile Only) */}
-        <div className="md:hidden fixed top-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-sm border-b border-gray-100 px-4 py-4 flex items-center justify-between shadow-sm gap-4">
-           <Link href="/feed" className="flex-shrink-0 flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center shadow-sm">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#E50914]">
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                </svg>
-              </div>
-           </Link>
-           
-           <div className="flex-1 text-center font-bold text-lg">Post Job</div>
-
-           <button 
-              className="flex-shrink-0 p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
-              onClick={() => setIsMobileMenuOpen(true)}
-           >
-              <Menu size={24} />
-           </button>
-        </div>
-
-        {/* MOBILE DRAWER */}
-        {isMobileMenuOpen && (
+      {/* MOBILE DRAWER */}
+      {isMobileMenuOpen && (
           <div className="fixed inset-0 z-50 md:hidden">
             <div 
               className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
               onClick={() => setIsMobileMenuOpen(false)}
             ></div>
             
-            <div className="absolute top-0 left-0 w-full h-full bg-white shadow-2xl flex flex-col overflow-y-auto animate-slide-in-left">
-              <div className="p-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+            <div className={`absolute top-0 left-0 w-full h-full shadow-2xl flex flex-col overflow-y-auto animate-slide-in-left ${isDarkMode ? 'bg-black border-r border-[#E70008]/20' : 'bg-white'}`}>
+              <div className={`p-4 border-b flex items-center justify-between sticky top-0 z-10 ${isDarkMode ? 'bg-black border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
                 <Link href="/" className="flex items-center gap-2">
                    <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center shadow-sm">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#E50914]">
@@ -97,95 +64,88 @@ export default function CreateJobPage() {
                 </Link>
                 <button 
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2 rounded-full hover:bg-gray-100 text-gray-500"
+                  className={`p-2 rounded-full hover:bg-gray-100 ${isDarkMode ? 'text-gray-400 hover:bg-[#E70008]/10' : 'text-gray-500 hover:bg-gray-100'}`}
                 >
                   <X size={24} />
                 </button>
               </div>
 
               <div className="p-4 space-y-6 pb-20">
-                <nav className="space-y-1">
-                  <Link href="/feed" className="w-full block">
-                    <div className="flex items-center gap-3 p-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
-                      <LayoutDashboard size={20} />
-                      <span className="text-sm font-medium">Dashboard</span>
-                    </div>
-                  </Link>
-                  <Link href="/friends" className="w-full block">
-                    <div className="flex items-center gap-3 p-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
-                      <Users size={20} />
-                      <span className="text-sm font-medium">Members</span>
-                    </div>
-                  </Link>
-                  <Link href="/my-projects" className="w-full block">
-                    <div className="flex items-center gap-3 p-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
-                      <FolderKanban size={20} />
-                      <span className="text-sm font-medium">Projects</span>
-                    </div>
-                  </Link>
-                  <Link href="/messages" className="w-full block">
-                    <div className="flex items-center gap-3 p-2 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
-                      <MessageSquare size={20} />
-                      <span className="text-sm font-medium">Messages</span>
-                    </div>
-                  </Link>
-                  <div className="flex items-center gap-3 p-2 rounded-lg text-[#E50914] bg-[#E50914]/5 font-bold transition-colors">
-                    <Briefcase size={20} />
-                    <span className="text-sm font-medium">Post Job</span>
-                  </div>
-                </nav>
+                <LeftPanel 
+                  activeTab={activeTab} 
+                  setActiveTab={setActiveTab} 
+                  closeMenu={() => setIsMobileMenuOpen(false)} 
+                  isMobile={true}
+                  isDarkMode={isDarkMode}
+                  toggleTheme={toggleTheme}
+                />
               </div>
             </div>
           </div>
         )}
 
+      {/* LEFT PANEL (Desktop) */}
+      <div className={`w-[240px] border-r hidden md:block flex-shrink-0 ${isDarkMode ? 'bg-[#111] border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
+         <div className="p-6 h-full overflow-y-auto">
+            <LeftPanel 
+               activeTab={activeTab} 
+               setActiveTab={setActiveTab}
+               isDarkMode={isDarkMode}
+               toggleTheme={toggleTheme}
+            />
+         </div>
+      </div>
+
+      {/* MAIN CONTENT */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden relative pt-[65px] md:pt-[71px]">
+        
         {/* SCROLLABLE CONTENT AREA */}
-        <div className="flex-1 overflow-y-auto pt-20 md:pt-0">
+        <div className="flex-1 overflow-y-auto pb-24 md:pb-0">
           <div className="max-w-2xl mx-auto p-4 md:p-8">
             
             {/* HEADER */}
-            <div className="mb-8">
+            <div className="mb-6 md:mb-8">
               <button 
                 onClick={() => router.back()} 
-                className="flex items-center gap-2 text-gray-500 hover:text-[#E50914] transition-colors mb-4 md:hidden"
+                className={`flex items-center gap-2 hover:text-[#E50914] transition-colors mb-4 md:hidden ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}
               >
                 <ArrowLeft size={20} />
                 <span className="text-sm font-bold">Back</span>
               </button>
-              <h1 className="text-3xl font-bold text-black mb-2">Post Job Opportunity</h1>
-              <p className="text-gray-500">Find the best talent for your team</p>
+              <h1 className={`text-2xl md:text-3xl font-bold mb-2 ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>Post Job Opportunity</h1>
+              <p className={`text-sm md:text-base ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>Find the best talent for your team</p>
             </div>
 
             {/* FORM */}
-            <form className="bg-white rounded-[24px] p-6 md:p-8 shadow-sm space-y-6">
+            <form className={`rounded-2xl md:rounded-[24px] p-5 md:p-8 shadow-sm space-y-6 ${isDarkMode ? 'bg-[#111] border border-[#E70008]/20' : 'bg-white'}`}>
               
               {/* Job Title */}
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700">Job Title</label>
+                <label className={`text-sm font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Job Title</label>
                 <input 
                   type="text" 
                   placeholder="e.g. Senior Frontend Developer" 
-                  className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm font-medium placeholder:text-gray-400"
+                  className={`w-full px-4 py-3 rounded-xl border focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm font-medium ${isDarkMode ? 'bg-[#222] border-gray-700 text-white placeholder:text-gray-500' : 'bg-gray-50 border-gray-200 text-black placeholder:text-gray-400'}`}
                 />
               </div>
 
               {/* Company Name */}
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700">Company Name</label>
+                <label className={`text-sm font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Company Name</label>
                 <input 
                   type="text" 
                   placeholder="e.g. Magna Coders" 
-                  className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm font-medium placeholder:text-gray-400"
+                  className={`w-full px-4 py-3 rounded-xl border focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm font-medium ${isDarkMode ? 'bg-[#222] border-gray-700 text-white placeholder:text-gray-500' : 'bg-gray-50 border-gray-200 text-black placeholder:text-gray-400'}`}
                 />
               </div>
 
               {/* Description */}
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700">Job Description</label>
+                <label className={`text-sm font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Job Description</label>
                 <textarea 
                   rows={6} 
                   placeholder="Describe the role, responsibilities, and requirements..." 
-                  className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm font-medium placeholder:text-gray-400 resize-none"
+                  className={`w-full px-4 py-3 rounded-xl border focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm font-medium resize-none ${isDarkMode ? 'bg-[#222] border-gray-700 text-white placeholder:text-gray-500' : 'bg-gray-50 border-gray-200 text-black placeholder:text-gray-400'}`}
                 />
               </div>
 
@@ -193,19 +153,19 @@ export default function CreateJobPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Location */}
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700">Location</label>
+                  <label className={`text-sm font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Location</label>
                   <input 
                     type="text" 
                     placeholder="e.g. Nairobi, Kenya (Remote)" 
-                    className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm font-medium placeholder:text-gray-400"
+                    className={`w-full px-4 py-3 rounded-xl border focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm font-medium ${isDarkMode ? 'bg-[#222] border-gray-700 text-white placeholder:text-gray-500' : 'bg-gray-50 border-gray-200 text-black placeholder:text-gray-400'}`}
                   />
                 </div>
 
                 {/* Job Type */}
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-700">Job Type</label>
+                  <label className={`text-sm font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Job Type</label>
                   <div className="relative">
-                    <select className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm font-medium appearance-none cursor-pointer">
+                    <select className={`w-full px-4 py-3 rounded-xl border focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm font-medium appearance-none cursor-pointer ${isDarkMode ? 'bg-[#222] border-gray-700 text-white' : 'bg-gray-50 border-gray-200 text-black'}`}>
                       <option value="">Select Type</option>
                       <option value="full-time">Full-time</option>
                       <option value="part-time">Part-time</option>
@@ -224,29 +184,29 @@ export default function CreateJobPage() {
 
               {/* Salary Range */}
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700">Salary Range</label>
+                <label className={`text-sm font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Salary Range</label>
                 <input 
                   type="text" 
                   placeholder="e.g. Ksh 150,000 – 250,000" 
-                  className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm font-medium placeholder:text-gray-400"
+                  className={`w-full px-4 py-3 rounded-xl border focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm font-medium ${isDarkMode ? 'bg-[#222] border-gray-700 text-white placeholder:text-gray-500' : 'bg-gray-50 border-gray-200 text-black placeholder:text-gray-400'}`}
                 />
               </div>
 
               {/* Skills/Tags */}
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700">Skills Required (comma separated)</label>
+                <label className={`text-sm font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Skills Required (comma separated)</label>
                 <input 
                   type="text" 
                   placeholder="e.g. React, TypeScript, Tailwind CSS, Next.js" 
-                  className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm font-medium placeholder:text-gray-400"
+                  className={`w-full px-4 py-3 rounded-xl border focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm font-medium ${isDarkMode ? 'bg-[#222] border-gray-700 text-white placeholder:text-gray-500' : 'bg-gray-50 border-gray-200 text-black placeholder:text-gray-400'}`}
                 />
               </div>
 
               {/* Attach Photo */}
               <div className="space-y-2">
-                <label className="text-sm font-bold text-gray-700">Attach Image / Logo</label>
-                <div className="w-full px-4 py-8 rounded-xl bg-gray-50 border border-dashed border-gray-300 hover:border-[#E50914] transition-colors flex flex-col items-center justify-center cursor-pointer group">
-                  <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform">
+                <label className={`text-sm font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Attach Image / Logo</label>
+                <div className={`w-full px-4 py-8 rounded-xl border border-dashed transition-colors flex flex-col items-center justify-center cursor-pointer group ${isDarkMode ? 'bg-[#222] border-gray-700 hover:border-[#E50914]' : 'bg-gray-50 border-gray-300 hover:border-[#E50914]'}`}>
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center shadow-sm mb-3 group-hover:scale-110 transition-transform ${isDarkMode ? 'bg-[#333]' : 'bg-white'}`}>
                     <Upload size={20} className="text-gray-400 group-hover:text-[#E50914]" />
                   </div>
                   <span className="text-sm font-medium text-gray-600 group-hover:text-[#E50914]">Click to upload image</span>
@@ -260,7 +220,7 @@ export default function CreateJobPage() {
                  <button 
                   type="button"
                   onClick={() => router.back()} 
-                  className="flex-1 py-3.5 bg-white border border-gray-200 text-gray-600 rounded-xl font-bold text-sm hover:bg-gray-50 transition-colors text-center"
+                  className={`flex-1 py-3.5 border rounded-xl font-bold text-sm transition-colors text-center ${isDarkMode ? 'bg-[#222] border-gray-700 text-gray-300 hover:bg-[#333]' : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'}`}
                 >
                   Cancel
                 </button>
