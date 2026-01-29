@@ -610,9 +610,18 @@ export default function MessagesPage() {
               {['Chats', 'My Groups', 'Unread', 'Archived'].map((item) => (
                 <button
                   key={item}
-                  onClick={() => setFilter(item.toLowerCase() === 'my groups' ? 'groups' : item.toLowerCase() as any)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
-                    (filter === 'groups' && item === 'My Groups') || filter === item.toLowerCase()
+                  onClick={() => {
+                  if (item === 'My Groups') {
+                    setFilter('groups');
+                  } else {
+                    const val = item.toLowerCase();
+                    if (val === 'chats' || val === 'groups' || val === 'unread' || val === 'archived') {
+                      setFilter(val);
+                    }
+                  }
+                }}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition-all ${
+                  (filter === 'groups' && item === 'My Groups') || filter === item.toLowerCase()
                       ? 'bg-black text-white shadow-md' 
                       : isDarkMode ? 'bg-[#222] border border-gray-700 text-gray-400 hover:bg-[#333]' : 'bg-white border border-gray-200 text-gray-500 hover:bg-gray-50'
                   }`}
