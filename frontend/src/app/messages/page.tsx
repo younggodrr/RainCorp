@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { 
   Phone, Video, CheckCheck, 
@@ -159,6 +159,14 @@ const INITIAL_CONVERSATIONS: Conversation[] = [
 ];
 
 export default function MessagesPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <MessagesContent />
+    </Suspense>
+  );
+}
+
+function MessagesContent() {
   const searchParams = useSearchParams();
   // State
   const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS);
