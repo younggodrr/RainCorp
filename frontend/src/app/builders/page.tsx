@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { 
@@ -51,6 +51,23 @@ export default function BuildersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Members');
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    localStorage.setItem('theme', newMode ? 'dark' : 'light');
+    window.dispatchEvent(new Event('themeChanged'));
+  };
+
   const itemsPerPage = 6; // Grid 3x2 or List
   
   const totalPages = Math.ceil(MOCK_BUILDERS.length / itemsPerPage);
@@ -60,52 +77,28 @@ export default function BuildersPage() {
   );
 
   return (
-    <div className="min-h-screen bg-[#FDF8F5] font-sans text-[#444444] flex overflow-hidden">
+    <div className={`min-h-screen font-sans flex overflow-hidden transition-colors duration-300 ${isDarkMode ? 'bg-black text-[#F9E4AD]' : 'bg-[#FDF8F5] text-[#444444]'}`}>
       
-      {/* DESKTOP SIDEBAR (Reused structure) */}
-      <div className="w-[80px] bg-white border-r border-gray-100 flex-col items-center py-6 gap-8 z-20 hidden md:flex">
-        <Link href="/feed" className="w-10 h-10 rounded-lg bg-[#E50914] flex items-center justify-center text-white mb-4 shadow-md hover:bg-[#cc0812] transition-colors">
-           <span className="font-bold text-xl">M</span>
-        </Link>
-
-        <div className="flex flex-col gap-6 w-full items-center">
-          <Link href="/feed" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-            <LayoutGrid size={24} />
-            <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Feed</span>
-          </Link>
-          
-          <Link href="/builders" className="p-3 rounded-xl text-[#E50914] bg-red-50 relative group">
-            <Users size={24} />
-             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Builders</span>
-          </Link>
-
-          <Link href="/messages" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-            <MessageSquare size={24} />
-             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Messages</span>
-          </Link>
-        </div>
-
-        <div className="mt-auto flex flex-col gap-6 w-full items-center">
-          <Link href="/settings" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-            <Settings size={24} />
-             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Settings</span>
-          </Link>
-          
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm cursor-pointer hover:shadow-md transition-all">
-            JD
-          </div>
-        </div>
-      </div>
+      {/* LEFT SIDEBAR */}
+      <LeftPanel 
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isSidebarExpanded={isSidebarExpanded}
+        setIsSidebarExpanded={setIsSidebarExpanded}
+        isDarkMode={isDarkMode}
+        toggleTheme={toggleTheme}
+      />
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col h-screen overflow-y-auto pt-24 relative">
+      <div className={`flex-1 flex flex-col h-screen overflow-y-auto pt-24 relative md:ml-[88px] ${isSidebarExpanded ? 'lg:ml-[260px]' : 'lg:ml-[88px]'} transition-all duration-300`}>
         
         {/* TOP NAVIGATION BAR (Reused) */}
         <TopNavigation 
           title="Builders" 
           onMobileMenuOpen={() => setIsMobileMenuOpen(true)}
-          className="md:left-[80px] lg:left-[80px]"
+          className={`md:left-[88px] ${isSidebarExpanded ? 'lg:left-[260px]' : 'lg:left-[88px]'}`}
           searchPlaceholder="Search by name, category, role, location..."
+          isDarkMode={isDarkMode}
         />
 
         {/* MOBILE DRAWER (Left Sidebar Content) */}
@@ -118,8 +111,8 @@ export default function BuildersPage() {
             ></div>
             
             {/* Drawer Content */}
-            <div className="absolute top-0 left-0 w-full h-full bg-white shadow-2xl flex flex-col overflow-y-auto animate-slide-in-left">
-              <div className="p-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+            <div className={`absolute top-0 left-0 w-full h-full shadow-2xl flex flex-col overflow-y-auto animate-slide-in-left ${isDarkMode ? 'bg-black text-white' : 'bg-white text-black'}`}>
+              <div className={`p-4 border-b flex items-center justify-between sticky top-0 z-10 ${isDarkMode ? 'bg-black border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
                 <Link href="/" className="flex items-center gap-2">
                    <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center shadow-sm">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#E50914]">
@@ -133,7 +126,7 @@ export default function BuildersPage() {
                 </Link>
                 <button 
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2 rounded-full hover:bg-gray-100 text-gray-500"
+                  className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-gray-400' : 'hover:bg-gray-100 text-gray-500'}`}
                 >
                   <X size={24} />
                 </button>
@@ -146,6 +139,8 @@ export default function BuildersPage() {
                   setActiveTab={setActiveTab} 
                   closeMenu={() => setIsMobileMenuOpen(false)} 
                   isMobile={true}
+                  isDarkMode={isDarkMode}
+                  toggleTheme={toggleTheme}
                 />
               </div>
             </div>
@@ -156,10 +151,10 @@ export default function BuildersPage() {
         <div className="px-4 md:px-10 py-8 pb-24 md:pb-10">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {currentBuilders.map((builder) => (
-              <Link href={`/user-profile?id=${builder.id}`} key={builder.id} className="bg-white rounded-2xl p-6 border border-black hover:shadow-md transition-all flex flex-col gap-4">
+              <Link href={`/user-profile?id=${builder.id}`} key={builder.id} className={`rounded-2xl p-6 border transition-all flex flex-col gap-4 hover:shadow-md ${isDarkMode ? 'bg-[#111] border-[#E70008]/20 shadow-[0_0_15px_rgba(231,0,8,0.1)]' : 'bg-white border-black'}`}>
                 {/* Header: Avatar & Info */}
                 <div className="flex gap-4 items-start">
-                  <div className="w-14 h-14 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden flex-shrink-0 text-gray-500 font-bold text-xl relative">
+                  <div className={`w-14 h-14 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 font-bold text-xl relative ${isDarkMode ? 'bg-[#222] text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
                     {/* Placeholder Avatar */}
                     {builder.avatar ? (
                       <Image src={builder.avatar} alt={builder.name} fill sizes="56px" className="object-cover" />
@@ -169,10 +164,10 @@ export default function BuildersPage() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <h3 className="font-bold text-black truncate">{builder.name}</h3>
+                      <h3 className={`font-bold truncate ${isDarkMode ? 'text-white' : 'text-black'}`}>{builder.name}</h3>
                     </div>
-                    <p className="text-xs text-gray-500 truncate">{builder.email}</p>
-                    <p className="text-xs text-gray-600 mt-1 line-clamp-2 leading-relaxed">{builder.bio}</p>
+                    <p className={`text-xs truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{builder.email}</p>
+                    <p className={`text-xs mt-1 line-clamp-2 leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{builder.bio}</p>
                   </div>
                   
                   {/* Status & Actions Column */}
@@ -191,26 +186,45 @@ export default function BuildersPage() {
                     </span>
                   ))}
                   {builder.roles.length > 2 && (
-                    <span className="px-3 py-1 rounded-full text-[10px] font-medium border bg-gray-100 text-gray-600 border-gray-200">
+                    <span className={`px-3 py-1 rounded-full text-[10px] font-medium border ${isDarkMode ? 'bg-[#222] text-gray-400 border-gray-700' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
                       +{builder.roles.length - 2}
                     </span>
                   )}
                 </div>
 
                 {/* Looking For */}
-                <div className="flex flex-col gap-2 p-3 bg-gray-50 rounded-xl">
-                  <div className="flex items-center justify-between gap-2">
-                     <div className="flex items-center gap-2 text-xs font-bold text-gray-700">
-                       <span className="text-sm">👀</span>
-                       <span>Looking for:</span>
-                     </div>
+                <div className={`flex gap-3 p-3 rounded-xl ${isDarkMode ? 'bg-[#222]' : 'bg-gray-50'}`}>
+                  {/* Action Icons */}
+                  <div className={`flex flex-col justify-center gap-2 border-r pr-3 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+                    <button 
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                      className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-[#333] text-gray-400 hover:text-white' : 'hover:bg-white text-gray-500 hover:text-[#E50914]'}`}
+                    >
+                      <UserPlus size={16} />
+                    </button>
+                    <button 
+                      onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                      className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-[#333] text-gray-400 hover:text-white' : 'hover:bg-white text-gray-500 hover:text-[#E50914]'}`}
+                    >
+                      <MessageSquare size={16} />
+                    </button>
                   </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {builder.lookingFor.map((item, idx) => (
-                      <span key={idx} className="px-2 py-0.5 bg-white border border-gray-200 text-gray-600 rounded-md text-[10px] font-medium">
-                        {item}
-                      </span>
-                    ))}
+
+                  {/* Content */}
+                  <div className="flex flex-col gap-2 flex-1">
+                    <div className="flex items-center justify-between gap-2">
+                       <div className={`flex items-center gap-2 text-xs font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                         <span className="text-sm">👀</span>
+                         <span>Looking for:</span>
+                       </div>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {builder.lookingFor.map((item, idx) => (
+                        <span key={idx} className={`px-2 py-0.5 border rounded-md text-[10px] font-medium ${isDarkMode ? 'bg-[#E50914] border-[#E50914] text-black' : 'bg-[#E50914] border-[#E50914] text-black'}`}>
+                          {item}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
@@ -222,7 +236,7 @@ export default function BuildersPage() {
                    </div>
                    <div className="flex items-center gap-3 text-gray-400">
                       <Globe size={16} className="text-[#F4A261] cursor-pointer transition-colors" />
-                      <Github size={16} className="text-black cursor-pointer transition-colors" />
+                      <Github size={16} className={`${isDarkMode ? 'text-white' : 'text-black'} cursor-pointer transition-colors`} />
                       <Linkedin size={16} className="text-[#0077b5] cursor-pointer transition-colors" />
                       <MessageCircle size={16} className="text-[#25D366] cursor-pointer transition-colors" />
                    </div>
@@ -236,7 +250,7 @@ export default function BuildersPage() {
             <button 
               onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
               disabled={currentPage === 1}
-              className="p-2 rounded-lg bg-white border border-gray-200 text-gray-400 disabled:opacity-50 hover:text-[#E50914] hover:border-[#E50914] transition-all shadow-sm"
+              className={`p-2 rounded-lg border disabled:opacity-50 hover:text-[#E50914] hover:border-[#E50914] transition-all shadow-sm ${isDarkMode ? 'bg-[#111] border-gray-700 text-gray-400' : 'bg-white border-gray-200 text-gray-400'}`}
             >
               <ChevronLeft size={20} />
             </button>
@@ -246,7 +260,7 @@ export default function BuildersPage() {
             <button 
               onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
-              className="p-2 rounded-lg bg-white border border-gray-200 text-gray-400 disabled:opacity-50 hover:text-[#E50914] hover:border-[#E50914] transition-all shadow-sm"
+              className={`p-2 rounded-lg border disabled:opacity-50 hover:text-[#E50914] hover:border-[#E50914] transition-all shadow-sm ${isDarkMode ? 'bg-[#111] border-gray-700 text-gray-400' : 'bg-white border-gray-200 text-gray-400'}`}
             >
               <ChevronRight size={20} />
             </button>
