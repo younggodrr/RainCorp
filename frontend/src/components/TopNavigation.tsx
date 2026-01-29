@@ -11,17 +11,18 @@ interface TopNavigationProps {
   searchPlaceholder?: string;
   searchValue?: string;
   onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  isDarkMode?: boolean;
 }
 
-export default function TopNavigation({ title, onMobileMenuOpen, className = '', searchPlaceholder = 'Search...', searchValue, onSearchChange }: TopNavigationProps) {
+export default function TopNavigation({ title, onMobileMenuOpen, className = '', searchPlaceholder = 'Search...', searchValue, onSearchChange, isDarkMode = false }: TopNavigationProps) {
   return (
-    <div className={`fixed top-0 right-0 z-30 bg-white/90 backdrop-blur-sm border-b border-gray-100 px-4 md:px-8 py-4 flex items-center justify-between transition-all duration-300 left-0 md:left-[88px] lg:left-[260px] ${className}`}>
+    <div className={`fixed top-0 right-0 z-30 backdrop-blur-sm border-b px-4 md:px-8 py-4 flex items-center justify-between transition-all duration-300 left-0 md:left-[88px] lg:left-[260px] ${className} ${isDarkMode ? 'bg-black/90 border-[#E70008]/20' : 'bg-white/90 border-gray-100'}`}>
       <div>
-        <h1 className="text-xl font-bold text-black hidden md:block">{title}</h1>
+        <h1 className={`text-xl font-bold hidden md:block ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>{title}</h1>
         {/* Mobile Logo */}
         <Link href="/" className="flex items-center gap-2 md:hidden">
-          <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center shadow-sm">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#E50914]">
+          <div className="w-8 h-8 rounded-lg bg-[#E70008] flex items-center justify-center shadow-sm">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-white">
               <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
             </svg>
           </div>
@@ -41,7 +42,7 @@ export default function TopNavigation({ title, onMobileMenuOpen, className = '',
             placeholder={searchPlaceholder}
             value={searchValue}
             onChange={onSearchChange}
-            className="bg-gray-50 border border-gray-100 rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#E50914] w-64 transition-all"
+            className={`rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#E50914] w-64 transition-all ${isDarkMode ? 'bg-[#111] border-[#E70008]/20 text-[#F9E4AD] placeholder-gray-500' : 'bg-gray-50 border-gray-100 text-black'}`}
           />
         </div>
 
@@ -53,12 +54,12 @@ export default function TopNavigation({ title, onMobileMenuOpen, className = '',
              placeholder="Search" 
              value={searchValue}
              onChange={onSearchChange}
-             className="bg-gray-50 border border-gray-100 rounded-full pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#E50914] w-28 transition-all"
+             className={`rounded-full pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#E50914] w-28 transition-all ${isDarkMode ? 'bg-[#111] border-[#E70008]/20 text-[#F9E4AD] placeholder-gray-500' : 'bg-gray-50 border-gray-100 text-black'}`}
            />
         </div>
 
         {/* Notification Icon */}
-        <Link href="/notifications" className="relative p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors">
+        <Link href="/notifications" className={`relative p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#E70008]/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}>
           <Bell size={24} />
           <div className="absolute top-1 right-1 w-5 h-5 bg-[#E50914] rounded-full flex items-center justify-center text-white text-[10px] font-bold border-2 border-white shadow-sm">
             3
@@ -67,7 +68,7 @@ export default function TopNavigation({ title, onMobileMenuOpen, className = '',
         
         {/* Mobile Menu Icon */}
         <button 
-          className="md:hidden p-2 rounded-full hover:bg-gray-100 text-gray-600 transition-colors"
+          className={`md:hidden p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#E70008]/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}
           onClick={onMobileMenuOpen}
         >
           <Menu size={24} />

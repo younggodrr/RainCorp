@@ -5,54 +5,36 @@ import Link from 'next/link';
 import { 
   LayoutGrid, Users, MessageCircleQuestion, Settings, 
   Menu, X, FolderKanban, ArrowLeft, Search, MessageSquare, 
-  LayoutDashboard, Upload
+  LayoutDashboard, Upload,
+  Image as ImageIcon,
+  Link as LinkIcon,
+  Github,
+  Check
 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
+import { NavItem } from '@/components/NavItem';
+import LeftPanel from '@/components/LeftPanel';
 
 export default function CreateProjectPage() {
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [createGroup, setCreateGroup] = useState(true);
+  const [activeTab, setActiveTab] = useState('Projects'); // For LeftPanel state
+  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
 
   return (
     <div className="h-screen bg-[#FDF8F5] font-sans text-[#444444] flex overflow-hidden">
       
-      {/* THIN SIDEBAR (Desktop) */}
-      <div className="w-[80px] bg-white border-r border-gray-100 flex-col items-center py-6 gap-8 z-20 hidden md:flex">
-        <Link href="/feed" className="w-10 h-10 rounded-lg bg-[#E50914] flex items-center justify-center text-white mb-4 shadow-md hover:bg-[#cc0812] transition-colors">
-           <span className="font-bold text-xl">M</span>
-        </Link>
-
-        <div className="flex flex-col gap-6 w-full items-center">
-          <Link href="/feed" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-            <LayoutGrid size={24} />
-             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Feed</span>
-          </Link>
-          
-          <Link href="/friends" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-            <Users size={24} />
-             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Friends</span>
-          </Link>
-
-          <Link href="/messages" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-            <MessageCircleQuestion size={24} />
-             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Messages</span>
-          </Link>
-        </div>
-
-        <div className="mt-auto flex flex-col gap-6 w-full items-center">
-          <Link href="/settings" className="p-3 rounded-xl text-gray-400 hover:bg-gray-50 hover:text-[#E50914] transition-all relative group">
-            <Settings size={24} />
-             <span className="absolute left-full ml-4 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none">Settings</span>
-          </Link>
-          
-          <Link href="/user-profile" className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm cursor-pointer hover:shadow-md transition-all">
-            JD
-          </Link>
-        </div>
-      </div>
+      {/* LEFT SIDEBAR (Reused from Feed) */}
+      <LeftPanel 
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        isSidebarExpanded={isSidebarExpanded}
+        setIsSidebarExpanded={setIsSidebarExpanded}
+      />
 
       {/* MAIN CONTENT */}
-      <div className="flex-1 flex flex-col h-full overflow-hidden relative">
+      <div className={`flex-1 flex flex-col h-full overflow-hidden relative md:ml-[88px] ${isSidebarExpanded ? 'lg:ml-[260px]' : 'lg:ml-[88px]'} transition-all duration-300`}>
         
         {/* TOP NAVIGATION BAR (Mobile Only) */}
         <div className="md:hidden fixed top-0 left-0 right-0 z-30 bg-white/90 backdrop-blur-sm border-b border-gray-100 px-4 py-4 flex items-center justify-between shadow-sm gap-4">
@@ -249,6 +231,41 @@ export default function CreateProjectPage() {
                   placeholder="e.g. 3" 
                   className="w-full px-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm font-medium placeholder:text-gray-400"
                 />
+              </div>
+
+              {/* GitHub Link */}
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">GitHub Repository (Optional)</label>
+                <div className="relative">
+                  <Github className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                  <input 
+                    type="url" 
+                    placeholder="https://github.com/username/repo" 
+                    className="w-full pl-12 pr-4 py-3 rounded-xl bg-gray-50 border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm font-medium placeholder:text-gray-400"
+                  />
+                </div>
+              </div>
+
+              {/* Create Group Option */}
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-700">Project Communication</label>
+                <div 
+                  className="w-full p-4 rounded-xl border bg-gray-50 border-[#E50914] shadow-sm flex items-center justify-between opacity-80 cursor-not-allowed"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center transition-colors bg-[#E50914] text-white">
+                      <FolderKanban size={20} />
+                    </div>
+                    <div className="text-left">
+                      <h4 className="text-sm font-bold text-black">Group's Project will be created</h4>
+                      <p className="text-xs text-gray-500">User will be added to the project's chat group automatically once approved by you</p>
+                    </div>
+                  </div>
+                  
+                  <div className="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all border-[#E50914] bg-[#E50914] text-white">
+                    <Check size={14} strokeWidth={3} />
+                  </div>
+                </div>
               </div>
 
               {/* Actions */}

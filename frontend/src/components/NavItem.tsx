@@ -7,16 +7,19 @@ interface NavItemProps {
   active?: boolean;
   onClick?: () => void;
   isMobile?: boolean;
+  isDarkMode?: boolean;
 }
 
-export function NavItem({ icon, label, badge, active, onClick, isMobile }: NavItemProps) {
+export function NavItem({ icon, label, badge, active, onClick, isMobile, isDarkMode }: NavItemProps) {
   return (
     <div 
       onClick={onClick}
       className={`relative w-full flex items-center ${isMobile ? 'justify-start px-4' : 'justify-center lg:justify-between px-2 lg:px-4'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${
         active 
           ? 'bg-[#E50914] text-white shadow-md' 
-          : 'text-gray-600 hover:bg-gray-100'
+          : isDarkMode 
+            ? 'text-gray-400 hover:text-white hover:bg-white/10' 
+            : 'text-gray-600 hover:bg-gray-100'
       }`}
     >
       <div className={`flex items-center ${isMobile ? 'gap-3' : 'gap-0 lg:gap-3'}`}>

@@ -14,7 +14,9 @@ import {
   Plus,
   Search,
   BookOpen,
-  Bot
+  Bot,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { NavItem } from './NavItem';
 
@@ -25,6 +27,8 @@ interface LeftPanelProps {
   isMobile?: boolean;
   isSidebarExpanded?: boolean;
   setIsSidebarExpanded?: (expanded: boolean) => void;
+  isDarkMode?: boolean;
+  toggleTheme?: () => void;
 }
 
 export default function LeftPanel({ 
@@ -33,7 +37,9 @@ export default function LeftPanel({
   closeMenu, 
   isMobile,
   isSidebarExpanded = true,
-  setIsSidebarExpanded
+  setIsSidebarExpanded,
+  isDarkMode = false,
+  toggleTheme
 }: LeftPanelProps) {
   
   const handleNavClick = (tab: string) => {
@@ -45,27 +51,14 @@ export default function LeftPanel({
   if (isMobile) {
     return (
       <div className="flex flex-col h-full">
-        {/* User Profile Card */}
-        <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl mb-6">
-          <div className="relative flex-shrink-0">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm">
-              JD
-            </div>
-            <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#2ECC71] border-2 border-white rounded-full"></div>
-          </div>
-          <div className="flex-1 min-w-0">
-            <h3 className="text-sm font-bold text-black truncate">John Doe</h3>
-            <p className="text-xs text-gray-500 truncate">Full Stack Dev</p>
-          </div>
-        </div>
-
         {/* Navigation Menu */}
-        <nav className="space-y-1 mb-6">
+        <nav className="space-y-1 mb-6 mt-4">
           <NavItem 
             icon={<LayoutDashboard size={20} />} 
             label="Dashboard" 
             active={activeTab === 'Dashboard'} 
             isMobile={isMobile} 
+            isDarkMode={isDarkMode}
             onClick={() => handleNavClick('Dashboard')} 
           />
           <NavItem 
@@ -73,6 +66,7 @@ export default function LeftPanel({
             label="Builders" 
             active={activeTab === 'Buiilders'} 
             isMobile={isMobile} 
+            isDarkMode={isDarkMode}
             onClick={() => handleNavClick('Builders')} 
           />
           <NavItem 
@@ -81,6 +75,7 @@ export default function LeftPanel({
             badge="3" 
             active={activeTab === 'Projects'} 
             isMobile={isMobile} 
+            isDarkMode={isDarkMode}
             onClick={() => handleNavClick('Projects')} 
           />
           <NavItem 
@@ -89,6 +84,7 @@ export default function LeftPanel({
             badge="12" 
             active={activeTab === 'Messages'} 
             isMobile={isMobile} 
+            isDarkMode={isDarkMode}
             onClick={() => handleNavClick('Messages')} 
           />
           <NavItem 
@@ -96,6 +92,7 @@ export default function LeftPanel({
             label="Opportunities" 
             active={activeTab === 'Opportunities'} 
             isMobile={isMobile} 
+            isDarkMode={isDarkMode}
             onClick={() => handleNavClick('Opportunities')} 
           />
           <NavItem 
@@ -103,23 +100,49 @@ export default function LeftPanel({
             label="Magna AI" 
             active={activeTab === 'Magna AI'} 
             isMobile={isMobile} 
+            isDarkMode={isDarkMode}
             onClick={() => handleNavClick('Magna AI')} 
           />
         </nav>
 
+        {/* Groups */}
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-3 px-2">
+            <h4 className="text-xs font-bold text-gray-400 uppercase">Your Groups</h4>
+            <button className="text-[#E50914] text-xs font-medium hover:underline">See All</button>
+          </div>
+          <div className="space-y-1">
+            {[
+              { name: 'React Developers', members: '12k members' },
+              { name: 'Startup Founders', members: '5k members' },
+              { name: 'UI/UX Designers', members: '8.5k members' }
+            ].map((group) => (
+              <button key={group.name} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors text-left group ${isDarkMode ? 'hover:bg-[#222]' : 'hover:bg-gray-50'}`}>
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isDarkMode ? 'bg-[#222] text-gray-400 group-hover:bg-[#333]' : 'bg-gray-100 text-gray-500 group-hover:bg-white group-hover:shadow-sm'}`}>
+                  <Users size={16} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h5 className={`text-sm font-medium truncate ${isDarkMode ? 'text-white' : 'text-black'}`}>{group.name}</h5>
+                  <p className={`text-xs truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{group.members}</p>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Magna School */}
         <div className="mb-6">
-          <div className="bg-gradient-to-br from-[#2ECC71]/10 to-[#2ECC71]/20 rounded-xl p-4 border border-[#2ECC71]/20">
+          <div className={`rounded-xl p-4 border ${isDarkMode ? 'bg-[#2ECC71]/10 border-[#2ECC71]/20' : 'bg-gradient-to-br from-[#2ECC71]/10 to-[#2ECC71]/20 border-[#2ECC71]/20'}`}>
             <div className="flex items-start gap-3 mb-3">
               <div className="w-8 h-8 rounded-lg bg-[#2ECC71] flex items-center justify-center text-white shadow-sm">
                 <GraduationCap size={18} />
               </div>
               <div>
-                <h4 className="font-bold text-black text-sm">Magna School</h4>
-                <p className="text-xs text-gray-600 leading-tight mt-0.5">Upskill with top tech courses</p>
+                <h4 className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-black'}`}>Magna School</h4>
+                <p className={`text-xs leading-tight mt-0.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Upskill with top tech courses</p>
               </div>
             </div>
-            <Link href="/magna-school" className="block w-full py-2 rounded-lg bg-white text-[#2ECC71] text-xs font-bold shadow-sm hover:shadow-md transition-all text-center">
+            <Link href="/magna-school" className={`block w-full py-2 rounded-lg text-xs font-bold shadow-sm transition-all text-center ${isDarkMode ? 'bg-[#2ECC71] text-white hover:bg-[#25a25a]' : 'bg-white text-[#2ECC71] hover:shadow-md'}`}>
               Start Learning
             </Link>
           </div>
@@ -130,9 +153,9 @@ export default function LeftPanel({
             <div className="bg-gradient-to-br from-[#E50914]/5 to-[#F4A261]/10 rounded-xl p-4 border border-[#E50914]/10">
               <div className="flex items-center gap-3 mb-2">
                 <BadgeCheck size={20} className="text-[#E50914]" />
-                <h4 className="font-bold text-black text-sm">Get Verified</h4>
+                <h4 className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-black'}`}>Get Verified</h4>
               </div>
-              <p className="text-xs text-gray-600 mb-3">
+              <p className={`text-xs mb-3 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
                 Boost your credibility and unlock exclusive features.
               </p>
               <Link href="/get-verification" className="block w-full py-2 rounded-lg bg-[#E50914] text-white text-xs font-bold shadow-sm hover:bg-[#cc0812] transition-all text-center">
@@ -143,7 +166,7 @@ export default function LeftPanel({
 
           <nav className="space-y-1">
             <Link href="/settings" className="w-full block">
-              <div className="flex items-center gap-3 px-3 py-2 text-gray-600 hover:bg-gray-50 rounded-xl transition-colors">
+              <div className={`flex items-center gap-3 px-3 py-2 rounded-xl transition-colors ${isDarkMode ? 'text-gray-400 hover:bg-[#222]' : 'text-gray-600 hover:bg-gray-50'}`}>
                 <Settings size={20} />
                 <span className="text-sm font-medium">Settings</span>
               </div>
@@ -155,9 +178,29 @@ export default function LeftPanel({
 
   // Desktop Sidebar Content
   return (
-    <aside className={`w-[88px] bg-white h-screen fixed left-0 top-0 border-r border-gray-100 flex flex-col z-20 hidden md:flex transition-all duration-300 overflow-y-auto pb-10 ${isSidebarExpanded ? 'lg:w-[260px]' : 'lg:w-[88px]'}`}>
+    <aside className={`w-[88px] h-screen fixed left-0 top-0 border-r flex flex-col z-20 hidden md:flex transition-all duration-300 overflow-y-auto pb-10 ${
+      isSidebarExpanded ? 'lg:w-[260px]' : 'lg:w-[88px]'
+    } ${
+      isDarkMode 
+        ? 'bg-black border-[#E70008]/20' 
+        : 'bg-white border-gray-100'
+    }`}>
         {/* Top Branding */}
         <div className="p-6 relative">
+          {/* Theme Toggle - Small, Top Left */}
+          {toggleTheme && (
+             <button 
+               onClick={toggleTheme}
+               className={`absolute top-2 left-6 p-1.5 rounded-full transition-colors z-40 ${
+                 isDarkMode 
+                   ? 'bg-[#222] text-[#F9E4AD] hover:bg-[#333]' 
+                   : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+               }`}
+             >
+                {isDarkMode ? <Sun size={14} /> : <Moon size={14} />}
+             </button>
+          )}
+
           <Link href="/" className={`flex items-center gap-3 justify-center lg:justify-start transition-all duration-300 ${isSidebarExpanded ? 'mb-8' : 'mb-14'}`}>
             <div className="w-10 h-10 rounded-lg bg-black flex-shrink-0 flex items-center justify-center shadow-sm">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-[#E50914]">
@@ -174,7 +217,11 @@ export default function LeftPanel({
           {setIsSidebarExpanded && (
             <button 
               onClick={() => setIsSidebarExpanded(!isSidebarExpanded)}
-              className={`absolute w-6 h-6 bg-white border border-gray-200 rounded-full flex items-center justify-center text-gray-500 hover:text-[#E50914] shadow-sm z-30 hidden lg:flex transition-all duration-300 ${
+              className={`absolute w-6 h-6 rounded-full flex items-center justify-center shadow-sm z-30 hidden lg:flex transition-all duration-300 ${
+                isDarkMode 
+                  ? 'bg-black border border-[#E70008]/20 text-gray-400 hover:text-white' 
+                  : 'bg-white border border-gray-200 text-gray-500 hover:text-[#E50914]'
+              } ${
                 isSidebarExpanded 
                   ? 'top-8 right-4' 
                   : 'top-20 left-1/2 -translate-x-1/2'
@@ -185,7 +232,13 @@ export default function LeftPanel({
           )}
 
           {/* User Profile Card */}
-          <div className={`flex items-center gap-3 p-0 rounded-xl mb-6 justify-center ${isSidebarExpanded ? 'lg:justify-start lg:p-3 lg:bg-gray-50' : 'lg:justify-center'}`}>
+          <div className={`flex items-center gap-3 p-0 rounded-xl mb-6 justify-center ${
+            isSidebarExpanded 
+              ? isDarkMode 
+                ? 'lg:justify-start lg:p-3 lg:bg-[#111]' 
+                : 'lg:justify-start lg:p-3 lg:bg-gray-50' 
+              : 'lg:justify-center'
+          }`}>
             <div className="relative flex-shrink-0">
               <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm">
                 JD
@@ -193,7 +246,7 @@ export default function LeftPanel({
               <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#2ECC71] border-2 border-white rounded-full"></div>
             </div>
             <div className={`flex-1 min-w-0 hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>
-              <h3 className="text-sm font-bold text-black truncate">John Doe</h3>
+              <h3 className={`text-sm font-bold truncate ${isDarkMode ? 'text-white' : 'text-black'}`}>John Doe</h3>
               <p className="text-xs text-gray-500 truncate">Full Stack Dev</p>
             </div>
           </div>
@@ -201,7 +254,7 @@ export default function LeftPanel({
           {/* Navigation Menu */}
           <nav className="space-y-1">
             <Link href="/feed">
-              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Dashboard' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Dashboard' ? 'bg-[#E50914] text-white shadow-md' : isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'}`}>
                 <div className="flex items-center gap-3">
                   <LayoutDashboard size={20} />
                   <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Dashboard</span>
@@ -209,14 +262,14 @@ export default function LeftPanel({
               </div>
             </Link>
             <Link href="/builders">
-              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Members' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Members' ? 'bg-[#E50914] text-white shadow-md' : isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'}`}>
                 <div className="flex items-center gap-3">
                   <Users size={20} />
                   <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Members</span>
                 </div>
               </div>
             </Link>
-            <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Projects' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => handleNavClick('Projects')}>
+            <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Projects' ? 'bg-[#E50914] text-white shadow-md' : isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => handleNavClick('Projects')}>
                 <div className="flex items-center gap-3">
                   <FolderKanban size={20} />
                   <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Projects</span>
@@ -224,7 +277,7 @@ export default function LeftPanel({
                 <span className={`hidden w-5 h-5 bg-[#F4A261] text-white text-[10px] font-bold rounded-full items-center justify-center ${isSidebarExpanded ? 'lg:flex' : ''}`}>3</span>
             </div>
             <Link href="/messages">
-              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Messages' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`}>
+              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Messages' ? 'bg-[#E50914] text-white shadow-md' : isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'}`}>
                 <div className="flex items-center gap-3">
                   <MessageSquare size={20} />
                   <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Messages</span>
@@ -232,14 +285,14 @@ export default function LeftPanel({
                 <span className={`hidden w-5 h-5 bg-[#E50914] text-white text-[10px] font-bold rounded-full items-center justify-center ${isSidebarExpanded ? 'lg:flex' : ''}`}>12</span>
               </div>
             </Link>
-            <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Opportunities' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => handleNavClick('Opportunities')}>
+            <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Opportunities' ? 'bg-[#E50914] text-white shadow-md' : isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => handleNavClick('Opportunities')}>
                 <div className="flex items-center gap-3">
                   <Briefcase size={20} />
                   <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Opportunities</span>
                 </div>
             </div>
             <Link href="/magna-ai">
-              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Magna AI' ? 'bg-[#E50914] text-white shadow-md' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => handleNavClick('Magna AI')}>
+              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Magna AI' ? 'bg-[#E50914] text-white shadow-md' : isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => handleNavClick('Magna AI')}>
                 <div className="flex items-center gap-3">
                   <Bot size={20} />
                   <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Magna AI</span>
@@ -279,13 +332,13 @@ export default function LeftPanel({
                 { name: 'Startup Founders', members: '5k members' },
                 { name: 'UI/UX Designers', members: '8.5k members' }
               ].map((group) => (
-                <button key={group.name} className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors text-left group">
-                  <div className="w-8 h-8 rounded-lg bg-gray-100 flex items-center justify-center text-gray-500 group-hover:bg-white group-hover:shadow-sm transition-all">
+                <button key={group.name} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors text-left group ${isDarkMode ? 'hover:bg-[#222]' : 'hover:bg-gray-50'}`}>
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isDarkMode ? 'bg-[#222] text-gray-400 group-hover:bg-[#333]' : 'bg-gray-100 text-gray-500 group-hover:bg-white group-hover:shadow-sm'}`}>
                     <Users size={16} />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h5 className="text-sm font-medium text-black truncate">{group.name}</h5>
-                    <p className="text-xs text-gray-500 truncate">{group.members}</p>
+                    <h5 className={`text-sm font-medium truncate ${isDarkMode ? 'text-white' : 'text-black'}`}>{group.name}</h5>
+                    <p className={`text-xs truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{group.members}</p>
                   </div>
                 </button>
               ))}
@@ -294,17 +347,17 @@ export default function LeftPanel({
 
           {/* Magna School */}
           <div className={`mt-6 hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>
-            <div className="bg-gradient-to-br from-[#2ECC71]/10 to-[#2ECC71]/20 rounded-xl p-4 border border-[#2ECC71]/20">
+            <div className={`rounded-xl p-4 border ${isDarkMode ? 'bg-[#2ECC71]/10 border-[#2ECC71]/20' : 'bg-gradient-to-br from-[#2ECC71]/10 to-[#2ECC71]/20 border-[#2ECC71]/20'}`}>
               <div className="flex items-start gap-3 mb-3">
                 <div className="w-8 h-8 rounded-lg bg-[#2ECC71] flex items-center justify-center text-white shadow-sm">
                   <GraduationCap size={18} />
                 </div>
                 <div>
-                  <h4 className="font-bold text-black text-sm">Magna School</h4>
-                  <p className="text-xs text-gray-600 leading-tight mt-0.5">Upskill with top tech courses</p>
+                  <h4 className={`font-bold text-sm ${isDarkMode ? 'text-white' : 'text-black'}`}>Magna School</h4>
+                  <p className={`text-xs leading-tight mt-0.5 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Upskill with top tech courses</p>
                 </div>
               </div>
-              <Link href="/magna-school" className="block w-full py-2 rounded-lg bg-white text-[#2ECC71] text-xs font-bold shadow-sm hover:shadow-md transition-all text-center">
+              <Link href="/magna-school" className={`block w-full py-2 rounded-lg text-xs font-bold shadow-sm transition-all text-center ${isDarkMode ? 'bg-[#2ECC71] text-white hover:bg-[#25a25a]' : 'bg-white text-[#2ECC71] hover:shadow-md'}`}>
                 Start Learning
               </Link>
             </div>

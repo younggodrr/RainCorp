@@ -46,6 +46,21 @@ export default function FeedPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isFabOpen, setIsFabOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
+  const [isDarkMode, setIsDarkMode] = useState(false);
+
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    localStorage.setItem('theme', newMode ? 'dark' : 'light');
+    window.dispatchEvent(new Event('themeChanged'));
+  };
 
   // Toast State
   const [toastVisible, setToastVisible] = useState(false);
@@ -111,7 +126,7 @@ export default function FeedPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#FDF8F5] font-sans text-[#444444] flex">
+    <div className={`min-h-screen font-sans flex transition-colors duration-300 ${isDarkMode ? 'bg-black text-[#F9E4AD]' : 'bg-[#FDF8F5] text-[#444444]'}`}>
       <Toast 
         message={toastMessage} 
         isVisible={toastVisible} 
@@ -124,6 +139,8 @@ export default function FeedPage() {
         setActiveTab={setActiveTab}
         isSidebarExpanded={isSidebarExpanded}
         setIsSidebarExpanded={setIsSidebarExpanded}
+        isDarkMode={isDarkMode}
+        toggleTheme={toggleTheme}
       />
 
       {/* MAIN CONTENT AREA */}
@@ -134,6 +151,7 @@ export default function FeedPage() {
           title="Feed" 
           onMobileMenuOpen={() => setIsMobileMenuOpen(true)}
           className={`md:left-[88px] ${isSidebarExpanded ? 'lg:left-[260px]' : 'lg:left-[88px]'}`}
+          isDarkMode={isDarkMode}
         />
 
         {/* MOBILE DRAWER (Left Sidebar Content) */}
@@ -146,8 +164,8 @@ export default function FeedPage() {
             ></div>
             
             {/* Drawer Content */}
-            <div className="absolute top-0 left-0 w-full h-full bg-white shadow-2xl flex flex-col overflow-y-auto animate-slide-in-left">
-              <div className="p-4 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white z-10">
+            <div className={`absolute top-0 left-0 w-full h-full shadow-2xl flex flex-col overflow-y-auto animate-slide-in-left ${isDarkMode ? 'bg-black text-white' : 'bg-white text-black'}`}>
+              <div className={`p-4 border-b flex items-center justify-between sticky top-0 z-10 ${isDarkMode ? 'bg-black border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
                 <Link href="/" className="flex items-center gap-2">
                    <div className="w-8 h-8 rounded-lg bg-black flex items-center justify-center shadow-sm">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-[#E50914]">
@@ -161,7 +179,7 @@ export default function FeedPage() {
                 </Link>
                 <button 
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="p-2 rounded-full hover:bg-gray-100 text-gray-500"
+                  className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-gray-400' : 'hover:bg-gray-100 text-gray-500'}`}
                 >
                   <X size={24} />
                 </button>
@@ -174,6 +192,8 @@ export default function FeedPage() {
                   setActiveTab={setActiveTab} 
                   closeMenu={() => setIsMobileMenuOpen(false)} 
                   isMobile={true}
+                  isDarkMode={isDarkMode}
+                  toggleTheme={toggleTheme}
                 />
               </div>
             </div>
@@ -184,24 +204,24 @@ export default function FeedPage() {
 
         {/* Filter Pills */}
         <div className="flex gap-3 mb-2 overflow-x-auto pb-2 scrollbar-hide">
-          <FilterPill label="All" active={activeFilter === 'All'} onClick={() => setActiveFilter('All')} />
-          <FilterPill label="Projects" active={activeFilter === 'Projects'} onClick={() => setActiveFilter('Projects')} />
-          <FilterPill label="Opportunities" active={activeFilter === 'Opportunities'} onClick={() => setActiveFilter('Opportunities')} />
-          <FilterPill label="Posts" active={activeFilter === 'Posts'} onClick={() => setActiveFilter('Posts')} />
-          <FilterPill label="Tech News" active={activeFilter === 'Tech News'} onClick={() => setActiveFilter('Tech News')} />
+          <FilterPill label="All" active={activeFilter === 'All'} onClick={() => setActiveFilter('All')} isDarkMode={isDarkMode} />
+          <FilterPill label="Projects" active={activeFilter === 'Projects'} onClick={() => setActiveFilter('Projects')} isDarkMode={isDarkMode} />
+          <FilterPill label="Opportunities" active={activeFilter === 'Opportunities'} onClick={() => setActiveFilter('Opportunities')} isDarkMode={isDarkMode} />
+          <FilterPill label="Posts" active={activeFilter === 'Posts'} onClick={() => setActiveFilter('Posts')} isDarkMode={isDarkMode} />
+          <FilterPill label="Tech News" active={activeFilter === 'Tech News'} onClick={() => setActiveFilter('Tech News')} isDarkMode={isDarkMode} />
         </div>
 
         {filteredPosts.map((post, index) => {
           if (filteredPosts.length === index + 1) {
              return (
                <div ref={lastPostElementRef} key={post.id}>
-                 <FeedItem post={post} onRequestJoin={(authorName) => showToast(post.type === 'job' ? `Application sent to ${authorName}!` : `Request sent. ${authorName} will review your request.`)} />
+                 <FeedItem post={post} onRequestJoin={(authorName) => showToast(post.type === 'job' ? `Application sent to ${authorName}!` : `Request sent. ${authorName} will review your request.`)} isDarkMode={isDarkMode} />
                </div>
              );
           } else {
              return (
                <div key={post.id}>
-                 <FeedItem post={post} onRequestJoin={(authorName) => showToast(post.type === 'job' ? `Application sent to ${authorName}!` : `Request sent. ${authorName} will review your request.`)} />
+                 <FeedItem post={post} onRequestJoin={(authorName) => showToast(post.type === 'job' ? `Application sent to ${authorName}!` : `Request sent. ${authorName} will review your request.`)} isDarkMode={isDarkMode} />
                </div>
              );
           }
@@ -275,7 +295,7 @@ export default function FeedPage() {
   );
 }
 
-function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (authorName: string) => void }) {
+function FeedItem({ post, onRequestJoin, isDarkMode }: { post: FeedPost, onRequestJoin?: (authorName: string) => void, isDarkMode?: boolean }) {
   const router = useRouter();
   const [isRequestSent, setIsRequestSent] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
@@ -333,7 +353,7 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
     }, 100);
   };
 
-  const cardClassName = "block bg-white rounded-2xl p-4 md:p-6 shadow-sm mt-6 cursor-pointer hover:shadow-md transition-all text-left w-full";
+  const cardClassName = `block rounded-2xl p-4 md:p-6 shadow-sm mt-6 cursor-pointer hover:shadow-md transition-all text-left w-full ${isDarkMode ? 'bg-[#111] border border-[#E70008]/20 shadow-[0_0_15px_rgba(231,0,8,0.1)]' : 'bg-white'}`;
 
   // Job Post
   if (post.type === 'job') {
@@ -348,7 +368,7 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-black">{post.author.name}</h3>
+                  <h3 className={`font-bold ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>{post.author.name}</h3>
                   <span className="text-sm text-gray-500">{post.author.role}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-400 mt-0.5">
@@ -364,17 +384,17 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
           </div>
 
           <div className="mb-4">
-            <p className="font-bold text-black mb-1">{job.company} is hiring! {job.title}</p>
-            <p className="text-gray-600">{job.description}</p>
+            <p className={`font-bold mb-1 ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>{job.company} is hiring! {job.title}</p>
+            <p className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>{job.description}</p>
           </div>
 
-          <div className="border border-[#2ECC71]/30 rounded-xl p-3 md:p-5 bg-[#2ECC71]/5">
+          <div className={`border rounded-xl p-3 md:p-5 ${isDarkMode ? 'border-[#2ECC71]/20 bg-[#2ECC71]/5' : 'border-[#2ECC71]/30 bg-[#2ECC71]/5'}`}>
             <div className="flex items-start gap-3 md:gap-4 mb-4">
               <div className="w-12 h-12 rounded-lg bg-[#F4A261] flex items-center justify-center text-white shadow-sm flex-shrink-0">
                 <Briefcase size={24} />
               </div>
               <div>
-                <h4 className="font-bold text-lg text-black leading-tight">{job.title}</h4>
+                <h4 className={`font-bold text-lg leading-tight ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>{job.title}</h4>
                 <p className="text-sm text-gray-600">{job.company}</p>
               </div>
             </div>
@@ -392,7 +412,7 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
                 </div>
             </div>
 
-            <div className="flex flex-wrap gap-4 mb-6 text-sm text-gray-600">
+            <div className={`flex flex-wrap gap-4 mb-6 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
               <div className="flex items-center gap-1.5">
                 <MapPin size={16} className="text-gray-400" />
                 {job.location}
@@ -409,7 +429,7 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
 
             <div className="flex flex-wrap gap-2 mb-6">
               {job.tags.map((tag) => (
-                <span key={tag} className="px-3 py-1 rounded-full bg-white text-xs font-medium text-gray-600 border border-gray-100">
+                <span key={tag} className={`px-3 py-1 rounded-full text-xs font-medium border ${isDarkMode ? 'bg-[#222] text-gray-300 border-gray-700' : 'bg-white text-gray-600 border-gray-100'}`}>
                   {tag}
                 </span>
               ))}
@@ -418,7 +438,7 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
             <div className="flex gap-2 md:gap-3">
               <button 
                 onClick={e => { e.preventDefault(); /* Logic */ }}
-                className="flex-1 py-2 md:py-2.5 rounded-full bg-white border border-gray-200 text-xs md:text-sm font-semibold text-black hover:bg-gray-50 transition-all"
+                className={`flex-1 py-2 md:py-2.5 rounded-full border text-xs md:text-sm font-semibold transition-all ${isDarkMode ? 'bg-transparent border-gray-700 text-gray-300 hover:bg-white/10' : 'bg-white border-gray-200 text-black hover:bg-gray-50'}`}
               >
                 View Details
               </button>
@@ -451,7 +471,7 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-black">{post.author.name}</h3>
+                  <h3 className={`font-bold ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>{post.author.name}</h3>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
                   <span>{post.createdAt}</span>
@@ -464,20 +484,20 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
           </div>
 
           <div className="mb-4">
-            <h3 className="font-bold text-lg text-black mb-2">{project.title}</h3>
-            <p className="text-gray-600 leading-relaxed">
+            <h3 className={`font-bold text-lg mb-2 ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>{project.title}</h3>
+            <p className={`leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
               {project.description}
             </p>
           </div>
 
-          <div className="flex flex-wrap gap-4 mb-4 text-sm text-gray-600">
-             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-50 border border-gray-100">
+          <div className={`flex flex-wrap gap-4 mb-4 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
+             <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border ${isDarkMode ? 'bg-[#222] border-gray-700' : 'bg-gray-50 border-gray-100'}`}>
                 <Users size={16} className="text-[#F4A261]" />
-                <span className="font-medium text-gray-700">{project.membersNeeded} builders needed</span>
+                <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>{project.membersNeeded} builders needed</span>
              </div>
-             <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-gray-50 border border-gray-100">
+             <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full border ${isDarkMode ? 'bg-[#222] border-gray-700' : 'bg-gray-50 border-gray-100'}`}>
                 <Send size={16} className="text-[#E50914]" />
-                <span className="font-medium text-gray-700">
+                <span className={`font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
                    {liveRequests} requests sent
                 </span>
                 <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse ml-1"></span>
@@ -513,7 +533,7 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
   if (post.type === 'tech-news') {
     const news = post as TechNewsPost;
     return (
-      <Link href={`/post/${post.id}`} className={`${cardClassName} border border-gray-100`}>
+      <Link href={`/post/${post.id}`} className={`${cardClassName} ${isDarkMode ? 'border-[#E70008]/20' : 'border-gray-100'} border`}>
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-center gap-2">
             <span className="px-3 py-1 rounded-full bg-gray-900 text-white text-xs font-bold flex items-center gap-1">
@@ -529,15 +549,15 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
         </div>
 
         <div className="mb-4">
-          <h3 className="font-bold text-xl text-black mb-2 leading-tight hover:text-[#E50914] cursor-pointer transition-colors">
+          <h3 className={`font-bold text-xl mb-2 leading-tight hover:text-[#E50914] cursor-pointer transition-colors ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>
             {news.title}
           </h3>
-          <p className="text-gray-600 text-sm leading-relaxed mb-4">
+          <p className={`text-sm leading-relaxed mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
             {news.summary}
           </p>
           
           {news.imageUrl && (
-            <div className="w-full h-48 md:h-64 rounded-xl overflow-hidden bg-gray-100 mb-4 relative group cursor-pointer">
+            <div className={`w-full h-48 md:h-64 rounded-xl overflow-hidden mb-4 relative group cursor-pointer ${isDarkMode ? 'bg-[#222]' : 'bg-gray-100'}`}>
               <Image 
                 src={news.imageUrl} 
                 alt={news.title} 
@@ -579,7 +599,7 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-black">{post.author.name}</h3>
+                  <h3 className={`font-bold ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>{post.author.name}</h3>
                 </div>
                 <div className="flex items-center gap-2 text-xs text-gray-500 mt-0.5">
                   <span>{post.createdAt}</span>
@@ -592,13 +612,13 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
           </div>
 
           <div className="mb-4">
-            <h3 className="font-bold text-lg text-black mb-2">{regular.title}</h3>
-            <p className="text-gray-600 leading-relaxed mb-4">
+            <h3 className={`font-bold text-lg mb-2 ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>{regular.title}</h3>
+            <p className={`leading-relaxed mb-4 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
               {regular.content}
             </p>
             
             {regular.image && (
-                <div className="w-full h-64 md:h-80 rounded-xl overflow-hidden bg-gray-100 mb-2 border border-gray-100 relative">
+                <div className={`w-full h-64 md:h-80 rounded-xl overflow-hidden mb-2 border border-gray-100 relative ${isDarkMode ? 'bg-[#222] border-gray-700' : 'bg-gray-100 border-gray-100'}`}>
                    <Image src={regular.image} alt="Post Content" fill sizes="(max-width: 768px) 100vw, 768px" className="object-cover hover:scale-105 transition-transform duration-500" />
                 </div>
             )}
@@ -614,14 +634,16 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
   );
 }
 
-function FilterPill({ label, active, onClick }: { label: string; active?: boolean; onClick?: () => void }) {
+function FilterPill({ label, active, onClick, isDarkMode }: { label: string; active?: boolean; onClick?: () => void, isDarkMode?: boolean }) {
   return (
     <button 
       onClick={onClick}
       className={`px-5 py-2 rounded-full text-sm font-medium whitespace-nowrap transition-all ${
       active
         ? 'bg-[#E50914] text-white shadow-md'
-        : 'bg-white text-black hover:bg-gray-50'
+        : isDarkMode 
+          ? 'bg-[#111] text-gray-300 border border-gray-800 hover:bg-[#222]' 
+          : 'bg-white text-black hover:bg-gray-50'
     }`}
     >
       {label}
