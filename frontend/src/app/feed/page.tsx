@@ -305,42 +305,6 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
   const [isRequestSent, setIsRequestSent] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
 
-  // Move hooks to top level to avoid conditional hook calls
-  const jobPost = post.type === 'job' ? post as JobPost : null;
-  const projectPost = post.type === 'project' ? post as ProjectPost : null;
-  
-  // Job progress bar state
-  const [progress, setProgress] = useState(jobPost?.deadlineProgress || 0);
-  
-  // Project live requests state
-  const [liveRequests, setLiveRequests] = useState(projectPost?.requestsSent || 0);
-
-  // Job progress effect
-  useEffect(() => {
-    if (jobPost && progress < 100) {
-      const interval = setInterval(() => {
-        if (Math.random() > 0.5) {
-          setProgress(prev => Math.min(prev + 0.5, 100));
-        }
-      }, 5000);
-      
-      return () => clearInterval(interval);
-    }
-  }, [jobPost, progress]);
-
-  // Project live requests effect
-  useEffect(() => {
-    if (projectPost) {
-      const interval = setInterval(() => {
-        if (Math.random() > 0.7) {
-          setLiveRequests(prev => prev + 1);
-        }
-      }, 5000);
-      
-      return () => clearInterval(interval);
-    }
-  }, [projectPost]);
-
   const handleRequestJoin = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -363,6 +327,20 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
   // Job Post
   if (post.type === 'job') {
     const job = post as JobPost;
+    
+    // Simulating real-time progress bar for deadline
+    const [progress, setProgress] = useState(job.deadlineProgress);
+
+    useEffect(() => {
+        // Slowly increase progress bar
+        const interval = setInterval(() => {
+             if (Math.random() > 0.5 && progress < 100) {
+                setProgress(prev => Math.min(prev + 0.5, 100));
+            }
+        }, 5000);
+        
+        return () => clearInterval(interval);
+    }, [progress]);
 
     return (
         <Link href={`/post/${post.id}`} className={cardClassName}>
@@ -466,6 +444,20 @@ function FeedItem({ post, onRequestJoin }: { post: FeedPost, onRequestJoin?: (au
 
   if (post.type === 'project') {
     const project = post as ProjectPost;
+    
+    // Simulating real-time updates for requests sent
+    const [liveRequests, setLiveRequests] = useState(project.requestsSent);
+
+    useEffect(() => {
+        // Randomly increment requests sent count every 3-10 seconds
+        const interval = setInterval(() => {
+            if (Math.random() > 0.7) {
+                setLiveRequests(prev => prev + 1);
+            }
+        }, 5000);
+        
+        return () => clearInterval(interval);
+    }, []);
 
     return (
         <Link href={`/post/${post.id}`} className={cardClassName}>

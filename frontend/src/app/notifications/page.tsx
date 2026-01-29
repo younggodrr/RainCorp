@@ -95,7 +95,6 @@ const MOCK_NOTIFICATIONS: Notification[] = [
 export default function NotificationsPage() {
   const [filter, setFilter] = useState<'all' | 'unread' | 'requests'>('all');
   const [notifications, setNotifications] = useState(MOCK_NOTIFICATIONS);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const filteredNotifications = notifications.filter(n => {
     if (filter === 'unread') return !n.read;
