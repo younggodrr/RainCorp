@@ -470,28 +470,6 @@ export default function CourseDetailPage() {
           </div>
         )}
 
-        {/* MOBILE BOTTOM NAV */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-3 md:hidden z-50 flex justify-between items-center pb-5 pt-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-          <Link href="/feed" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
-            <LayoutDashboard size={24} />
-            <span className="text-[10px] font-medium">Feed</span>
-          </Link>
-          <Link href="/builders" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
-            <Search size={24} />
-            <span className="text-[10px] font-medium">Builders</span>
-          </Link>
-          <Link href="/messages" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
-            <MessageSquare size={24} />
-            <span className="text-[10px] font-medium">Chat</span>
-          </Link>
-          <Link href="/user-profile" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-[10px]">
-               JD
-            </div>
-            <span className="text-[10px] font-medium">Profile</span>
-          </Link>
-        </div>
-
       </div>
     </div>
   );

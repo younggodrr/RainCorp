@@ -269,7 +269,7 @@ export default function MagnaAIPage() {
               </div>
 
               {/* Chat Messages */}
-              <div className="flex-1 p-4 space-y-6 pb-32">
+              <div className="flex-1 p-4 space-y-6 pb-40">
                  <div className="flex justify-center my-4">
                    <span className="bg-gray-100 text-gray-500 text-xs px-3 py-1 rounded-full font-medium">Today</span>
                  </div>
@@ -301,7 +301,7 @@ export default function MagnaAIPage() {
             </div>
           ) : (
             /* DEFAULT GREETING VIEW */
-            <div className="flex-1 overflow-y-auto px-6 md:px-8 pt-48 md:pt-24 pb-40 md:pb-8 flex flex-col items-start justify-start w-full max-w-4xl mx-auto gap-8">
+            <div className="flex-1 overflow-y-auto px-6 md:px-8 pt-20 md:pt-24 pb-40 md:pb-8 flex flex-col items-start justify-start w-full max-w-4xl mx-auto gap-8">
               {/* Greeting */}
               <div className="w-full text-left">
                 <button 
@@ -379,7 +379,7 @@ export default function MagnaAIPage() {
           )}
 
           {/* Fixed Bottom Input Area */}
-          <div className="fixed bottom-0 left-0 right-0 p-4 bg-[#FDF8F5] md:bg-transparent z-50 pb-[env(safe-area-inset-bottom,16px)] md:hidden">
+          <div className="fixed bottom-[80px] left-0 right-0 p-4 bg-[#FDF8F5] md:bg-transparent z-[60] pb-0 md:hidden">
             <div className="max-w-4xl mx-auto w-full">
                <div className="relative flex items-end bg-[#F0F4F9] rounded-[28px] px-4 py-2 shadow-sm">
                   <button className="p-2 rounded-full hover:bg-gray-200 text-gray-600 transition-colors mr-2 flex-shrink-0 mb-1">

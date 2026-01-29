@@ -204,14 +204,6 @@ export default function BuildersPage() {
                        <span className="text-sm">👀</span>
                        <span>Looking for:</span>
                      </div>
-                     <div className="flex items-center gap-2">
-                        <button className={`p-1.5 rounded-full transition-all ${builder.connected ? 'bg-[#F4A261]/10 text-[#F4A261]' : 'bg-black text-white hover:bg-gray-800'}`}>
-                          {builder.connected ? <UserCheck size={16} /> : <UserPlus size={16} />}
-                        </button>
-                        <button className="p-1.5 rounded-full bg-white text-gray-600 border border-gray-200 hover:bg-gray-100 transition-all">
-                          <MessageSquare size={16} />
-                        </button>
-                     </div>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {builder.lookingFor.map((item, idx) => (
@@ -261,28 +253,6 @@ export default function BuildersPage() {
           </div>
         </div>
 
-      </div>
-
-      {/* MOBILE BOTTOM NAV */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-6 py-3 md:hidden z-50 flex justify-between items-center pb-5 pt-3 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <Link href="/feed" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
-          <LayoutGrid size={24} />
-          <span className="text-[10px] font-medium">Feed</span>
-        </Link>
-        <Link href="/builders" className="flex flex-col items-center gap-1 text-[#E50914] transition-colors">
-          <Search size={24} />
-          <span className="text-[10px] font-medium">Builders</span>
-        </Link>
-        <Link href="/messages" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
-          <MessageSquare size={24} />
-          <span className="text-[10px] font-medium">Chat</span>
-        </Link>
-        <Link href="/user-profile?from=nav" className="flex flex-col items-center gap-1 text-gray-400 hover:text-[#E50914] transition-colors">
-          <div className="w-6 h-6 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-[10px]">
-             JD
-          </div>
-          <span className="text-[10px] font-medium">Profile</span>
-        </Link>
       </div>
 
     </div>
