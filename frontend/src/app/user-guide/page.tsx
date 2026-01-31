@@ -3,31 +3,34 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, ChevronRight, ChevronLeft, Check, User, MapPin, Briefcase, Award, Target } from 'lucide-react';
+import { Camera, ChevronRight, ChevronLeft, Check, User, MapPin, Briefcase, Award, Target, Sun, Moon, Lightbulb, Code, Palette, TrendingUp, Sprout, GraduationCap, UserPlus, LineChart, Headphones, Users, Handshake, Globe, DollarSign } from 'lucide-react';
+import TopNavigation from '@/components/TopNavigation';
+import BottomNavigation from '@/components/BottomNavigation';
+import LeftPanel from '@/components/LeftPanel';
 
 // --- Constants ---
 
 const ROLES = [
-  { id: 'visionary', label: 'Visionary', description: 'Turning ideas into reality' },
-  { id: 'developer', label: 'Developer', description: 'Bringing ideas to life through code' },
-  { id: 'designer', label: 'Designer', description: 'Designing seamless and engaging user interfaces' },
-  { id: 'growth_strategist', label: 'Growth Strategist', description: 'Expanding reach and accelerating product growth' },
-  { id: 'seed_investor', label: 'Seed Investor', description: 'Empowering the next generation of startups' },
-  { id: 'mentor', label: 'Mentor', description: 'Guiding founders and teams towards success' },
-  { id: 'talent_seeker', label: 'Talent Seeker', description: 'Building teams and hiring top talent' },
-  { id: 'research_analyst', label: 'Research/Analyst', description: 'Analyzing data and trends to drive informed decisions' },
-  { id: 'business_strategy', label: 'Business/Strategy', description: 'Leading projects and driving business growth' },
-  { id: 'support', label: 'Support', description: 'Helping users and building strong communities' },
+  { id: 'visionary', label: 'Visionary', description: 'Turning ideas into reality', icon: Lightbulb },
+  { id: 'developer', label: 'Developer', description: 'Bringing ideas to life through code', icon: Code },
+  { id: 'designer', label: 'Designer', description: 'Designing seamless and engaging user interfaces', icon: Palette },
+  { id: 'growth_strategist', label: 'Growth Strategist', description: 'Expanding reach and accelerating product growth', icon: TrendingUp },
+  { id: 'seed_investor', label: 'Seed Investor', description: 'Empowering the next generation of startups', icon: Sprout },
+  { id: 'mentor', label: 'Mentor', description: 'Guiding founders and teams towards success', icon: GraduationCap },
+  { id: 'talent_seeker', label: 'Talent Seeker', description: 'Building teams and hiring top talent', icon: UserPlus },
+  { id: 'research_analyst', label: 'Research/Analyst', description: 'Analyzing data and trends to drive informed decisions', icon: LineChart },
+  { id: 'business_strategy', label: 'Business/Strategy', description: 'Leading projects and driving business growth', icon: Briefcase },
+  { id: 'support', label: 'Support', description: 'Helping users and building strong communities', icon: Headphones },
 ];
 
 const GOALS = [
-  { id: 'team_member', label: 'Team Member', description: 'Collaborate and grow with a team' },
-  { id: 'accountability_partner', label: 'Accountability Partner', description: 'Stay on track and motivated together' },
-  { id: 'mentor_goal', label: 'Mentor', description: 'Receive expert guidance and mentorship' },
-  { id: 'networking', label: 'Networking & Opportunities', description: 'Connect and offer your skills and services' },
-  { id: 'investment', label: 'Investment Prospect', description: 'Discover promising startups to invest in' },
-  { id: 'technical_cofounder', label: 'Technical Co-founder', description: 'Partner to build and scale the product' },
-  { id: 'design_assistance', label: 'Design Assistance', description: 'UI/UX and product design' },
+  { id: 'team_member', label: 'Team Member', description: 'Collaborate and grow with a team', icon: Users },
+  { id: 'accountability_partner', label: 'Accountability Partner', description: 'Stay on track and motivated together', icon: Handshake },
+  { id: 'mentor_goal', label: 'Mentor', description: 'Receive expert guidance and mentorship', icon: GraduationCap },
+  { id: 'networking', label: 'Networking & Opportunities', description: 'Connect and offer your skills and services', icon: Globe },
+  { id: 'investment', label: 'Investment Prospect', description: 'Discover promising startups to invest in', icon: DollarSign },
+  { id: 'technical_cofounder', label: 'Technical Co-founder', description: 'Partner to build and scale the product', icon: Code },
+  { id: 'design_assistance', label: 'Design Assistance', description: 'UI/UX and product design', icon: Palette },
 ];
 
 const ROLE_SUB_CATEGORIES = {
@@ -177,6 +180,21 @@ type FormData = {
 
 export default function UserGuidePage() {
   const [step, setStep] = useState(1);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  
+  // Theme management
+  React.useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') setIsDarkMode(true);
+  }, []);
+
+  const toggleTheme = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    localStorage.setItem('theme', newMode ? 'dark' : 'light');
+    window.dispatchEvent(new Event('themeChanged'));
+  };
+
   const [formData, setFormData] = useState<FormData>({
     gender: '',
     profilePicture: null,
@@ -241,7 +259,7 @@ export default function UserGuidePage() {
       case 1:
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-extrabold text-black text-center mb-8">How do you identify?</h2>
+            <h2 className={`text-2xl font-extrabold text-center mb-8 ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>How do you identify?</h2>
             <div className="space-y-4 max-w-md mx-auto">
               {['Male', 'Female', 'Prefer not to say'].map((option) => (
                 <button
@@ -250,10 +268,12 @@ export default function UserGuidePage() {
                   className={`w-full p-4 rounded-xl border-2 text-left transition-all flex items-center justify-between ${
                     formData.gender === option 
                       ? 'border-[#E50914] bg-[#E50914]/5 text-[#E50914]' 
-                      : 'border-gray-200 hover:border-gray-300'
+                      : isDarkMode 
+                        ? 'border-gray-700 hover:border-gray-600 bg-[#222]' 
+                        : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <span className="font-bold text-black">{option}</span>
+                  <span className={`font-bold ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>{option}</span>
                   {formData.gender === option && <Check size={20} />}
                 </button>
               ))}
@@ -264,10 +284,10 @@ export default function UserGuidePage() {
       case 2:
         return (
           <div className="space-y-6 text-center">
-            <h2 className="text-2xl font-extrabold text-black mb-2">Add a profile picture</h2>
-            <p className="text-gray-500 mb-8">Put a face to the name</p>
+            <h2 className={`text-2xl font-extrabold mb-2 ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>Add a profile picture</h2>
+            <p className={`${isDarkMode ? 'text-[#F4A261]' : 'text-gray-500'} mb-8`}>Put a face to the name</p>
             
-            <div className="relative w-40 h-40 mx-auto bg-gray-100 rounded-full flex items-center justify-center overflow-hidden border-4 border-white shadow-lg group cursor-pointer">
+            <div className={`relative w-40 h-40 mx-auto rounded-full flex items-center justify-center overflow-hidden border-4 shadow-lg group cursor-pointer ${isDarkMode ? 'bg-[#222] border-[#333]' : 'bg-gray-100 border-white'}`}>
               {formData.profilePicture ? (
                 <Image 
                   src={URL.createObjectURL(formData.profilePicture)} 
@@ -303,8 +323,8 @@ export default function UserGuidePage() {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-extrabold text-black mb-2">What describes you best?</h2>
-              <p className="text-gray-500">Select up to two options</p>
+              <h2 className={`text-2xl font-extrabold mb-2 ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>What describes you best?</h2>
+              <p className={isDarkMode ? 'text-[#F4A261]' : 'text-gray-500'}>Select up to two options</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -315,14 +335,19 @@ export default function UserGuidePage() {
                   className={`p-4 rounded-xl border-2 text-left transition-all ${
                     formData.roles.includes(role.id)
                       ? 'border-[#E50914] bg-[#E50914]/5' 
-                      : 'border-gray-200 hover:border-gray-300'
+                      : isDarkMode 
+                        ? 'border-gray-700 hover:border-gray-600 bg-[#222]' 
+                        : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <div className="font-extrabold text-black mb-1 flex justify-between items-center">
-                    {role.label}
+                  <div className={`font-extrabold mb-1 flex justify-between items-center ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>
+                    <div className="flex items-center gap-3">
+                      <role.icon size={24} className={formData.roles.includes(role.id) ? 'text-[#E50914]' : isDarkMode ? 'text-[#F4A261]' : 'text-gray-600'} />
+                      {role.label}
+                    </div>
                     {formData.roles.includes(role.id) && <Check size={18} className="text-[#E50914]" />}
                   </div>
-                  <div className="text-xs text-gray-500">{role.description}</div>
+                  <div className={`text-xs mt-2 ${isDarkMode ? 'text-[#F4A261]' : 'text-gray-500'}`}>{role.description}</div>
                 </button>
               ))}
             </div>
@@ -333,8 +358,8 @@ export default function UserGuidePage() {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-extrabold text-black mb-2">What are you looking for?</h2>
-              <p className="text-gray-500">Select up to three options</p>
+              <h2 className={`text-2xl font-extrabold mb-2 ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>What are you looking for?</h2>
+              <p className={isDarkMode ? 'text-[#F4A261]' : 'text-gray-500'}>Select up to three options</p>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -345,14 +370,19 @@ export default function UserGuidePage() {
                   className={`p-4 rounded-xl border-2 text-left transition-all ${
                     formData.goals.includes(goal.id)
                       ? 'border-[#F4A261] bg-[#F4A261]/5' 
-                      : 'border-gray-200 hover:border-gray-300'
+                      : isDarkMode 
+                        ? 'border-gray-700 hover:border-gray-600 bg-[#222]' 
+                        : 'border-gray-200 hover:border-gray-300'
                   }`}
                 >
-                  <div className="font-extrabold text-black mb-1 flex justify-between items-center">
-                    {goal.label}
+                  <div className={`font-extrabold mb-1 flex justify-between items-center ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>
+                    <div className="flex items-center gap-3">
+                      <goal.icon size={24} className={formData.goals.includes(goal.id) ? 'text-[#F4A261]' : isDarkMode ? 'text-[#F4A261]' : 'text-gray-600'} />
+                      {goal.label}
+                    </div>
                     {formData.goals.includes(goal.id) && <Check size={18} className="text-[#F4A261]" />}
                   </div>
-                  <div className="text-xs text-gray-500">{goal.description}</div>
+                  <div className={`text-xs mt-2 ${isDarkMode ? 'text-[#F4A261]' : 'text-gray-500'}`}>{goal.description}</div>
                 </button>
               ))}
             </div>
@@ -375,15 +405,15 @@ export default function UserGuidePage() {
         return (
           <div className="space-y-8">
             <div className="text-center">
-              <h2 className="text-2xl font-extrabold text-black mb-2">Tell us more</h2>
-              <p className="text-gray-500">This makes it easy to find better matches for you</p>
+              <h2 className={`text-2xl font-extrabold mb-2 ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>Tell us more</h2>
+              <p className={isDarkMode ? 'text-[#F4A261]' : 'text-gray-500'}>This makes it easy to find better matches for you</p>
             </div>
 
             {/* Specialisation */}
             <div>
-              <h3 className="font-extrabold mb-3 flex items-center gap-2 text-black">
+              <h3 className={`font-extrabold mb-3 flex items-center gap-2 ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>
                 <Briefcase size={18} className="text-[#E50914]" />
-                Specialisation <span className="text-xs font-normal text-gray-400 ml-2">(Max 3)</span>
+                Specialisation <span className={`text-xs font-normal ml-2 ${isDarkMode ? 'text-[#F4A261]/80' : 'text-gray-400'}`}>(Max 3)</span>
               </h3>
               <div className="flex flex-wrap gap-2">
                 {displaySpecialisations.map((spec) => (
@@ -393,7 +423,9 @@ export default function UserGuidePage() {
                     className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
                       formData.specialisation.includes(spec)
                         ? 'bg-[#E50914] text-white border-[#E50914]'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                        : isDarkMode
+                          ? 'bg-[#222] text-[#F4A261] border-gray-700 hover:border-gray-600'
+                          : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
                     }`}
                   >
                     {spec}
@@ -404,9 +436,9 @@ export default function UserGuidePage() {
 
             {/* Top Skills */}
             <div>
-              <h3 className="font-extrabold mb-3 flex items-center gap-2 text-black">
+              <h3 className={`font-extrabold mb-3 flex items-center gap-2 ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>
                 <Award size={18} className="text-[#F4A261]" />
-                Top Skills <span className="text-xs font-normal text-gray-400 ml-2">(Max 6)</span>
+                Top Skills <span className={`text-xs font-normal ml-2 ${isDarkMode ? 'text-[#F4A261]/80' : 'text-gray-400'}`}>(Max 6)</span>
               </h3>
               <div className="flex flex-wrap gap-2 mb-3">
                 {displaySkills.map((skill) => (
@@ -416,7 +448,9 @@ export default function UserGuidePage() {
                     className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
                       formData.skills.includes(skill)
                         ? 'bg-[#F4A261] text-white border-[#F4A261]'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                        : isDarkMode
+                          ? 'bg-[#222] text-[#F4A261] border-gray-700 hover:border-gray-600'
+                          : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
                     }`}
                   >
                     {skill}
@@ -441,7 +475,11 @@ export default function UserGuidePage() {
                   onChange={(e) => setCustomSkill(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && addCustomSkill()}
                   placeholder="Add other skill..."
-                  className="flex-1 px-4 py-2 rounded-full text-sm border border-gray-200 focus:outline-none focus:border-[#F4A261] text-black"
+                  className={`flex-1 px-4 py-2 rounded-full text-sm border focus:outline-none focus:border-[#F4A261] ${
+                    isDarkMode 
+                      ? 'bg-[#222] border-gray-700 text-[#F4A261] placeholder-[#F4A261]/70' 
+                      : 'border-gray-200 text-black'
+                  }`}
                 />
                 <button
                   onClick={addCustomSkill}
@@ -455,7 +493,7 @@ export default function UserGuidePage() {
 
             {/* Availability */}
             <div>
-              <h3 className="font-extrabold mb-3 flex items-center gap-2 text-black">
+              <h3 className={`font-extrabold mb-3 flex items-center gap-2 ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>
                 <Target size={18} className="text-[#2ECC71]" />
                 Available for
               </h3>
@@ -467,7 +505,9 @@ export default function UserGuidePage() {
                     className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
                       formData.availability.includes(avail)
                         ? 'bg-[#2ECC71] text-white border-[#2ECC71]'
-                        : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                        : isDarkMode
+                          ? 'bg-[#222] text-[#F4A261] border-gray-700 hover:border-gray-600'
+                          : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
                     }`}
                   >
                     {avail}
@@ -482,21 +522,25 @@ export default function UserGuidePage() {
         return (
           <div className="space-y-8">
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-extrabold text-black mb-2">Final touches</h2>
-              <p className="text-gray-500">Let others know who you are</p>
+              <h2 className={`text-2xl font-extrabold mb-2 ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>Final touches</h2>
+              <p className={isDarkMode ? 'text-[#F4A261]' : 'text-gray-500'}>Let others know who you are</p>
             </div>
 
             {/* Bio */}
             <div>
-              <label className="block font-bold mb-2 text-black">Share a bit info about you</label>
+              <label className={`block font-bold mb-2 ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>Share a bit info about you</label>
               <textarea
                 value={formData.bio}
                 onChange={(e) => updateFormData('bio', e.target.value)}
                 placeholder="Tell us about your journey, interests, and what drives you..."
-                className="w-full h-32 p-4 rounded-xl border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] outline-none resize-none bg-gray-50 text-black"
+                className={`w-full h-32 p-4 rounded-xl border focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] outline-none resize-none ${
+                  isDarkMode 
+                    ? 'bg-[#222] border-gray-700 text-[#F4A261] placeholder-[#F4A261]/70' 
+                    : 'bg-gray-50 border-gray-200 text-black'
+                }`}
               />
               <div className="text-right mt-1">
-                <span className={`text-xs ${formData.bio.length > 0 && formData.bio.length < 40 ? 'text-red-500' : 'text-gray-400'}`}>
+                <span className={`text-xs ${formData.bio.length > 0 && formData.bio.length < 40 ? 'text-red-500' : isDarkMode ? 'text-[#F4A261]/70' : 'text-gray-400'}`}>
                   {formData.bio.length} / 40 minimum characters
                 </span>
               </div>
@@ -504,7 +548,7 @@ export default function UserGuidePage() {
 
             {/* Location */}
             <div>
-              <label className="block font-bold mb-2 flex items-center gap-2 text-black">
+              <label className={`block font-bold mb-2 flex items-center gap-2 ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>
                 <MapPin size={18} />
                 Location
               </label>
@@ -514,7 +558,11 @@ export default function UserGuidePage() {
                   placeholder="Country (e.g. Kenya)"
                   value={formData.country}
                   onChange={(e) => updateFormData('country', e.target.value)}
-                  className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] outline-none bg-white text-black"
+                  className={`w-full p-4 rounded-xl border focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] outline-none ${
+                    isDarkMode 
+                      ? 'bg-[#222] border-gray-700 text-[#F4A261] placeholder-[#F4A261]/70' 
+                      : 'bg-white border-gray-200 text-black'
+                  }`}
                 />
 
                 {formData.country.toLowerCase() === 'kenya' && (
@@ -523,11 +571,15 @@ export default function UserGuidePage() {
                     animate={{ opacity: 1, height: 'auto' }}
                     className="space-y-2"
                   >
-                    <label className="block text-sm font-bold text-black">Select County</label>
+                    <label className={`block text-sm font-bold ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>Select County</label>
                     <select
                       value={formData.county}
                       onChange={(e) => updateFormData('county', e.target.value)}
-                      className="w-full p-4 rounded-xl border border-gray-200 focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] outline-none bg-white appearance-none text-black"
+                      className={`w-full p-4 rounded-xl border focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] outline-none appearance-none ${
+                        isDarkMode 
+                          ? 'bg-[#222] border-gray-700 text-[#F4A261]' 
+                          : 'bg-white border-gray-200 text-black'
+                      }`}
                     >
                       <option value="">Select a county...</option>
                       {COUNTIES.map((county) => (
@@ -559,63 +611,89 @@ export default function UserGuidePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FDF8F5] flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl bg-white rounded-3xl shadow-xl overflow-hidden flex flex-col min-h-[600px]">
-        {/* Progress Bar */}
-        <div className="h-2 bg-gray-100 w-full">
-          <div 
-            className="h-full bg-gradient-to-r from-[#F4A261] to-[#E50914] transition-all duration-300 ease-out"
-            style={{ width: `${(step / totalSteps) * 100}%` }}
-          />
-        </div>
-
-        {/* Content */}
-        <div className="flex-1 p-8 md:p-12 overflow-y-auto">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={step}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-              className="h-full"
-            >
-              {renderStep()}
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {/* Footer Navigation */}
-        <div className="p-8 border-t border-gray-100 bg-gray-50 flex justify-between items-center">
-          <button
-            onClick={handleBack}
-            disabled={step === 1}
-            className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all ${
-              step === 1 
-                ? 'text-gray-300 cursor-not-allowed' 
-                : 'text-gray-600 hover:bg-gray-200'
-            }`}
+    <div className={`min-h-screen ${isDarkMode ? 'bg-[#0A0A0A]' : 'bg-[#FDF8F5]'} transition-colors duration-300`}>
+      <TopNavigation 
+        title="User Guide"
+        onMobileMenuOpen={() => {}}
+        showSearch={false}
+        className="!left-0"
+        isDarkMode={isDarkMode}
+        customAction={
+          <button 
+            onClick={toggleTheme}
+            className={`relative w-16 h-8 rounded-full transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-[#E50914] ${isDarkMode ? 'bg-gray-800' : 'bg-[#FBE6A4] border border-[#F4A261]/30'}`}
           >
-            <ChevronLeft size={20} />
-            Back
-          </button>
-
-          <div className="flex gap-2">
-            <div className="text-sm text-gray-400 font-medium flex items-center mr-4">
-              Step {step} of {totalSteps}
+            <div className="absolute inset-0 flex justify-between items-center px-2">
+              <Sun className="w-4 h-4 text-[#E50914]" />
+              <Moon className="w-4 h-4 text-[#F4A261]" />
             </div>
+            <motion.div 
+              className="absolute top-1 left-1 w-6 h-6 rounded-full bg-white shadow-md"
+              animate={{ x: isDarkMode ? 32 : 0 }}
+              transition={{ type: "spring", stiffness: 500, damping: 30 }}
+            />
+          </button>
+        }
+      />
+
+      <div className="pt-24 pb-8 px-4 flex items-center justify-center min-h-screen">
+        <div className={`w-full max-w-2xl rounded-3xl shadow-xl overflow-hidden flex flex-col min-h-[600px] ${isDarkMode ? 'bg-[#111] border border-[#E70008]/20' : 'bg-white'}`}>
+          {/* Progress Bar */}
+          <div className={`h-2 w-full ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}>
+            <div 
+              className="h-full bg-gradient-to-r from-[#F4A261] to-[#E50914] transition-all duration-300 ease-out"
+              style={{ width: `${(step / totalSteps) * 100}%` }}
+            />
+          </div>
+
+          {/* Content */}
+          <div className="flex-1 p-8 md:p-12 overflow-y-auto">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.2 }}
+                className="h-full"
+              >
+                {renderStep()}
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Footer Navigation */}
+          <div className={`p-8 border-t flex justify-between items-center ${isDarkMode ? 'border-gray-800 bg-[#161616]' : 'border-gray-100 bg-gray-50'}`}>
             <button
-              onClick={handleNext}
-              disabled={isNextDisabled()}
-              className={`flex items-center gap-2 px-8 py-3 rounded-full font-bold text-white transition-all shadow-md ${
-                isNextDisabled()
-                  ? 'bg-gray-300 cursor-not-allowed shadow-none'
-                  : 'bg-[#E50914] hover:bg-[#cc0812] hover:shadow-lg'
+              onClick={handleBack}
+              disabled={step === 1}
+              className={`flex items-center gap-2 px-6 py-3 rounded-full font-medium transition-all ${
+                step === 1 
+                  ? 'text-gray-300 cursor-not-allowed' 
+                  : isDarkMode ? 'text-[#F4A261] hover:bg-gray-800' : 'text-gray-600 hover:bg-gray-200'
               }`}
             >
-              {step === totalSteps ? 'Complete' : 'Next'}
-              {step !== totalSteps && <ChevronRight size={20} />}
+              <ChevronLeft size={20} />
+              Back
             </button>
+
+            <div className="flex gap-2">
+              <div className={`text-sm font-medium flex items-center mr-4 ${isDarkMode ? 'text-[#F4A261]' : 'text-gray-400'}`}>
+                Step {step} of {totalSteps}
+              </div>
+              <button
+                onClick={handleNext}
+                disabled={isNextDisabled()}
+                className={`flex items-center gap-2 px-8 py-3 rounded-full font-bold text-white transition-all shadow-md ${
+                  isNextDisabled()
+                    ? 'bg-gray-300 cursor-not-allowed shadow-none'
+                    : 'bg-[#E50914] hover:bg-[#cc0812] hover:shadow-lg'
+                }`}
+              >
+                {step === totalSteps ? 'Complete' : 'Next'}
+                {step !== totalSteps && <ChevronRight size={20} />}
+              </button>
+            </div>
           </div>
         </div>
       </div>

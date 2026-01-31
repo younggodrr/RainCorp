@@ -12,9 +12,21 @@ interface TopNavigationProps {
   searchValue?: string;
   onSearchChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   isDarkMode?: boolean;
+  showSearch?: boolean;
+  customAction?: React.ReactNode;
 }
 
-export default function TopNavigation({ title, onMobileMenuOpen, className = '', searchPlaceholder = 'Search...', searchValue, onSearchChange, isDarkMode = false }: TopNavigationProps) {
+export default function TopNavigation({ 
+  title, 
+  onMobileMenuOpen, 
+  className = '', 
+  searchPlaceholder = 'Search...', 
+  searchValue, 
+  onSearchChange, 
+  isDarkMode = false,
+  showSearch = true,
+  customAction
+}: TopNavigationProps) {
   return (
     <div className={`fixed top-0 right-0 z-30 backdrop-blur-sm border-b px-4 md:px-8 py-4 flex items-center justify-between transition-all duration-300 left-0 md:left-[88px] lg:left-[260px] ${className} ${isDarkMode ? 'bg-black/90 border-[#E70008]/20' : 'bg-white/90 border-gray-100'}`}>
       <div>
@@ -35,28 +47,32 @@ export default function TopNavigation({ title, onMobileMenuOpen, className = '',
 
       <div className="flex items-center gap-2 md:gap-4">
         {/* Search Bar (Desktop) */}
-        <div className="hidden md:flex relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
-          <input 
-            type="text" 
-            placeholder={searchPlaceholder}
-            value={searchValue}
-            onChange={onSearchChange}
-            className={`rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#E50914] w-64 transition-all ${isDarkMode ? 'bg-[#111] border-[#E70008]/20 text-[#F9E4AD] placeholder-gray-500' : 'bg-gray-50 border-gray-100 text-black'}`}
-          />
-        </div>
+        {showSearch && (
+          <div className="hidden md:flex relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
+            <input 
+              type="text" 
+              placeholder={searchPlaceholder}
+              value={searchValue}
+              onChange={onSearchChange}
+              className={`rounded-full pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#E50914] w-64 transition-all ${isDarkMode ? 'bg-[#111] border-[#E70008]/20 text-[#F9E4AD] placeholder-gray-500' : 'bg-gray-50 border-gray-100 text-black'}`}
+            />
+          </div>
+        )}
 
         {/* Small Search Bar (Mobile) */}
-        <div className="flex md:hidden relative">
-           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
-           <input 
-             type="text" 
-             placeholder="Search" 
-             value={searchValue}
-             onChange={onSearchChange}
-             className={`rounded-full pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#E50914] w-28 transition-all ${isDarkMode ? 'bg-[#111] border-[#E70008]/20 text-[#F9E4AD] placeholder-gray-500' : 'bg-gray-50 border-gray-100 text-black'}`}
-           />
-        </div>
+        {showSearch && (
+          <div className="flex md:hidden relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+            <input 
+              type="text" 
+              placeholder="Search" 
+              value={searchValue}
+              onChange={onSearchChange}
+              className={`rounded-full pl-8 pr-3 py-1.5 text-xs focus:outline-none focus:ring-1 focus:ring-[#E50914] w-28 transition-all ${isDarkMode ? 'bg-[#111] border-[#E70008]/20 text-[#F9E4AD] placeholder-gray-500' : 'bg-gray-50 border-gray-100 text-black'}`}
+            />
+          </div>
+        )}
 
         {/* Notification Icon */}
         <Link href="/notifications" className={`relative p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#E70008]/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}>
@@ -65,6 +81,13 @@ export default function TopNavigation({ title, onMobileMenuOpen, className = '',
             3
           </div>
         </Link>
+        
+        {/* Custom Action */}
+        {customAction && (
+          <div className="flex items-center">
+            {customAction}
+          </div>
+        )}
         
         {/* Mobile Menu Icon */}
         <button 
