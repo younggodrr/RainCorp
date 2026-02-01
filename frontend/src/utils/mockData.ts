@@ -98,135 +98,225 @@ export const generateMockPost = (id: string, seed: number): FeedPost => {
     const authorNames = ['John Doe', 'Sarah Jenkins', 'Mike Ross', 'Emily Chen'];
     const roles = ['Full Stack Dev', 'UI/UX Designer', 'Product Manager', 'DevOps Engineer'];
     
+    const author = {
+        name: getRandomItem(authorNames, seed),
+        avatar: getRandomItem(['JD', 'SJ', 'MR', 'EC'], seed),
+        role: getRandomItem(roles, seed + 1)
+    };
+
     const base = {
-      id,
-      type,
-      author: {
-        name: getRandomItem(authorNames, seed + 1),
-        avatar: '', // handled in component
-        role: getRandomItem(roles, seed + 2)
-      },
-      createdAt: `${Math.floor(seededRandom(seed + 3) * 24)} hours ago`,
-      likes: Math.floor(seededRandom(seed + 4) * 500),
-      comments: Math.floor(seededRandom(seed + 5) * 50),
+        id,
+        author,
+        createdAt: '2h ago',
+        likes: Math.floor(seededRandom(seed + 2) * 100),
+        comments: Math.floor(seededRandom(seed + 3) * 20),
     };
 
     if (type === 'job') {
-      const titles = ['Senior Frontend Developer', 'Backend Engineer', 'Product Designer', 'DevOps Specialist'];
-      const companies = ['Magna Coders', 'Tech Corp', 'Startup Inc', 'Future Systems'];
-      const timeLeftRange = ['Apply by Friday', 'Closing soon', '2 days left', '1 week left'];
-      
-      return {
-        ...base,
-        title: getRandomItem(titles, seed + 6),
-        company: getRandomItem(companies, seed + 7),
-        description: 'We are looking for a talented individual to join our team. Competitive salary and great benefits.',
-        location: 'Remote',
-        salary: '$120k - $150k',
-        tags: ['React', 'TypeScript', 'Node.js'],
-        jobType: 'Full-time',
-        deadlineProgress: Math.floor(seededRandom(seed + 15) * 60) + 30, // Random progress between 30% and 90%
-        timeLeft: getRandomItem(timeLeftRange, seed + 16)
-      } as JobPost;
-    } else if (type === 'project') {
-      const titles = ['E-commerce Platform', 'Social Media App', 'AI Dashboard', 'Crypto Wallet'];
-      const membersRange = ['2-3', '3-4', '1-2', '4-5'];
-      const timeLeftRange = ['2 days left', '5 days left', '1 week left', 'Ending soon'];
-      
-      return {
-        ...base,
-        title: getRandomItem(titles, seed + 8),
-        description: 'Building a new platform using the latest tech stack. Looking for collaborators!',
-        tags: ['Next.js', 'Tailwind', 'Supabase'],
-        membersNeeded: getRandomItem(membersRange, seed + 13),
-        requestsSent: Math.floor(seededRandom(seed + 14) * 20) + 5, // Random number between 5 and 25
-        deadlineProgress: Math.floor(seededRandom(seed + 15) * 60) + 30, // Random progress between 30% and 90%
-        timeLeft: getRandomItem(timeLeftRange, seed + 16)
-      } as ProjectPost;
-    } else if (type === 'tech-news') {
-      const titles = ['The Future of AI in 2026', 'New React Features Announced', 'WebAssembly Takes Over', 'Cybersecurity Trends'];
-      const sources = ['TechCrunch', 'The Verge', 'Hacker News', 'Wired'];
-
-      return {
-        ...base,
-        title: getRandomItem(titles, seed + 9),
-        summary: 'A deep dive into the latest technological advancements and what they mean for developers in the coming year.',
-        source: getRandomItem(sources, seed + 10),
-        url: '#',
-        imageUrl: '/api/placeholder/800/400'
-      } as TechNewsPost;
-    } else {
-      const titles = ['Just launched!', 'Working on something new', 'Learning Rust', 'Office vibes'];
-      
-      return {
-        ...base,
-        title: getRandomItem(titles, seed + 11),
-        content: 'Excited to share my latest progress. What do you guys think about this approach?',
-        image: seededRandom(seed + 12) > 0.7 ? '/api/placeholder/800/400' : undefined
-      } as RegularPost;
-    }
-}
-
-export const generateMockComments = (postId: string, count: number): Comment[] => {
-    // Parse seed from ID
-    const match = postId.match(/post-(\d+)/);
-    const baseSeed = match && match[1] ? parseInt(match[1], 10) : 99999;
-
-    const names = ['Alice Smith', 'Bob Johnson', 'Charlie Brown', 'David Lee', 'Eve Wilson', 'Frank Miller'];
-    const contents = [
-        'This is amazing! Great work.',
-        'I totally agree with this.',
-        'Can you share more details about the implementation?',
-        'Looking forward to seeing more updates.',
-        'Interesting perspective.',
-        'Wow, I learned a lot from this.',
-        'Is this open source?',
-        'Congrats on the launch!',
-        'This saved me hours of debugging.',
-        'Really cool concept.'
-    ];
-
-    return Array.from({ length: count }).map((_, index) => {
-        const seed = baseSeed + index * 100; // Spread seeds
-        const hoursAgo = Math.floor(seededRandom(seed + 3) * 10);
         return {
-            id: `comment-${postId}-${index}`,
-            author: {
-                name: getRandomItem(names, seed + 1),
-                avatar: undefined
-            },
-            content: getRandomItem(contents, seed + 2),
-            createdAt: `${hoursAgo} hours ago`,
-            timestamp: Date.now() - hoursAgo * 3600000,
-            likes: Math.floor(seededRandom(seed + 4) * 50),
-            isLiked: false,
-            isOwner: false,
-            replies: []
+            ...base,
+            type: 'job',
+            title: getRandomItem(['Senior React Developer', 'Backend Engineer', 'Product Designer'], seed + 4),
+            company: getRandomItem(['TechCorp', 'StartUp Inc', 'Global Solutions'], seed + 5),
+            description: 'We are looking for a talented developer to join our team...',
+            location: 'Remote',
+            salary: '$120k - $150k',
+            tags: ['React', 'TypeScript', 'Node.js'],
+            jobType: 'Full-time',
+            deadlineProgress: 30,
+            timeLeft: '5 days left'
         };
-    });
+    } else if (type === 'project') {
+        return {
+            ...base,
+            type: 'project',
+            title: getRandomItem(['E-commerce Platform', 'Social Media App', 'AI Tool'], seed + 6),
+            description: 'Building a new platform for creators. Need help with frontend.',
+            tags: ['Next.js', 'Tailwind', 'Supabase'],
+            membersNeeded: '2 Developers',
+            requestsSent: 5,
+            deadlineProgress: 45,
+            timeLeft: '2 weeks left'
+        };
+    } else if (type === 'tech-news') {
+        return {
+            ...base,
+            type: 'tech-news',
+            title: getRandomItem(['New React Version Released', 'AI Breakthrough', 'Tech Market Trends'], seed + 7),
+            summary: 'The latest update brings significant performance improvements...',
+            source: 'TechCrunch',
+            url: '#'
+        };
+    } else {
+        return {
+            ...base,
+            type: 'post',
+            title: 'Just finished a new feature!',
+            content: 'Check out this cool animation I made using Framer Motion.',
+        };
+    }
 };
 
 export const generateMockPosts = (page: number, limit: number): FeedPost[] => {
-  return Array.from({ length: limit }).map((_, index) => {
-    // Generate a deterministic ID based on page and index
-    const virtualId = (page - 1) * 1000 + index;
-    const uniqueId = `post-${virtualId}`;
-    
-    // Use the virtualId as the seed
-    return generateMockPost(uniqueId, virtualId);
-  });
+    const posts: FeedPost[] = [];
+    for (let i = 0; i < limit; i++) {
+        posts.push(generateMockPost(`post-${page}-${i}`, page * limit + i));
+    }
+    return posts;
 };
 
-export const getPostById = (id: string): FeedPost | null => {
-  // Parse the ID to get the seed
-  // ID format: post-{number}
-  const match = id.match(/post-(\d+)/);
-  
-  if (match && match[1]) {
-      const seed = parseInt(match[1], 10);
-      return generateMockPost(id, seed);
-  }
-  
-  // Fallback for unknown IDs
-  return generateMockPost(id, 99999);
+export const generateMockComments = (postId: string, count: number): Comment[] => {
+    const comments: Comment[] = [];
+    for(let i=0; i<count; i++) {
+        comments.push({
+            id: `comment-${postId}-${i}`,
+            author: {
+                name: `User ${i}`,
+                avatar: 'U'
+            },
+            content: 'Great post! Thanks for sharing.',
+            createdAt: '1h ago',
+            timestamp: Date.now() - i * 3600000,
+            likes: Math.floor(Math.random() * 10),
+            isLiked: false,
+            replies: []
+        });
+    }
+    return comments;
 };
+
+// --- CHAT TYPES & MOCK DATA ---
+
+export type MessageType = 'text' | 'file' | 'image';
+
+export interface Message {
+  id: string;
+  sender: string;
+  text: string;
+  time: string;
+  avatar: string;
+  isMe: boolean;
+  type: MessageType;
+  fileName?: string;
+  fileSize?: string;
+  read?: boolean;
+}
+
+export interface Conversation {
+  id: string;
+  name: string;
+  lastMessage: string;
+  time: string;
+  unread: number;
+  isTyping: boolean;
+  pinned: boolean;
+  isGroup: boolean;
+  archived: boolean;
+  messages: Message[];
+  avatarColor: string; // Tailwind class
+}
+
+export const generateMockMessages = (count: number, isGroup: boolean): Message[] => {
+  const messages: Message[] = [];
+  const senders = isGroup ? ['Sarah', 'Mike', 'Jessica', 'Me'] : ['Them', 'Me'];
+  
+  for (let i = 0; i < count; i++) {
+    const isMe = Math.random() > 0.5;
+    messages.push({
+      id: `msg-${i}`,
+      sender: isMe ? 'Me' : senders[Math.floor(Math.random() * (senders.length - 1))],
+      text: isMe ? 'Just checking in on the progress.' : 'Everything is going according to plan!',
+      time: '10:00 AM',
+      avatar: isMe ? 'ME' : 'JD',
+      isMe,
+      type: 'text',
+      read: true
+    });
+  }
+  return messages;
+};
+
+export const MOCK_CONVERSATIONS: Conversation[] = [
+  { 
+    id: '1', 
+    name: 'Kretya Studio', 
+    lastMessage: 'Victor is typing...', 
+    time: '4m', 
+    unread: 12, 
+    isTyping: true, 
+    pinned: true, 
+    isGroup: false, 
+    archived: false,
+    avatarColor: 'bg-blue-100 text-blue-600',
+    messages: [
+      { id: 'm1', sender: 'Kretya Studio', text: 'Hey, how is the project coming along?', time: '09:41 AM', avatar: 'KS', isMe: false, type: 'text', read: true },
+      { id: 'm2', sender: 'Me', text: 'It is going great! I will send over the files shortly.', time: '09:42 AM', avatar: 'ME', isMe: true, type: 'text', read: true },
+      { id: 'm3', sender: 'Kretya Studio', text: 'Perfect, looking forward to it.', time: '09:45 AM', avatar: 'KS', isMe: false, type: 'text', read: true },
+    ] 
+  },
+  { 
+    id: '2', 
+    name: 'PM Okta', 
+    lastMessage: 'I see, okay noted!', 
+    time: '10m', 
+    unread: 0, 
+    isTyping: false, 
+    pinned: true, 
+    isGroup: false, 
+    archived: false,
+    avatarColor: 'bg-purple-100 text-purple-600',
+    messages: generateMockMessages(5, false)
+  },
+  { 
+    id: '3', 
+    name: 'Design Team', 
+    lastMessage: 'Sarah: New mockups are ready', 
+    time: '15m', 
+    unread: 3, 
+    isTyping: false, 
+    pinned: false, 
+    isGroup: true, 
+    archived: false,
+    avatarColor: 'bg-green-100 text-green-600',
+    messages: generateMockMessages(10, true)
+  },
+  { 
+    id: '4', 
+    name: 'Project Alpha', 
+    lastMessage: 'Meeting at 2 PM?', 
+    time: '2h', 
+    unread: 0, 
+    isTyping: false, 
+    pinned: false, 
+    isGroup: true, 
+    archived: false,
+    avatarColor: 'bg-yellow-100 text-yellow-600',
+    messages: generateMockMessages(3, true)
+  },
+  { 
+    id: '5', 
+    name: 'Lead Frans', 
+    lastMessage: 'ok, thanks!', 
+    time: '1h', 
+    unread: 0, 
+    isTyping: false, 
+    pinned: false, 
+    isGroup: false, 
+    archived: false,
+    avatarColor: 'bg-pink-100 text-pink-600',
+    messages: generateMockMessages(8, false)
+  },
+  { 
+    id: '6', 
+    name: 'Victor Yoga', 
+    lastMessage: 'You can check it...', 
+    time: 'now', 
+    unread: 1, 
+    isTyping: false, 
+    pinned: false, 
+    isGroup: false, 
+    archived: false,
+    avatarColor: 'bg-indigo-100 text-indigo-600',
+    messages: generateMockMessages(2, false)
+  },
+];

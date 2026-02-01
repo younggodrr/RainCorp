@@ -20,143 +20,7 @@ import ContactInfoModal from '@/components/ContactInfoModal';
 import AttachmentModal from '@/components/AttachmentModal';
 import DiscoverGroupsModal from '@/components/DiscoverGroupsModal';
 
-// --- TYPES ---
-
-type MessageType = 'text' | 'file' | 'image';
-
-interface Message {
-  id: string;
-  sender: string;
-  text: string;
-  time: string;
-  avatar: string;
-  isMe: boolean;
-  type: MessageType;
-  fileName?: string;
-  fileSize?: string;
-  read?: boolean;
-}
-
-interface Conversation {
-  id: string;
-  name: string;
-  lastMessage: string;
-  time: string;
-  unread: number;
-  isTyping: boolean;
-  pinned: boolean;
-  isGroup: boolean;
-  archived: boolean;
-  messages: Message[];
-  avatarColor: string; // Tailwind class
-}
-
-// --- MOCK DATA GENERATORS ---
-
-const generateMockMessages = (count: number, isGroup: boolean): Message[] => {
-  const messages: Message[] = [];
-  const senders = isGroup ? ['Sarah', 'Mike', 'Jessica', 'Me'] : ['Them', 'Me'];
-  
-  for (let i = 0; i < count; i++) {
-    const isMe = Math.random() > 0.5;
-    messages.push({
-      id: `msg-${i}`,
-      sender: isMe ? 'Me' : senders[Math.floor(Math.random() * (senders.length - 1))],
-      text: isMe ? 'Just checking in on the progress.' : 'Everything is going according to plan!',
-      time: '10:00 AM',
-      avatar: isMe ? 'ME' : 'JD',
-      isMe,
-      type: 'text',
-      read: true
-    });
-  }
-  return messages;
-};
-
-const INITIAL_CONVERSATIONS: Conversation[] = [
-  { 
-    id: '1', 
-    name: 'Kretya Studio', 
-    lastMessage: 'Victor is typing...', 
-    time: '4m', 
-    unread: 12, 
-    isTyping: true, 
-    pinned: true, 
-    isGroup: false, 
-    archived: false,
-    avatarColor: 'bg-blue-100 text-blue-600',
-    messages: [
-      { id: 'm1', sender: 'Kretya Studio', text: 'Hey, how is the project coming along?', time: '09:41 AM', avatar: 'KS', isMe: false, type: 'text', read: true },
-      { id: 'm2', sender: 'Me', text: 'It is going great! I will send over the files shortly.', time: '09:42 AM', avatar: 'ME', isMe: true, type: 'text', read: true },
-      { id: 'm3', sender: 'Kretya Studio', text: 'Perfect, looking forward to it.', time: '09:45 AM', avatar: 'KS', isMe: false, type: 'text', read: true },
-    ] 
-  },
-  { 
-    id: '2', 
-    name: 'PM Okta', 
-    lastMessage: 'I see, okay noted!', 
-    time: '10m', 
-    unread: 0, 
-    isTyping: false, 
-    pinned: true, 
-    isGroup: false, 
-    archived: false,
-    avatarColor: 'bg-purple-100 text-purple-600',
-    messages: generateMockMessages(5, false)
-  },
-  { 
-    id: '3', 
-    name: 'Design Team', 
-    lastMessage: 'Sarah: New mockups are ready', 
-    time: '15m', 
-    unread: 3, 
-    isTyping: false, 
-    pinned: false, 
-    isGroup: true, 
-    archived: false,
-    avatarColor: 'bg-green-100 text-green-600',
-    messages: generateMockMessages(10, true)
-  },
-  { 
-    id: '4', 
-    name: 'Project Alpha', 
-    lastMessage: 'Meeting at 2 PM?', 
-    time: '2h', 
-    unread: 0, 
-    isTyping: false, 
-    pinned: false, 
-    isGroup: true, 
-    archived: false,
-    avatarColor: 'bg-yellow-100 text-yellow-600',
-    messages: generateMockMessages(3, true)
-  },
-  { 
-    id: '5', 
-    name: 'Lead Frans', 
-    lastMessage: 'ok, thanks!', 
-    time: '1h', 
-    unread: 0, 
-    isTyping: false, 
-    pinned: false, 
-    isGroup: false, 
-    archived: false,
-    avatarColor: 'bg-pink-100 text-pink-600',
-    messages: generateMockMessages(8, false)
-  },
-  { 
-    id: '6', 
-    name: 'Victor Yoga', 
-    lastMessage: 'You can check it...', 
-    time: 'now', 
-    unread: 1, 
-    isTyping: false, 
-    pinned: false, 
-    isGroup: false, 
-    archived: false,
-    avatarColor: 'bg-indigo-100 text-indigo-600',
-    messages: generateMockMessages(2, false)
-  },
-];
+import { MOCK_CONVERSATIONS, Conversation, Message } from '@/utils/mockData';
 
 export default function MessagesPage() {
   return (
@@ -169,7 +33,7 @@ export default function MessagesPage() {
 function MessagesContent() {
   const searchParams = useSearchParams();
   // State
-  const [conversations, setConversations] = useState<Conversation[]>(INITIAL_CONVERSATIONS);
+  const [conversations, setConversations] = useState<Conversation[]>(MOCK_CONVERSATIONS);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Messages');

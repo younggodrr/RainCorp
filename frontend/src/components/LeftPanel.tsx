@@ -1,5 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { 
   LayoutDashboard, 
   Users, 
@@ -17,9 +18,12 @@ import {
   Bot,
   Sun,
   Moon,
-  Coins
+  Coins,
+  LogOut,
+  Mic
 } from 'lucide-react';
 import { NavItem } from './NavItem';
+import { MOCK_CONVERSATIONS } from '@/utils/mockData';
 
 interface LeftPanelProps {
   activeTab: string;
@@ -42,11 +46,45 @@ export default function LeftPanel({
   isDarkMode = false,
   toggleTheme
 }: LeftPanelProps) {
+  const router = useRouter();
   
   const handleNavClick = (tab: string) => {
     setActiveTab(tab);
     if (closeMenu) closeMenu();
   };
+
+  const handleLogout = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const refreshToken = localStorage.getItem('refreshToken');
+      
+      await fetch(`${apiUrl}/api/auth/logout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ refreshToken }),
+      });
+      
+      // Clear local storage
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      
+      router.push('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Ensure local storage is cleared even if API fails
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('user');
+      
+      router.push('/login');
+    }
+  };
+
+  const groups = MOCK_CONVERSATIONS.filter(c => c.isGroup).slice(0, 3);
 
   // Mobile Drawer Content
   if (isMobile) {
@@ -128,23 +166,19 @@ export default function LeftPanel({
         <div className="mb-6">
           <div className="flex items-center justify-between mb-3 px-2">
             <h4 className="text-xs font-bold text-gray-400 uppercase">Your Groups</h4>
-            <button className="text-[#E50914] text-xs font-medium hover:underline">See All</button>
+            <Link href="/messages?filter=groups" className="text-[#E50914] text-xs font-medium hover:underline">See All</Link>
           </div>
           <div className="space-y-1">
-            {[
-              { name: 'React Developers', members: '12k members' },
-              { name: 'Startup Founders', members: '5k members' },
-              { name: 'UI/UX Designers', members: '8.5k members' }
-            ].map((group) => (
-              <button key={group.name} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors text-left group ${isDarkMode ? 'hover:bg-[#222]' : 'hover:bg-gray-50'}`}>
+            {groups.map((group) => (
+              <Link key={group.id} href={`/messages?id=${group.id}`} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors text-left group ${isDarkMode ? 'hover:bg-[#222]' : 'hover:bg-gray-50'}`}>
                 <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isDarkMode ? 'bg-[#222] text-gray-400 group-hover:bg-[#333]' : 'bg-gray-100 text-gray-500 group-hover:bg-white group-hover:shadow-sm'}`}>
                   <Users size={16} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <h5 className={`text-sm font-medium truncate ${isDarkMode ? 'text-white' : 'text-black'}`}>{group.name}</h5>
-                  <p className={`text-xs truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{group.members}</p>
+                  <p className={`text-xs truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{group.messages.length} messages</p>
                 </div>
-              </button>
+              </Link>
             ))}
           </div>
         </div>
@@ -330,6 +364,14 @@ export default function LeftPanel({
                 </div>
               </div>
             </Link>
+            <Link href="/magna-podcast">
+              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${activeTab === 'Magna Podcast' ? 'bg-[#E50914] text-white shadow-md' : isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'}`} onClick={() => handleNavClick('Magna Podcast')}>
+                <div className="flex items-center gap-3">
+                  <Mic size={20} />
+                  <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Magna Podcast</span>
+                </div>
+              </div>
+            </Link>
           </nav>
 
           {/* Quick Actions */}
@@ -355,23 +397,19 @@ export default function LeftPanel({
           <div className={`mt-6 hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>
             <div className="flex items-center justify-between mb-3 px-2">
               <h4 className="text-xs font-bold text-gray-400 uppercase">Your Groups</h4>
-              <button className="text-[#E50914] text-xs font-medium hover:underline">See All</button>
+              <Link href="/messages?filter=groups" className="text-[#E50914] text-xs font-medium hover:underline">See All</Link>
             </div>
             <div className="space-y-1">
-              {[
-                { name: 'React Developers', members: '12k members' },
-                { name: 'Startup Founders', members: '5k members' },
-                { name: 'UI/UX Designers', members: '8.5k members' }
-              ].map((group) => (
-                <button key={group.name} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors text-left group ${isDarkMode ? 'hover:bg-[#222]' : 'hover:bg-gray-50'}`}>
+              {groups.map((group) => (
+                <Link key={group.id} href={`/messages?id=${group.id}`} className={`w-full flex items-center gap-3 p-2 rounded-lg transition-colors text-left group ${isDarkMode ? 'hover:bg-[#222]' : 'hover:bg-gray-50'}`}>
                   <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all ${isDarkMode ? 'bg-[#222] text-gray-400 group-hover:bg-[#333]' : 'bg-gray-100 text-gray-500 group-hover:bg-white group-hover:shadow-sm'}`}>
                     <Users size={16} />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h5 className={`text-sm font-medium truncate ${isDarkMode ? 'text-white' : 'text-black'}`}>{group.name}</h5>
-                    <p className={`text-xs truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{group.members}</p>
+                    <p className={`text-xs truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{group.messages.length} messages</p>
                   </div>
-                </button>
+                </Link>
               ))}
             </div>
           </div>
@@ -412,13 +450,21 @@ export default function LeftPanel({
 
           <nav className="space-y-1">
             <Link href="/settings" className="w-full block">
-              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer text-gray-600 hover:bg-gray-100`}>
+              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer ${isDarkMode ? 'text-gray-400 hover:text-white hover:bg-white/10' : 'text-gray-600 hover:bg-gray-100'}`}>
                 <div className="flex items-center gap-3">
                   <Settings size={20} />
                   <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Settings</span>
                 </div>
               </div>
             </Link>
+            <button onClick={handleLogout} className="w-full block text-left">
+              <div className={`relative w-full flex items-center justify-center ${isSidebarExpanded ? 'lg:justify-between px-2 lg:px-4' : 'lg:justify-center px-0'} py-3 rounded-full transition-all text-sm font-medium cursor-pointer text-[#E50914] hover:bg-[#E50914]/10`}>
+                <div className="flex items-center gap-3">
+                  <LogOut size={20} />
+                  <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Log Out</span>
+                </div>
+              </div>
+            </button>
           </nav>
         </div>
 

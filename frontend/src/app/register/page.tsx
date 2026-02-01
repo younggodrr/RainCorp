@@ -159,6 +159,7 @@ export default function RegisterPage() {
         showSearch={false}
         className="!left-0"
         isDarkMode={isDarkMode}
+        showBack={true}
         customAction={
           <button 
             onClick={toggleTheme}

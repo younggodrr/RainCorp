@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Eye, EyeOff, Mail, Lock, Sun, Moon, Github, Chrome } from 'lucide-react';
+import { Eye, EyeOff, Mail, Lock, Sun, Moon, Github, Chrome, ArrowLeft } from 'lucide-react';
+import TopNavigation from '@/components/TopNavigation';
 
 export default function LoginPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -60,12 +61,58 @@ export default function LoginPage() {
     if (!validateForm()) return;
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      console.log('Login attempt:', formData);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const response = await fetch(`${apiUrl}/api/auth/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          identifier: formData.email,
+          password: formData.password,
+        }),
+      });
+
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status} ${response.statusText}`);
+        }
+        throw new Error('Invalid response from server');
+      }
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+
+      // Store token if needed, or handle session
+      console.log('Login successful:', data);
+      
+      // Store tokens and user data
+      localStorage.setItem('accessToken', data.accessToken);
+      localStorage.setItem('refreshToken', data.refreshToken);
+      localStorage.setItem('userid', data.user.id);
+      if (data.user) {
+        localStorage.setItem('user', JSON.stringify(data.user));
+      } else {
+        // Fallback if user object is at top level
+        localStorage.setItem('user', JSON.stringify({
+          id: data.id,
+          username: data.username,
+          email: data.email,
+          avatar: data.avatar,
+          role: data.role,
+          isVerified: data.isVerified
+        }));
+      }
+      
+      // Navigate to feed
       window.location.href = '/feed';
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
-      setErrors({ general: 'Login failed. Please try again.' });
+      setErrors({ general: error.message || 'Login failed. Please try again.' });
     } finally {
       setIsLoading(false);
     }
@@ -113,16 +160,21 @@ export default function LoginPage() {
 
       {/* Top Navigation Area */}
       <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-20">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center shadow-lg">
-             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-[#E50914]">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-              </svg>
+        <div className="flex items-center gap-4">
+          <Link href="/" className={`p-2 rounded-full hover:bg-black/5 transition-colors ${theme.textPrimary}`}>
+            <ArrowLeft className="w-6 h-6" />
+          </Link>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-black rounded-lg flex items-center justify-center shadow-lg">
+               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-6 h-6 text-[#E50914]">
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+            </div>
+            <span className={`text-xl font-bold ${theme.textPrimary}`}>
+              <span className="text-[#F4A261]">Magna</span>
+              <span className="text-[#E50914]">Coders</span>
+            </span>
           </div>
-          <span className={`text-xl font-bold ${theme.textPrimary}`}>
-            <span className="text-[#F4A261]">Magna</span>
-            <span className="text-[#E50914]">Coders</span>
-          </span>
         </div>
 
         <button 

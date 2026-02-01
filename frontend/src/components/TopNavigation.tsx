@@ -2,7 +2,8 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { Search, Bell, Menu, X } from 'lucide-react';
+import { Search, Bell, Menu, X, ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface TopNavigationProps {
   title: string;
@@ -14,6 +15,8 @@ interface TopNavigationProps {
   isDarkMode?: boolean;
   showSearch?: boolean;
   customAction?: React.ReactNode;
+  showBack?: boolean;
+  hideBackOnMobile?: boolean;
 }
 
 export default function TopNavigation({ 
@@ -25,12 +28,25 @@ export default function TopNavigation({
   onSearchChange, 
   isDarkMode = false,
   showSearch = true,
-  customAction
+  customAction,
+  showBack = false,
+  hideBackOnMobile = false
 }: TopNavigationProps) {
+  const router = useRouter();
+
   return (
     <div className={`fixed top-0 right-0 z-30 backdrop-blur-sm border-b px-4 md:px-8 py-4 flex items-center justify-between transition-all duration-300 left-0 md:left-[88px] lg:left-[260px] ${className} ${isDarkMode ? 'bg-black/90 border-[#E70008]/20' : 'bg-white/90 border-gray-100'}`}>
-      <div>
-        <h1 className={`text-xl font-bold hidden md:block ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>{title}</h1>
+      <div className="flex items-center gap-4">
+        {showBack && (
+          <button 
+            onClick={() => router.back()}
+            className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#E70008]/10 text-[#F9E4AD]' : 'hover:bg-gray-100 text-black'} ${hideBackOnMobile ? 'hidden md:block' : ''}`}
+          >
+            <ArrowLeft size={24} />
+          </button>
+        )}
+        <div>
+          <h1 className={`text-xl font-bold hidden md:block ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>{title}</h1>
         {/* Mobile Logo */}
         <Link href="/" className="flex items-center gap-2 md:hidden">
           <div className="w-8 h-8 rounded-lg bg-[#E70008] flex items-center justify-center shadow-sm">
@@ -44,6 +60,7 @@ export default function TopNavigation({
           </span>
         </Link>
       </div>
+    </div>
 
       <div className="flex items-center gap-2 md:gap-4">
         {/* Search Bar (Desktop) */}

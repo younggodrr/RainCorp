@@ -215,73 +215,77 @@ export default function NotificationsPage() {
         <div className="flex-1 overflow-y-auto pt-[65px] md:pt-[80px]">
           <div className="max-w-3xl mx-auto p-4 md:p-8 mb-20 md:mb-0">
             
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-end gap-4 mb-8">
-              <button 
-                 onClick={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
-                 className={`text-sm font-medium px-4 py-2 rounded-full transition-colors ${
-                   isDarkMode 
-                     ? 'text-[#E50914] hover:bg-[#E50914]/10' 
-                     : 'text-[#E50914] hover:bg-red-50'
-                 }`}
-               >
-                 Mark all as read
-               </button>
-               
-               <button 
-                 onClick={clearAllNotifications}
-                 className={`text-sm font-medium px-4 py-2 rounded-full transition-colors flex items-center gap-2 ${
-                   isDarkMode 
-                     ? 'text-gray-400 hover:text-white hover:bg-white/10' 
-                     : 'text-gray-500 hover:text-black hover:bg-gray-100'
-                 }`}
-               >
-                 <Trash2 size={16} />
-                 Clear all
-               </button>
+            {/* Header Actions */}
+            <div className="flex items-center justify-between mb-6">
+               <h2 className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+                 Activity
+               </h2>
+               <div className="flex items-center gap-2">
+                  <button 
+                     onClick={() => setNotifications(prev => prev.map(n => ({ ...n, read: true })))}
+                     className={`text-xs font-medium px-3 py-1.5 rounded-full transition-colors ${
+                       isDarkMode 
+                         ? 'text-[#E50914] hover:bg-[#E50914]/10' 
+                         : 'text-[#E50914] hover:bg-red-50'
+                     }`}
+                   >
+                     Mark all read
+                   </button>
+                   <button 
+                     onClick={clearAllNotifications}
+                     className={`p-2 rounded-full transition-colors ${
+                       isDarkMode 
+                         ? 'text-gray-400 hover:text-white hover:bg-white/10' 
+                         : 'text-gray-400 hover:text-black hover:bg-gray-100'
+                     }`}
+                     title="Clear all"
+                   >
+                     <Trash2 size={18} />
+                   </button>
+               </div>
             </div>
 
             {/* FILTERS */}
-            <div className={`flex gap-4 overflow-x-auto mb-6 p-2 ${isDarkMode ? '' : ''}`}>
+            <div className="flex gap-2 overflow-x-auto mb-8 pb-2 scrollbar-hide">
               <button
                 onClick={() => setFilter('all')}
-                className={`relative overflow-visible flex items-center gap-2 px-4 h-10 rounded-full text-xs font-bold transition-all shadow-sm border ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all whitespace-nowrap ${
                   filter === 'all' 
-                    ? isDarkMode ? 'bg-white text-black border-white' : 'bg-white text-black border-gray-200 ring-1 ring-gray-200' 
-                    : isDarkMode ? 'bg-[#222] text-gray-400 hover:bg-[#333] hover:text-white border-gray-700' : 'bg-gray-50 text-gray-500 hover:bg-white hover:text-black border-transparent hover:border-gray-200'
+                    ? 'bg-[#E50914] text-white shadow-md' 
+                    : isDarkMode ? 'bg-[#222] text-gray-400 hover:bg-[#333] hover:text-white' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                 }`}
               >
                 All
                 {hasUnread('all') && (
-                  <span className="absolute top-0 right-0 -mt-1 -mr-1 w-2.5 h-2.5 bg-[#E50914] rounded-full z-10"></span>
+                  <span className={`w-2 h-2 rounded-full ${filter === 'all' ? 'bg-white' : 'bg-[#E50914]'}`}></span>
                 )}
               </button>
               <button
                 onClick={() => setFilter('job_opportunities')}
-                className={`relative overflow-visible flex items-center gap-2 px-4 h-10 rounded-full text-xs font-bold transition-all shadow-sm border ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all whitespace-nowrap ${
                   filter === 'job_opportunities' 
-                    ? isDarkMode ? 'bg-white text-black border-white' : 'bg-white text-black border-gray-200 ring-1 ring-gray-200' 
-                    : isDarkMode ? 'bg-[#222] text-gray-400 hover:bg-[#333] hover:text-white border-gray-700' : 'bg-gray-50 text-gray-500 hover:bg-white hover:text-black border-transparent hover:border-gray-200'
+                    ? 'bg-[#E50914] text-white shadow-md' 
+                    : isDarkMode ? 'bg-[#222] text-gray-400 hover:bg-[#333] hover:text-white' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                 }`}
               >
                 <Briefcase size={16} />
                 <span>Jobs</span>
                 {hasUnread('job_opportunities') && (
-                  <span className="absolute top-0 right-0 -mt-1 -mr-1 w-2.5 h-2.5 bg-[#E50914] rounded-full z-10"></span>
+                  <span className={`w-2 h-2 rounded-full ${filter === 'job_opportunities' ? 'bg-white' : 'bg-[#E50914]'}`}></span>
                 )}
               </button>
               <button
                 onClick={() => setFilter('projects')}
-                className={`relative overflow-visible flex items-center gap-2 px-4 h-10 rounded-full text-xs font-bold transition-all shadow-sm border ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition-all whitespace-nowrap ${
                   filter === 'projects' 
-                    ? isDarkMode ? 'bg-white text-black border-white' : 'bg-white text-black border-gray-200 ring-1 ring-gray-200' 
-                    : isDarkMode ? 'bg-[#222] text-gray-400 hover:bg-[#333] hover:text-white border-gray-700' : 'bg-gray-50 text-gray-500 hover:bg-white hover:text-black border-transparent hover:border-gray-200'
+                     ? 'bg-[#E50914] text-white shadow-md' 
+                    : isDarkMode ? 'bg-[#222] text-gray-400 hover:bg-[#333] hover:text-white' : 'bg-white text-gray-600 hover:bg-gray-50 border border-gray-200'
                 }`}
               >
                 <FolderKanban size={16} />
                 <span>Projects</span>
                 {hasUnread('projects') && (
-                  <span className="absolute top-0 right-0 -mt-1 -mr-1 w-2.5 h-2.5 bg-[#E50914] rounded-full z-10"></span>
+                  <span className={`w-2 h-2 rounded-full ${filter === 'projects' ? 'bg-white' : 'bg-[#E50914]'}`}></span>
                 )}
               </button>
             </div>
@@ -311,42 +315,48 @@ export default function NotificationsPage() {
             <div className="space-y-3">
               {filteredNotifications.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-20 text-gray-400">
-                  <Bell size={48} className="mb-4 opacity-20" />
-                  <p>No notifications found</p>
+                  <div className={`w-20 h-20 rounded-full flex items-center justify-center mb-4 ${isDarkMode ? 'bg-[#222]' : 'bg-gray-50'}`}>
+                    <Bell size={32} className="opacity-20" />
+                  </div>
+                  <p className="text-sm font-medium">No new notifications</p>
                 </div>
               ) : (
                 filteredNotifications.map((notification) => (
                   <div 
                     key={notification.id} 
                     onClick={() => markAsRead(notification.id)}
-                    className={`group relative flex items-start gap-4 p-4 rounded-2xl border transition-all hover:shadow-md cursor-pointer ${
+                    className={`group relative flex items-start gap-4 p-5 rounded-2xl transition-all cursor-pointer border-l-4 ${
                       notification.read 
-                        ? isDarkMode ? 'bg-[#111] border-[#E70008]/20 hover:border-[#E50914]/40' : 'bg-white border-gray-100 hover:border-red-100'
-                        : isDarkMode ? 'bg-[#E50914]/5 border-[#E50914]/20' : 'bg-red-50/40 border-red-100'
+                        ? isDarkMode ? 'bg-transparent border-transparent hover:bg-[#111]' : 'bg-transparent border-transparent hover:bg-white hover:shadow-sm'
+                        : isDarkMode ? 'bg-[#111] border-[#E50914]' : 'bg-white border-[#E50914] shadow-sm'
                     }`}
                   >
                     {/* Avatar */}
                     <div className="relative flex-shrink-0">
-                      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                        {notification.actor.initials}
-                      </div>
+                      {notification.actor.avatar ? (
+                        <img src={notification.actor.avatar} alt={notification.actor.name} className="w-12 h-12 rounded-full object-cover" />
+                      ) : (
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                          {notification.actor.initials}
+                        </div>
+                      )}
                       <div className={`absolute -bottom-1 -right-1 w-6 h-6 rounded-full flex items-center justify-center shadow-sm border ${
-                        isDarkMode ? 'bg-[#222] border-gray-800' : 'bg-white border-gray-100'
+                        isDarkMode ? 'bg-[#222] border-black' : 'bg-white border-white'
                       }`}>
                         {getIcon(notification.type)}
                       </div>
                     </div>
 
                     {/* Content */}
-                    <div className="flex-1 min-w-0 pt-1">
+                    <div className="flex-1 min-w-0 pt-0.5">
                       <div className="flex items-start justify-between gap-2">
                         <div className="pr-8">
-                          <p className={`text-sm ${isDarkMode ? 'text-gray-200' : 'text-gray-800'}`}>
-                            <span className={`font-bold ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>{notification.actor.name}</span>{' '}
+                          <p className={`text-sm leading-relaxed ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+                            <span className={`font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{notification.actor.name}</span>{' '}
                             <span className={isDarkMode ? 'text-gray-400' : 'text-gray-600'}>{notification.content}</span>{' '}
-                            {notification.target && <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{notification.target}</span>}
+                            {notification.target && <span className={`font-medium ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>"{notification.target}"</span>}
                           </p>
-                          <span className={`text-xs mt-1 block ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{notification.timestamp}</span>
+                          <span className={`text-xs mt-1.5 block font-medium ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>{notification.timestamp}</span>
                         </div>
                       </div>
 
@@ -355,17 +365,17 @@ export default function NotificationsPage() {
                         <div className="flex gap-3 mt-4">
                           <button 
                             onClick={(e) => handleAccept(notification.id, e)}
-                            className="px-5 py-2 rounded-xl bg-[#E50914] text-white text-xs font-bold hover:bg-[#cc0812] transition-colors shadow-md flex items-center gap-2"
+                            className="px-6 py-2 rounded-full bg-[#E50914] text-white text-xs font-bold hover:bg-[#cc0812] transition-all shadow-md flex items-center gap-2"
                           >
                             <Check size={14} />
                             Accept
                           </button>
                           <button 
                             onClick={(e) => handleDecline(notification.id, e)}
-                            className={`px-5 py-2 rounded-xl border text-xs font-bold transition-colors ${
+                            className={`px-6 py-2 rounded-full border text-xs font-bold transition-all ${
                             isDarkMode 
-                              ? 'border-gray-700 text-gray-300 hover:bg-[#222]' 
-                              : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
+                              ? 'border-gray-700 text-gray-300 hover:bg-[#222] hover:text-white' 
+                              : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-black'
                           }`}>
                             Decline
                           </button>
@@ -374,23 +384,18 @@ export default function NotificationsPage() {
                       
                       {/* Status Feedback */}
                       {notification.requestStatus === 'accepted' && (
-                        <div className="mt-2 text-xs font-bold text-[#25D366] flex items-center gap-1">
+                        <div className="mt-3 text-xs font-bold text-[#25D366] flex items-center gap-1.5 bg-[#25D366]/10 w-fit px-3 py-1 rounded-full">
                           <Check size={12} />
                           Request Accepted
                         </div>
                       )}
                       {notification.requestStatus === 'declined' && (
-                        <div className="mt-2 text-xs font-bold text-gray-500 flex items-center gap-1">
+                        <div className="mt-3 text-xs font-bold text-gray-500 flex items-center gap-1.5 bg-gray-100 dark:bg-gray-800 w-fit px-3 py-1 rounded-full">
                           <X size={12} />
                           Request Declined
                         </div>
                       )}
                     </div>
-
-                    {/* Unread Indicator */}
-                    {!notification.read && (
-                      <div className="absolute top-5 right-5 w-2.5 h-2.5 rounded-full bg-[#E50914]" />
-                    )}
                     
                     {/* Delete Button (visible on hover) */}
                     <button 
@@ -398,7 +403,7 @@ export default function NotificationsPage() {
                         e.stopPropagation();
                         deleteNotification(notification.id);
                       }}
-                      className={`absolute top-4 right-4 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-all ${
+                      className={`absolute top-4 right-4 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-all ${
                         isDarkMode ? 'text-gray-500 hover:bg-[#222] hover:text-[#E50914]' : 'text-gray-300 hover:bg-gray-100 hover:text-[#E50914]'
                       }`}
                     >

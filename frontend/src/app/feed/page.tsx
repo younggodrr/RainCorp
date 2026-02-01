@@ -26,6 +26,7 @@ import {
   X,
   FileText,
   Bot,
+  TriangleAlert,
   Send
 } from 'lucide-react';
 import Link from 'next/link';
@@ -47,6 +48,19 @@ export default function FeedPage() {
   const [isFabOpen, setIsFabOpen] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
   const [isDarkMode, setIsDarkMode] = useState(false);
+
+  const [showInactiveAlert, setShowInactiveAlert] = useState(true);
+  const [showProfileAlert, setShowProfileAlert] = useState(true);
+  const [isResending, setIsResending] = useState(false);
+
+  const handleResendEmail = () => {
+    setIsResending(true);
+    // Simulate API call to resend verification email
+    setTimeout(() => {
+      setIsResending(false);
+      showToast('Verification email has been resent to your inbox.');
+    }, 1500);
+  };
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -209,6 +223,36 @@ export default function FeedPage() {
           <FilterPill label="Opportunities" active={activeFilter === 'Opportunities'} onClick={() => setActiveFilter('Opportunities')} isDarkMode={isDarkMode} />
           <FilterPill label="Posts" active={activeFilter === 'Posts'} onClick={() => setActiveFilter('Posts')} isDarkMode={isDarkMode} />
           <FilterPill label="Tech News" active={activeFilter === 'Tech News'} onClick={() => setActiveFilter('Tech News')} isDarkMode={isDarkMode} />
+        </div>
+
+        {/* Notification Bars */}
+        <div className="space-y-2 mb-6">
+          {/* Inactive Account Notification */}
+          {showInactiveAlert && (
+            <div className="w-full bg-[#E50914]/10 border border-[#E50914]/20 p-4 rounded-xl flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-full bg-[#E50914]/20 flex items-center justify-center text-[#E50914]">
+                  <TriangleAlert size={16} />
+                </div>
+                <div>
+                  <h4 className={`text-sm font-bold ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>Account Inactive</h4>
+                  <p className={`text-xs ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>Please activate your account via the email link we sent you.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <button 
+                  onClick={handleResendEmail}
+                  disabled={isResending}
+                  className={`text-xs font-bold text-[#E50914] hover:underline ${isResending ? 'opacity-50 cursor-not-allowed' : ''}`}
+                >
+                  {isResending ? 'Sending...' : 'Resend Email'}
+                </button>
+                <button onClick={() => setShowInactiveAlert(false)} className={`text-xs ${isDarkMode ? 'text-gray-500 hover:text-white' : 'text-gray-400 hover:text-black'}`}>
+                  <X size={16} />
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {filteredPosts.map((post, index) => {

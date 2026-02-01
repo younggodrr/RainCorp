@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Camera, ChevronRight, ChevronLeft, Check, User, MapPin, Briefcase, Award, Target, Sun, Moon, Lightbulb, Code, Palette, TrendingUp, Sprout, GraduationCap, UserPlus, LineChart, Headphones, Users, Handshake, Globe, DollarSign } from 'lucide-react';
+import { Camera, ChevronRight, ChevronLeft, Check, User, MapPin, Briefcase, Award, Target, Sun, Moon, Lightbulb, Code, Palette, TrendingUp, Sprout, GraduationCap, UserPlus, LineChart, Headphones, Users, Handshake, Globe, DollarSign, LayoutTemplate, Server, Layers, Smartphone, Gamepad2, ShieldCheck, Blocks, Bot, BarChart, Cpu, Settings, Database, Layout, Box, Image as ImageIcon, Video, PenTool, Search, MousePointer, Type, Grid, Star, Bug, Table, PieChart, Calculator, Split, ClipboardList, Scale, Map, Crown, ShieldAlert, Repeat, Smile, Wrench, MessageSquare, Puzzle, Tag, Clock, MessageCircle, Rocket, Ruler, Eye, Gavel, Flag, Brain, Mic, Network, Filter, Flame, DoorOpen, Gift, Building, Bird, Compass, Dumbbell, Presentation, Ear, ClipboardCheck, Hourglass, Atom, Ship, RefreshCw, Feather, Anchor, Share2, Cloud, GitBranch, FileText, Megaphone, BookOpen, Heart, Zap, Mail } from 'lucide-react';
 import TopNavigation from '@/components/TopNavigation';
 import BottomNavigation from '@/components/BottomNavigation';
 import LeftPanel from '@/components/LeftPanel';
@@ -160,6 +160,87 @@ const COUNTIES = [
   'Tharaka-Nithi County', 'Trans Nzoia County', 'Turkana County', 'Uasin Gishu County',
   'Vihiga County', 'Wajir County', 'West Pokot County'
 ];
+
+const ICON_MAP: Record<string, any> = {
+  // Tech
+  'Frontend': LayoutTemplate, 'Backend': Server, 'Full-stack': Layers, 'Mobile': Smartphone, 'Gaming': Gamepad2,
+  'Cyber-security': ShieldCheck, 'Web 3': Blocks, 'Artificial/Machine Learning': Bot, 'Data Analyst': BarChart, 'Robotics': Cpu,
+  'Frontend Developer': LayoutTemplate, 'Backend Developer': Server, 'Fullstack Developer': Layers, 'Mobile App Developer': Smartphone,
+  'DevOps Engineer': Settings, 'Data Engineer': Database, 'AI/ML Engineer': Bot, 'Blockchain Developer': Blocks,
+  'Game Developer': Gamepad2, 'Embedded Systems Developer': Cpu,
+  'JavaScript': Code, 'TypeScript': Code, 'Python': Code, 'Java': Code, 'C++': Code, 'React': Atom, 'Node.js': Server,
+  'AWS': Cloud, 'Docker': Box, 'Kubernetes': Ship, 'SQL': Database, 'NoSQL': Database, 'Git': GitBranch, 'CI/CD': RefreshCw, 'GraphQL': Network,
+
+  // Design
+  'UI Designer': Layout, 'UX Designer': User, 'Product Designer': Box, 'Graphic Designer': ImageIcon,
+  'Motion Designer': Video, 'Web Designer': Globe, 'Branding/Identity Designer': PenTool,
+  'Figma': PenTool, 'Adobe XD': PenTool, 'Photoshop': ImageIcon, 'Illustrator': PenTool, 'Sketch': PenTool,
+  'User Research': Search, 'Wireframing': Layout, 'Interaction Design': MousePointer, 'Typography': Type,
+  'Color Theory': Palette, 'Design Systems': Grid, 'HTML/CSS': Code, 'Animation': Video, 'Branding': Star,
+
+  // Research/Analyst
+  'Data Scientist': BarChart, 'Business Analyst': LineChart, 'Market Researcher': Search,
+  'QA/Test Engineer': Bug, 'User Researcher': Users, 'Security Analyst': ShieldCheck,
+  'Data Analysis': BarChart, 'R': Code, 'Excel': Table, 'Tableau': PieChart, 'Power BI': BarChart,
+  'Statistical Modeling': TrendingUp, 'Market Research': Search, 'Machine Learning': Bot, 'Data Visualization': PieChart,
+  'Business Intelligence': Lightbulb, 'Qualitative Research': FileText, 'Quantitative Research': Calculator, 'A/B Testing': Split,
+
+  // Business/Strategy
+  'Project Manager': ClipboardList, 'Product Manager': Box, 'Business Development': TrendingUp, 'Marketing Specialist': Megaphone,
+  'Sales & Partnerships': Handshake, 'Finance & Operations': DollarSign, 'Legal/Compliance Advisor': Scale,
+  'Strategic Planning': Map, 'Project Management': ClipboardList, 'Financial Analysis': DollarSign, 'Market Analysis': LineChart,
+  'Leadership': Crown, 'Negotiation': Handshake, 'Risk Management': ShieldAlert, 'Sales Strategy': Target,
+  'Marketing Strategy': Megaphone, 'Operations Management': Settings, 'Change Management': RefreshCw, 'Stakeholder Management': Users, 'Agile Methodologies': Repeat,
+
+  // Support
+  'Community Manager': Users, 'Technical Writer': FileText, 'Content Creator': Video, 'Mentor/Coach': GraduationCap,
+  'Customer Support': Headphones, 'Recruiter/Talent Scout': UserPlus, 'Educator/Trainer': BookOpen,
+  'Customer Service': Smile, 'Technical Support': Wrench, 'Communication': MessageSquare, 'Problem Solving': Puzzle,
+  'CRM Tools': Database, 'Ticket Management': Tag, 'Documentation': FileText, 'Empathy': Heart,
+  'Conflict Resolution': Handshake, 'Time Management': Clock, 'Troubleshooting': Wrench, 'Team Collaboration': Users,
+  'Training': BookOpen, 'Feedback Analysis': MessageCircle, 'Community Management': Users,
+
+  // Visionary
+  'Product Innovator': Lightbulb, 'Tech Futurist': Rocket, 'Social Entrepreneur': Heart, 'Startup Founder': Rocket,
+  'Strategic Planner': Map, 'Change Maker': Zap, 'Creative Director': Palette, 'Industry Disruptor': Zap,
+  'Concept Architect': Ruler, 'Impact Leader': Globe,
+  'Innovation': Lightbulb, 'Strategic Thinking': Brain, 'Public Speaking': Mic, 'Networking': Network,
+  'Storytelling': BookOpen, 'Trend Analysis': TrendingUp, 'Creative Problem Solving': Puzzle, 'Concept Development': Lightbulb,
+  'Vision Planning': Eye, 'Team Building': Users, 'Fundraising': DollarSign, 'Risk Assessment': ShieldAlert, 'Decision Making': Gavel, 'Change Leadership': Flag,
+
+  // Growth Strategist
+  'Growth Hacker': Rocket, 'Digital Marketer': Globe, 'SEO Specialist': Search, 'Conversion Rate Optimizer': TrendingUp,
+  'User Acquisition Manager': UserPlus, 'Retention Specialist': Anchor, 'Brand Strategist': Star, 'Go-to-Market Lead': Rocket,
+  'Sales Funnel Architect': Filter, 'Revenue Operations': DollarSign,
+  'SEO': Search, 'SEM': Search, 'Content Marketing': FileText, 'Social Media Marketing': Share2, 'Email Marketing': Mail,
+  'Analytics': BarChart, 'Conversion Rate Optimization': TrendingUp, 'Customer Acquisition': UserPlus,
+  'Retention Strategies': Anchor, 'Viral Marketing': Flame, 'PPC Advertising': DollarSign, 'Copywriting': PenTool,
+  'Funnel Optimization': Filter, 'Market Trends': TrendingUp,
+
+  // Talent Seeker
+  'Technical Recruiter': UserPlus, 'HR Manager': Users, 'Talent Acquisition Specialist': Search, 'Headhunter': Target,
+  'People Operations': Users, 'Team Builder': Blocks, 'Culture Specialist': Heart, 'Hiring Manager': Briefcase,
+  'Staffing Coordinator': ClipboardList, 'Employer Branding Specialist': Star,
+  'Recruitment': UserPlus, 'Sourcing': Search, 'Interviewing': MessageSquare, 'HR Policies': FileText, 'Employee Relations': Handshake,
+  'Talent Management': Users, 'Onboarding': DoorOpen, 'Performance Management': TrendingUp, 'Compensation & Benefits': Gift,
+  'Employer Branding': Star, 'Candidate Experience': Smile, 'Diversity & Inclusion': Globe, 'Labor Laws': Scale,
+
+  // Seed Investor
+  'Angel Investor': Feather, 'Venture Capitalist': Building, 'Private Equity Investor': Briefcase, 'Early-Stage Backer': Sprout,
+  'Impact Investor': Heart, 'Tech Investor': Cpu, 'Crowdfunding Backer': Users, 'Incubator Partner': Bird,
+  'Accelerator Mentor': Rocket, 'Portfolio Manager': PieChart,
+  'Due Diligence': Search, 'Financial Modeling': Calculator, 'Valuation': DollarSign, 'Deal Structuring': Handshake,
+  'Investment Strategy': Target, 'Trend Forecasting': TrendingUp, 'Legal Knowledge': Scale, 'Mentorship': GraduationCap,
+  'Exit Strategies': DoorOpen,
+
+  // Mentor
+  'Career Coach': Compass, 'Technical Mentor': Code, 'Leadership Coach': Crown, 'Startup Advisor': Rocket,
+  'Life Coach': Sun, 'Executive Mentor': Briefcase, 'Peer Mentor': Users, 'Skills Trainer': Dumbbell,
+  'Industry Veteran': Award, 'Workshop Facilitator': Presentation,
+  'Coaching': Share2, 'Active Listening': Ear, 'Feedback': MessageSquare, 'Goal Setting': Target, 'Motivation': Zap,
+  'Career Guidance': Compass, 'Leadership Development': Crown, 'Skill Assessment': ClipboardCheck,
+  'Emotional Intelligence': Heart, 'Patience': Hourglass, 'Knowledge Sharing': Share2,
+};
 
 // --- Types ---
 
@@ -342,7 +423,7 @@ export default function UserGuidePage() {
                 >
                   <div className={`font-extrabold mb-1 flex justify-between items-center ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>
                     <div className="flex items-center gap-3">
-                      <role.icon size={24} className={formData.roles.includes(role.id) ? 'text-[#E50914]' : isDarkMode ? 'text-[#F4A261]' : 'text-gray-600'} />
+                      <role.icon size={24} className={formData.roles.includes(role.id) ? 'text-[#E50914]' : isDarkMode ? 'text-[#E50914]' : 'text-gray-600'} />
                       {role.label}
                     </div>
                     {formData.roles.includes(role.id) && <Check size={18} className="text-[#E50914]" />}
@@ -377,7 +458,7 @@ export default function UserGuidePage() {
                 >
                   <div className={`font-extrabold mb-1 flex justify-between items-center ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>
                     <div className="flex items-center gap-3">
-                      <goal.icon size={24} className={formData.goals.includes(goal.id) ? 'text-[#F4A261]' : isDarkMode ? 'text-[#F4A261]' : 'text-gray-600'} />
+                      <goal.icon size={24} className={formData.goals.includes(goal.id) ? 'text-[#F4A261]' : isDarkMode ? 'text-[#E50914]' : 'text-gray-600'} />
                       {goal.label}
                     </div>
                     {formData.goals.includes(goal.id) && <Check size={18} className="text-[#F4A261]" />}
@@ -416,21 +497,25 @@ export default function UserGuidePage() {
                 Specialisation <span className={`text-xs font-normal ml-2 ${isDarkMode ? 'text-[#F4A261]/80' : 'text-gray-400'}`}>(Max 3)</span>
               </h3>
               <div className="flex flex-wrap gap-2">
-                {displaySpecialisations.map((spec) => (
-                  <button
-                    key={spec}
-                    onClick={() => toggleSelection('specialisation', spec, 3)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
-                      formData.specialisation.includes(spec)
-                        ? 'bg-[#E50914] text-white border-[#E50914]'
-                        : isDarkMode
-                          ? 'bg-[#222] text-[#F4A261] border-gray-700 hover:border-gray-600'
-                          : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    {spec}
-                  </button>
-                ))}
+                {displaySpecialisations.map((spec) => {
+                  const Icon = ICON_MAP[spec] || Briefcase;
+                  return (
+                    <button
+                      key={spec}
+                      onClick={() => toggleSelection('specialisation', spec, 3)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium border transition-all flex items-center gap-2 ${
+                        formData.specialisation.includes(spec)
+                          ? 'bg-[#E50914] text-white border-[#E50914]'
+                          : isDarkMode
+                            ? 'bg-[#222] text-[#F4A261] border-gray-700 hover:border-gray-600'
+                            : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <Icon size={14} className={!formData.specialisation.includes(spec) && isDarkMode ? 'text-[#E50914]' : ''} />
+                      {spec}
+                    </button>
+                  );
+                })}
               </div>
             </div>
 
@@ -441,29 +526,34 @@ export default function UserGuidePage() {
                 Top Skills <span className={`text-xs font-normal ml-2 ${isDarkMode ? 'text-[#F4A261]/80' : 'text-gray-400'}`}>(Max 6)</span>
               </h3>
               <div className="flex flex-wrap gap-2 mb-3">
-                {displaySkills.map((skill) => (
-                  <button
-                    key={skill}
-                    onClick={() => toggleSelection('skills', skill, 6)}
-                    className={`px-4 py-2 rounded-full text-sm font-medium border transition-all ${
-                      formData.skills.includes(skill)
-                        ? 'bg-[#F4A261] text-white border-[#F4A261]'
-                        : isDarkMode
-                          ? 'bg-[#222] text-[#F4A261] border-gray-700 hover:border-gray-600'
-                          : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
-                    }`}
-                  >
-                    {skill}
-                  </button>
-                ))}
+                {displaySkills.map((skill) => {
+                  const Icon = ICON_MAP[skill] || Award;
+                  return (
+                    <button
+                      key={skill}
+                      onClick={() => toggleSelection('skills', skill, 6)}
+                      className={`px-4 py-2 rounded-full text-sm font-medium border transition-all flex items-center gap-2 ${
+                        formData.skills.includes(skill)
+                          ? 'bg-[#F4A261] text-white border-[#F4A261]'
+                          : isDarkMode
+                            ? 'bg-[#222] text-[#F4A261] border-gray-700 hover:border-gray-600'
+                            : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <Icon size={14} className={!formData.skills.includes(skill) && isDarkMode ? 'text-[#E50914]' : ''} />
+                      {skill}
+                    </button>
+                  );
+                })}
                 {formData.skills
                   .filter(skill => !displaySkills.includes(skill))
                   .map(skill => (
                     <button
                       key={skill}
                       onClick={() => toggleSelection('skills', skill, 6)}
-                      className="px-4 py-2 rounded-full text-sm font-medium border transition-all bg-[#F4A261] text-white border-[#F4A261]"
+                      className="px-4 py-2 rounded-full text-sm font-medium border transition-all bg-[#F4A261] text-white border-[#F4A261] flex items-center gap-2"
                     >
+                      <Award size={14} />
                       {skill}
                     </button>
                   ))}
@@ -618,6 +708,7 @@ export default function UserGuidePage() {
         showSearch={false}
         className="!left-0"
         isDarkMode={isDarkMode}
+        showBack={true}
         customAction={
           <button 
             onClick={toggleTheme}
