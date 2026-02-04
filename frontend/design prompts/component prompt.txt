@@ -16,7 +16,7 @@ Identify self-contained logical sections (e.g., specific headers, pagination con
 Identify generic UI elements that could be reused elsewhere.
 Extract Components:
 
-For each identified section, create a new .tsx file in frontend/src/components.
+For each identified section, create a new .tsx file in frontend/src/components. except for the top navigation bar and left panel component. we have those
 Name the component descriptively (e.g., ProjectCard.tsx, FilterBar.tsx).
 Props & Types: Define a strict TypeScript interface for the component's props.
 Imports: Move all necessary imports (icons, next/link, next/image, etc.) to the new file.
@@ -31,4 +31,4 @@ Quality Check:
 
 Ensure the visual design (Tailwind classes) remains exactly the same.
 Ensure all interactive elements (buttons, links) still function correctly.
-Target File: frontend/src/app/feed/page.tsx 
+Target File: frontend/src/app/magna-ai/page.tsx 

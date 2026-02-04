@@ -1,14 +1,12 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { 
-  Menu, X, Plus, Search, 
-  MapPin, Briefcase, DollarSign, Clock, Building, Globe,
-  MoreHorizontal
-} from 'lucide-react';
 import LeftPanel from '@/components/LeftPanel';
 import TopNavigation from '@/components/TopNavigation';
+import JobCard, { Job } from '@/components/JobCard';
+import TabFilters from '@/components/TabFilters';
+import JobPageHeader from '@/components/JobPageHeader';
+import MobileDrawer from '@/components/MobileDrawer';
 
 export default function JobsPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -33,7 +31,7 @@ export default function JobsPage() {
   };
 
   // Mock Jobs Data
-  const allJobs = [
+  const allJobs: Job[] = [
     {
       id: 1,
       title: "Senior Frontend Engineer",
@@ -164,199 +162,39 @@ export default function JobsPage() {
         />
 
         {/* MOBILE DRAWER */}
-        {isMobileMenuOpen && (
-          <div className="fixed inset-0 z-50 md:hidden">
-            <div 
-              className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
-              onClick={() => setIsMobileMenuOpen(false)}
-            ></div>
-            
-            <div className={`absolute top-0 left-0 w-full h-full shadow-2xl flex flex-col overflow-y-auto animate-slide-in-left ${
-              isDarkMode ? 'bg-black border-r border-[#E70008]/20' : 'bg-white'
-            }`}>
-              <div className={`p-4 border-b flex items-center justify-between sticky top-0 z-10 ${
-                isDarkMode ? 'bg-black border-[#E70008]/20' : 'bg-white border-gray-100'
-              }`}>
-                <Link href="/" className="flex items-center gap-2">
-                   <div className="w-8 h-8 rounded-lg bg-[#E70008] flex items-center justify-center shadow-lg">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-white">
-                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                      </svg>
-                   </div>
-                   <span className="text-lg font-bold tracking-tight">
-                      <span className="text-[#F4A261]">Magna</span>
-                      <span className="text-[#E70008]">Coders</span>
-                   </span>
-                </Link>
-                <button 
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  className={`p-2 rounded-full hover:bg-gray-100 ${isDarkMode ? 'text-gray-400 hover:bg-[#E70008]/10' : 'text-gray-500 hover:bg-gray-100'}`}
-                >
-                  <X size={24} />
-                </button>
-              </div>
-
-              <div className="p-4 space-y-6 pb-20">
-                <LeftPanel 
-                  activeTab={activeTab} 
-                  setActiveTab={setActiveTab} 
-                  closeMenu={() => setIsMobileMenuOpen(false)} 
-                  isMobile={true}
-                  isDarkMode={isDarkMode}
-                  toggleTheme={toggleTheme}
-                />
-              </div>
-            </div>
-          </div>
-        )}
+        <MobileDrawer 
+          isOpen={isMobileMenuOpen}
+          onClose={() => setIsMobileMenuOpen(false)}
+          isDarkMode={isDarkMode}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          toggleTheme={toggleTheme}
+        />
 
         {/* SCROLLABLE CONTENT AREA */}
         <div className="flex-1 overflow-y-auto pt-[65px] md:pt-[80px]">
           <div className="max-w-6xl mx-auto p-4 md:p-8">
             
             {/* HEADER */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
-              <div>
-                <h1 className={`text-3xl font-bold mb-2 ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>Opportunities</h1>
-                <p className={isDarkMode ? 'text-gray-400' : 'text-gray-500'}>Find your next dream role</p>
-              </div>
-              
-              <div className="flex items-center gap-4">
-                <Link href="/create-job" className="flex items-center justify-center gap-2 px-6 py-3 bg-[#E50914] text-white rounded-xl font-bold shadow-md hover:bg-[#cc0812] transition-all active:scale-95 w-full md:w-auto">
-                  <Plus size={20} />
-                  <span>Post a Job</span>
-                </Link>
-              </div>
-            </div>
+            <JobPageHeader isDarkMode={isDarkMode} />
 
             {/* TABS */}
-            <div className={`flex items-center gap-6 border-b mb-8 overflow-x-auto no-scrollbar ${
-              isDarkMode ? 'border-[#E70008]/20' : 'border-gray-200'
-            }`}>
-              {tabs.map(tab => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveFilterTab(tab)}
-                  className={`pb-4 px-2 text-sm font-bold whitespace-nowrap relative transition-colors ${
-                    activeFilterTab === tab 
-                      ? 'text-[#E50914]' 
-                      : isDarkMode ? 'text-gray-500 hover:text-[#F9E4AD]' : 'text-gray-400 hover:text-gray-600'
-                  }`}
-                >
-                  {tab}
-                  {activeFilterTab === tab && (
-                    <span className="absolute bottom-0 left-0 w-full h-0.5 bg-[#E50914] rounded-t-full shadow-[0_0_10px_rgba(231,0,8,0.8)]"></span>
-                  )}
-                </button>
-              ))}
-            </div>
+            <TabFilters 
+              tabs={tabs} 
+              activeTab={activeFilterTab} 
+              onTabChange={setActiveFilterTab} 
+              isDarkMode={isDarkMode} 
+            />
 
             {/* JOBS GRID */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {filteredJobs.map(job => (
-                <div key={job.id} className={`rounded-2xl p-6 border shadow-sm hover:shadow-md transition-all group ${
-                  isDarkMode 
-                    ? 'bg-[#111] border-[#E70008]/30 shadow-[0_0_15px_rgba(231,0,8,0.1)]' 
-                    : 'bg-white border-gray-100'
-                }`}>
-                  {/* Card Header */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-4">
-                      <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-white font-bold text-lg shadow-sm flex-shrink-0 ${job.logoColor}`}>
-                        {job.company.charAt(0)}
-                      </div>
-                      <div className="min-w-0">
-                        <h2 className={`text-lg font-bold transition-colors group-hover:text-[#E50914] truncate ${
-                          isDarkMode ? 'text-[#F9E4AD]' : 'text-black'
-                        }`}>
-                          {job.title}
-                        </h2>
-                        <p className={`text-sm font-medium truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                          {job.company}
-                        </p>
-                      </div>
-                    </div>
-                    <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#222] text-gray-400' : 'hover:bg-gray-100 text-gray-400'}`}>
-                      <MoreHorizontal size={20} />
-                    </button>
-                  </div>
-
-                  {/* Description */}
-                  <p className={`text-sm mb-6 leading-relaxed line-clamp-2 ${
-                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                  }`}>
-                    {job.description}
-                  </p>
-
-                  {/* Expiration Status for Saved Jobs */}
-                  {activeFilterTab === 'Saved jobs' && job.category === 'saved' && (
-                    <div className="mb-4">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className={`text-xs font-semibold uppercase tracking-wider ${job.isExpired ? 'text-red-500' : 'text-gray-500'}`}>
-                          {job.isExpired ? 'Application Expired' : 'Application Deadline'}
-                        </span>
-                        <span className={`text-xs font-bold ${job.isExpired ? 'text-red-500' : 'text-[#E50914]'}`}>
-                          {job.timeLeft}
-                        </span>
-                      </div>
-                      {!job.isExpired && (
-                        <div className="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                          <div 
-                            className="h-full bg-gradient-to-r from-[#F4A261] to-[#E50914]"
-                            style={{ width: '65%' }} // Mock progress
-                          />
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Details Grid */}
-                  <div className={`grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-4 mb-6 text-sm ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-                    <div className="flex items-center gap-2">
-                      <MapPin size={16} className={`flex-shrink-0 ${isDarkMode ? 'text-[#E50914]' : 'text-gray-400'}`} />
-                      <span className="truncate">{job.location}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Briefcase size={16} className={`flex-shrink-0 ${isDarkMode ? 'text-[#E50914]' : 'text-gray-400'}`} />
-                      <span>{job.type}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <DollarSign size={16} className={`flex-shrink-0 ${isDarkMode ? 'text-[#E50914]' : 'text-gray-400'}`} />
-                      <span>{job.salary}</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Clock size={16} className={`flex-shrink-0 ${isDarkMode ? 'text-[#E50914]' : 'text-gray-400'}`} />
-                      <span>{job.postedAt}</span>
-                    </div>
-                  </div>
-
-                  {/* Tags */}
-                  <div className="flex flex-wrap gap-2 mb-6">
-                    {job.tags.map(tag => (
-                      <span key={tag} className={`px-3 py-1 rounded-full text-xs font-medium border ${
-                        isDarkMode 
-                          ? 'bg-[#222] text-gray-300 border-gray-800' 
-                          : 'bg-gray-50 text-gray-600 border-gray-100'
-                      }`}>
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-3">
-                    <button className="flex-1 py-2.5 bg-[#E50914] text-white rounded-xl font-bold text-sm shadow-sm hover:bg-[#cc0812] transition-colors">
-                      Apply Now
-                    </button>
-                    <button className={`flex-1 py-2.5 border rounded-xl font-bold text-sm transition-colors ${
-                      isDarkMode 
-                        ? 'bg-transparent border-[#E70008]/40 text-[#F9E4AD] hover:bg-[#E70008]/10' 
-                        : 'bg-white border-gray-200 text-black hover:bg-gray-50'
-                    }`}>
-                      Save Job
-                    </button>
-                  </div>
-                </div>
+                <JobCard 
+                  key={job.id} 
+                  job={job} 
+                  isDarkMode={isDarkMode} 
+                  showExpiration={activeFilterTab === 'Saved jobs' && job.category === 'saved'} 
+                />
               ))}
             </div>
 
