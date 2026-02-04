@@ -118,6 +118,17 @@ export default function LoginPage() {
     }
   };
 
+  const handleGoogleLogin = () => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    window.location.href = `${apiUrl}api/auth/social/google`;
+  };
+
+  const handleGithubLogin = () => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+    window.location.href = `${apiUrl}api/auth/social/github`;
+  };
+
+
   // Prevent hydration mismatch
   if (!mounted) return null;
 
@@ -299,11 +310,17 @@ export default function LoginPage() {
 
           {/* Social Buttons */}
           <div className="grid grid-cols-2 gap-4">
-            <button type="button" className={`flex items-center justify-center gap-2 py-2.5 rounded-full border border-transparent transition-all ${theme.socialBtn}`}>
+            <button 
+              type="button" 
+              onClick={handleGoogleLogin}
+              className={`flex items-center justify-center gap-2 py-2.5 rounded-full border border-transparent transition-all ${theme.socialBtn}`}
+            >
               <Chrome className="w-5 h-5" />
               <span className="font-medium text-sm">Google</span>
             </button>
-            <button type="button" className={`flex items-center justify-center gap-2 py-2.5 rounded-full border border-transparent transition-all ${theme.socialBtn}`}>
+            <button
+            onClick={handleGithubLogin}
+             type="button" className={`flex items-center justify-center gap-2 py-2.5 rounded-full border border-transparent transition-all ${theme.socialBtn}`}>
               <Github className="w-5 h-5" />
               <span className="font-medium text-sm">GitHub</span>
             </button>

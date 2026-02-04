@@ -43,7 +43,7 @@ function CommentItem({ comment, onLike, onDelete, onEdit, onReply }: CommentItem
   return (
     <div className="flex gap-3">
       <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white text-xs font-bold flex-shrink-0 relative overflow-hidden">
-          {comment.author.avatar ? (
+          {comment.author.avatar && (comment.author.avatar.startsWith('/') || comment.author.avatar.startsWith('http')) ? (
               <Image src={comment.author.avatar} alt={comment.author.name} fill sizes="32px" className="object-cover" />
           ) : (
               comment.author.name.charAt(0)

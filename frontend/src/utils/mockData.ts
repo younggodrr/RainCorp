@@ -165,8 +165,26 @@ export const generateMockPosts = (page: number, limit: number): FeedPost[] => {
     return posts;
 };
 
+export const getPostById = (id: string): FeedPost => {
+    // Generate a deterministic seed from the ID
+    let seed = 0;
+    for (let i = 0; i < id.length; i++) {
+        seed = ((seed << 5) - seed) + id.charCodeAt(i);
+        seed |= 0; // Convert to 32bit integer
+    }
+    return generateMockPost(id, Math.abs(seed));
+};
+
 export const generateMockComments = (postId: string, count: number): Comment[] => {
     const comments: Comment[] = [];
+    // Use postId to generate a base seed
+    let seed = 0;
+    for (let i = 0; i < postId.length; i++) {
+        seed = ((seed << 5) - seed) + postId.charCodeAt(i);
+        seed |= 0;
+    }
+    seed = Math.abs(seed);
+
     for(let i=0; i<count; i++) {
         comments.push({
             id: `comment-${postId}-${i}`,
@@ -177,7 +195,7 @@ export const generateMockComments = (postId: string, count: number): Comment[] =
             content: 'Great post! Thanks for sharing.',
             createdAt: '1h ago',
             timestamp: Date.now() - i * 3600000,
-            likes: Math.floor(Math.random() * 10),
+            likes: Math.floor(seededRandom(seed + i) * 10),
             isLiked: false,
             replies: []
         });
@@ -220,11 +238,17 @@ export const generateMockMessages = (count: number, isGroup: boolean): Message[]
   const messages: Message[] = [];
   const senders = isGroup ? ['Sarah', 'Mike', 'Jessica', 'Me'] : ['Them', 'Me'];
   
+  // Use a fixed seed based on count and isGroup to be deterministic
+  let seed = count + (isGroup ? 100 : 0);
+
   for (let i = 0; i < count; i++) {
-    const isMe = Math.random() > 0.5;
+    const rand = seededRandom(seed + i);
+    const isMe = rand > 0.5;
+    const senderIndex = Math.floor(seededRandom(seed + i + 1) * (senders.length - 1));
+
     messages.push({
       id: `msg-${i}`,
-      sender: isMe ? 'Me' : senders[Math.floor(Math.random() * (senders.length - 1))],
+      sender: isMe ? 'Me' : senders[senderIndex],
       text: isMe ? 'Just checking in on the progress.' : 'Everything is going according to plan!',
       time: '10:00 AM',
       avatar: isMe ? 'ME' : 'JD',
@@ -319,4 +343,108 @@ export const MOCK_CONVERSATIONS: Conversation[] = [
     avatarColor: 'bg-indigo-100 text-indigo-600',
     messages: generateMockMessages(2, false)
   },
+  { 
+    id: '7', 
+    name: 'FRONT END MAGNA CODERS', 
+    lastMessage: '+256 784 465531: Then u do rem...', 
+    time: 'Yesterday', 
+    unread: 45, 
+    isTyping: false, 
+    pinned: false, 
+    isGroup: true, 
+    archived: false,
+    avatarColor: 'bg-green-100 text-green-600',
+    messages: generateMockMessages(45, true)
+  },
+  { 
+    id: '8', 
+    name: 'MAGNA.CODE <\\>', 
+    lastMessage: '~ pii Left', 
+    time: 'Yesterday', 
+    unread: 0, 
+    isTyping: false, 
+    pinned: true, 
+    isGroup: true, 
+    archived: false,
+    avatarColor: 'bg-gray-100 text-gray-600',
+    messages: generateMockMessages(10, true)
+  },
+  { 
+    id: '9', 
+    name: 'CYBER SECURITY MAGNA CODERS', 
+    lastMessage: '~ pii Left', 
+    time: 'Yesterday', 
+    unread: 28, 
+    isTyping: false, 
+    pinned: false, 
+    isGroup: true, 
+    archived: false,
+    avatarColor: 'bg-red-100 text-red-600',
+    messages: generateMockMessages(28, true)
+  },
+  { 
+    id: '10', 
+    name: 'BACK END MAGNA CODERS', 
+    lastMessage: '+254 782 743399 joined from th...', 
+    time: 'Yesterday', 
+    unread: 55, 
+    isTyping: false, 
+    pinned: false, 
+    isGroup: true, 
+    archived: false,
+    avatarColor: 'bg-orange-100 text-orange-600',
+    messages: generateMockMessages(55, true)
+  },
+  { 
+    id: '11', 
+    name: 'BEGINNERS INTO CODING', 
+    lastMessage: '~ pii Left', 
+    time: 'Yesterday', 
+    unread: 32, 
+    isTyping: false, 
+    pinned: false, 
+    isGroup: true, 
+    archived: false,
+    avatarColor: 'bg-blue-100 text-blue-600',
+    messages: generateMockMessages(32, true)
+  },
+  { 
+    id: '12', 
+    name: 'NETWORKING AND CCTV INSTALLATION', 
+    lastMessage: '+254 112 739953: software za kubypa...', 
+    time: 'Yesterday', 
+    unread: 14, 
+    isTyping: false, 
+    pinned: false, 
+    isGroup: true, 
+    archived: false,
+    avatarColor: 'bg-cyan-100 text-cyan-600',
+    messages: generateMockMessages(14, true)
+  },
+  { 
+    id: '13', 
+    name: 'ROBOTICS 🤖', 
+    lastMessage: '~ Henry games Left', 
+    time: '2/1/26', 
+    unread: 5, 
+    isTyping: false, 
+    pinned: false, 
+    isGroup: true, 
+    archived: false,
+    avatarColor: 'bg-slate-100 text-slate-600',
+    messages: generateMockMessages(5, true)
+  },
+  { 
+    id: '14', 
+    name: 'DIGITAL MARKETING & GRAPHICS', 
+    lastMessage: '+254 743 955900 joined from the co...', 
+    time: '2/1/26', 
+    unread: 3, 
+    isTyping: false, 
+    pinned: false, 
+    isGroup: true, 
+    archived: false,
+    avatarColor: 'bg-purple-100 text-purple-600',
+    messages: generateMockMessages(3, true)
+  }
 ];
