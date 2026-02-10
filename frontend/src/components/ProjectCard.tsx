@@ -1,5 +1,5 @@
 import React from 'react';
-import { Users, Calendar } from 'lucide-react';
+import { Users, Calendar, MapPin } from 'lucide-react';
 
 interface Project {
   id: number;
@@ -12,13 +12,15 @@ interface Project {
   teamCount: number;
   date: string;
   image: null | string;
+  location?: string;
 }
 
 interface ProjectCardProps {
   project: Project;
+  showActions?: boolean;
 }
 
-export default function ProjectCard({ project }: ProjectCardProps) {
+export default function ProjectCard({ project, showActions = true }: ProjectCardProps) {
   return (
     <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all group">
       {/* Card Header */}
@@ -65,9 +67,17 @@ export default function ProjectCard({ project }: ProjectCardProps) {
 
       {/* Footer Info */}
       <div className="flex items-center justify-between text-xs text-gray-400 font-medium mb-6">
-        <div className="flex items-center gap-2">
-          <Users size={14} />
-          <span>Team: {project.teamCount} members</span>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <Users size={14} />
+            <span>Team: {project.teamCount} members</span>
+          </div>
+          {project.location && (
+            <div className="flex items-center gap-2">
+              <MapPin size={14} />
+              <span>{project.location}</span>
+            </div>
+          )}
         </div>
         <div className="flex items-center gap-2">
           <Calendar size={14} />
@@ -76,14 +86,16 @@ export default function ProjectCard({ project }: ProjectCardProps) {
       </div>
 
       {/* Actions */}
-      <div className="flex gap-3">
-        <button className="flex-1 py-2.5 bg-[#E50914] text-white rounded-xl font-bold text-sm shadow-sm hover:bg-[#cc0812] transition-colors">
-          Edit
-        </button>
-        <button className="flex-1 py-2.5 bg-white border border-gray-200 text-black rounded-xl font-bold text-sm hover:bg-gray-50 transition-colors">
-          Delete
-        </button>
-      </div>
+      {showActions && (
+        <div className="flex gap-3">
+          <button className="flex-1 py-2.5 bg-[#E50914] text-white rounded-xl font-bold text-sm shadow-sm hover:bg-[#cc0812] transition-colors">
+            Edit
+          </button>
+          <button className="flex-1 py-2.5 bg-white border border-gray-200 text-black rounded-xl font-bold text-sm hover:bg-gray-50 transition-colors">
+            Delete
+          </button>
+        </div>
+      )}
     </div>
   );
 }

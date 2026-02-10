@@ -8,6 +8,7 @@ import ProjectListHeader from '@/components/ProjectListHeader';
 import TabFilters from '@/components/TabFilters';
 import ProjectCard from '@/components/ProjectCard';
 import { PROJECTS, PROJECT_TABS } from './constants';
+import { TRENDING_PROJECTS } from '../projects/data';
 
 export default function MyProjectsPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -28,6 +29,9 @@ export default function MyProjectsPage() {
     localStorage.setItem('theme', newMode ? 'dark' : 'light');
     window.dispatchEvent(new Event('themeChanged'));
   };
+
+  // Determine which projects to display based on active tab
+  const displayProjects = activeFilterTab === 'Search new projects' ? TRENDING_PROJECTS : PROJECTS;
 
   return (
     <div className={`min-h-screen font-sans flex transition-colors duration-300 ${isDarkMode ? 'bg-black text-[#F9E4AD]' : 'bg-[#FDF8F5] text-[#444444]'}`}>
@@ -71,8 +75,8 @@ export default function MyProjectsPage() {
             
             {/* HEADER */}
             <ProjectListHeader 
-              title="My Projects"
-              description="Manage and create your collaborative projects"
+              title={activeFilterTab === 'Search new projects' ? "Trending Projects" : "My Projects"}
+              description={activeFilterTab === 'Search new projects' ? "Discover popular projects from the community" : "Manage and create your collaborative projects"}
               createLink="/create-project"
               createLabel="Create New Project"
             />
@@ -87,8 +91,12 @@ export default function MyProjectsPage() {
 
             {/* PROJECTS GRID */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-8">
-              {PROJECTS.map(project => (
-                <ProjectCard key={project.id} project={project} />
+              {displayProjects.map(project => (
+                <ProjectCard 
+                  key={project.id} 
+                  project={project} 
+                  showActions={activeFilterTab !== 'Search new projects'} 
+                />
               ))}
             </div>
 
