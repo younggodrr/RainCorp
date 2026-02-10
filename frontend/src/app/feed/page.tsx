@@ -123,8 +123,7 @@ export default function FeedPage() {
         activeTab={activeTab}
         setActiveTab={setActiveTab}
         isSidebarExpanded={isSidebarExpanded}
-        setIsSidebarExpanded={setIsSidebarExpanded}
-        isDarkMode={isDarkMode}
+         isDarkMode={isDarkMode}
         toggleTheme={toggleTheme}
       />
 

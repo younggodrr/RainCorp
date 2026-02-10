@@ -21,6 +21,11 @@ Name the component descriptively (e.g., ProjectCard.tsx, FilterBar.tsx).
 Props & Types: Define a strict TypeScript interface for the component's props.
 Imports: Move all necessary imports (icons, next/link, next/image, etc.) to the new file.
 Interactivity: If the component needs state or event handlers, decide whether to handle it internally (add "use client") or accept callbacks as props from the parent.
+
+Extract Constants & Data:
+Identify static data arrays, configuration objects, or helper functions defined within the component.
+Move these into a separate `constants.tsx` or `data.ts` file in the same directory.
+Export them and import them back into the main page or the new components as needed.
 Refactor the Original Page:
 
 Import the new components.
@@ -31,4 +36,4 @@ Quality Check:
 
 Ensure the visual design (Tailwind classes) remains exactly the same.
 Ensure all interactive elements (buttons, links) still function correctly.
-Target File: frontend/src/app/magna-ai/page.tsx 
+Target File: frontend/src/app/my-projects/page.tsx 
