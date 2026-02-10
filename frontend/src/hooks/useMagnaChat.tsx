@@ -1,14 +1,86 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { MessageBubbleProps } from '@/components/MagnaMessageBubble';
 import { ChatSession } from '@/components/MagnaChatSidebar';
 import MagnaNewIcon from '@/components/MagnaNewIcon';
 import { Job } from '@/components/JobCard';
 import { Builder } from '@/components/BuilderCard';
+import { Project } from '@/components/ProjectCard';
+import { Mic, BookOpen } from 'lucide-react';
+import { COURSES, Course } from '@/app/magna-school/constants';
 
 export interface ToastConfig {
   isVisible: boolean;
   message: string;
 }
+
+const MOCK_PROJECTS: Project[] = [
+  {
+    id: 101,
+    title: "Decentralized Voting App",
+    description: "A secure blockchain-based voting system ensuring transparency and anonymity.",
+    category: "Blockchain",
+    status: "open",
+    level: "advanced",
+    techStack: ["Solidity", "React", "Web3.js", "Ethereum"],
+    teamCount: 5,
+    date: "2024-02-01",
+    location: "Global",
+    image: null
+  },
+  {
+    id: 102,
+    title: "Health & Wellness Tracker",
+    description: "Mobile app for tracking fitness goals, nutrition, and mental well-being.",
+    category: "Health Tech",
+    status: "in-progress",
+    level: "intermediate",
+    techStack: ["Flutter", "Firebase", "Dart"],
+    teamCount: 4,
+    date: "2024-01-28",
+    location: "London, UK",
+    image: null
+  },
+  {
+    id: 103,
+    title: "Smart Home Automation",
+    description: "IoT dashboard to control and monitor smart home devices from a single interface.",
+    category: "IoT",
+    status: "planning",
+    level: "advanced",
+    techStack: ["React", "Node.js", "MQTT", "Raspberry Pi"],
+    teamCount: 2,
+    date: "2024-02-05",
+    location: "Berlin, Germany",
+    image: null
+  },
+  {
+    id: 104,
+    title: "Language Learning Bot",
+    description: "AI-powered chatbot that helps users practice new languages through conversation.",
+    category: "AI/ML",
+    status: "open",
+    level: "beginner",
+    techStack: ["Python", "OpenAI API", "Telegram Bot API"],
+    teamCount: 3,
+    date: "2024-01-25",
+    location: "Remote",
+    image: null
+  },
+  {
+    id: 105,
+    title: "E-Commerce Dashboard",
+    description: "Comprehensive admin dashboard for managing online stores and analytics.",
+    category: "Web Dev",
+    status: "open",
+    level: "intermediate",
+    techStack: ["Next.js", "Tailwind CSS", "Prisma"],
+    teamCount: 3,
+    date: "2024-02-10",
+    location: "New York, USA",
+    image: null
+  }
+];
 
 const MOCK_BUILDERS: Builder[] = [
   {
@@ -146,6 +218,7 @@ const MOCK_JOBS: Job[] = [
 ];
 
 export function useMagnaChat() {
+  const router = useRouter();
   const [activeTab, setActiveTab] = useState('Magna AI');
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -280,6 +353,136 @@ export function useMagnaChat() {
     const currentQuery = searchQuery;
     setSearchQuery('');
     setIsTyping(true);
+
+    // Handle "Open Magna Podcast" command
+    if (currentQuery.toLowerCase().includes('open magna podcast')) {
+       const loadingMsgId = (Date.now() + 1).toString();
+       
+       setTimeout(() => {
+         // Show Loading Animation with Podcast Icon
+         const loadingMsg: MessageBubbleProps = {
+           id: loadingMsgId,
+           sender: 'Magna AI',
+           text: "Opening Magna Podcast...",
+           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+           avatar: <MagnaNewIcon className="w-5 h-5 text-red-600" />,
+           color: 'bg-red-100',
+           isLoading: true,
+           loadingIcon: <Mic size={12} className="text-[#E50914]" />
+         };
+         setMessages(prev => [...prev, loadingMsg]);
+         setIsTyping(false);
+ 
+         // Navigate after delay
+         setTimeout(() => {
+            router.push('/magna-podcast');
+         }, 1500);
+       }, 500);
+       return;
+    }
+
+    // Handle "Open Magna School" command
+    if (currentQuery.toLowerCase().includes('open magna school')) {
+       const loadingMsgId = (Date.now() + 1).toString();
+       
+       setTimeout(() => {
+         // Show Loading Animation with Book Icon
+         const loadingMsg: MessageBubbleProps = {
+           id: loadingMsgId,
+           sender: 'Magna AI',
+           text: "Opening Magna School...",
+           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+           avatar: <MagnaNewIcon className="w-5 h-5 text-red-600" />,
+           color: 'bg-red-100',
+           isLoading: true,
+           loadingIcon: <BookOpen size={12} className="text-[#E50914]" />
+         };
+         setMessages(prev => [...prev, loadingMsg]);
+         setIsTyping(false);
+ 
+         // Navigate after delay
+         setTimeout(() => {
+            router.push('/magna-school');
+         }, 1500);
+       }, 500);
+       return;
+    }
+
+    // Handle "Tell me more about Magna School" command
+    if (currentQuery.toLowerCase().includes('tell me more about magna school')) {
+       const loadingMsgId = (Date.now() + 1).toString();
+       
+       setTimeout(() => {
+         // 1. Show Loading Animation
+         const loadingMsg: MessageBubbleProps = {
+           id: loadingMsgId,
+           sender: 'Magna AI',
+           text: "Finding top courses...",
+           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+           avatar: <MagnaNewIcon className="w-5 h-5 text-red-600" />,
+           color: 'bg-red-100',
+           isLoading: true
+         };
+         setMessages(prev => [...prev, loadingMsg]);
+         setIsTyping(false);
+ 
+         // 2. Show Results after delay
+         setTimeout(() => {
+           setMessages(prev => prev.map(msg => {
+             if (msg.id === loadingMsgId) {
+               return {
+                 ...msg,
+                 text: `Here are some top-rated courses from Magna School:`,
+                 isLoading: false,
+                 schoolResults: COURSES,
+                 onViewMore: () => setToastConfig({ isVisible: true, message: 'Unlock full access with 100 Magna Coins' })
+               };
+             }
+             return msg;
+           }));
+           setChatState('IDLE');
+         }, 2000);
+       }, 1000);
+       return;
+    }
+
+    // Handle Project Search (Keywords: "project", "projects")
+    if (currentQuery.toLowerCase().includes('project')) {
+       const loadingMsgId = (Date.now() + 1).toString();
+       
+       setTimeout(() => {
+         // 1. Show Loading Animation
+         const loadingMsg: MessageBubbleProps = {
+           id: loadingMsgId,
+           sender: 'Magna AI',
+           text: "Looking for trending projects...",
+           time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+           avatar: <MagnaNewIcon className="w-5 h-5 text-red-600" />,
+           color: 'bg-red-100',
+           isLoading: true
+         };
+         setMessages(prev => [...prev, loadingMsg]);
+         setIsTyping(false);
+ 
+         // 2. Show Results after delay
+         setTimeout(() => {
+           setMessages(prev => prev.map(msg => {
+             if (msg.id === loadingMsgId) {
+               return {
+                 ...msg,
+                 text: `Here are some trending projects I found for you:`,
+                 isLoading: false,
+                 projectResults: MOCK_PROJECTS,
+                 onViewMore: () => setToastConfig({ isVisible: true, message: 'Unlock this feature with 100 Magna Coins' })
+               };
+             }
+             return msg;
+           }));
+           setChatState('IDLE');
+         }, 2000);
+       }, 1000);
+       return;
+    }
 
     // Handle Job Stack Response
     if (chatState === 'WAITING_FOR_JOB_STACK') {

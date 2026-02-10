@@ -1,7 +1,7 @@
 import React from 'react';
 import { Users, Calendar, MapPin } from 'lucide-react';
 
-interface Project {
+export interface Project {
   id: number;
   title: string;
   description: string;
@@ -18,25 +18,72 @@ interface Project {
 interface ProjectCardProps {
   project: Project;
   showActions?: boolean;
+  isDarkMode?: boolean;
+  isCompact?: boolean;
 }
 
-export default function ProjectCard({ project, showActions = true }: ProjectCardProps) {
+export default function ProjectCard({ project, showActions = true, isDarkMode = false, isCompact = false }: ProjectCardProps) {
+  if (isCompact) {
+    return (
+      <div className={`rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-all group h-full flex flex-col ${
+        isDarkMode 
+          ? 'bg-[#111] border-[#E70008]/20' 
+          : 'bg-white border-gray-100'
+      }`}>
+        <div className={`h-16 relative overflow-hidden flex items-center justify-center ${
+            project.category === 'Blockchain' ? 'bg-blue-600' :
+            project.category === 'Health Tech' ? 'bg-green-600' :
+            project.category === 'IoT' ? 'bg-purple-600' :
+            project.category === 'AI/ML' ? 'bg-indigo-600' : 'bg-gray-600'
+        }`}>
+          <span className="text-white font-bold text-xl">{project.title.charAt(0)}</span>
+        </div>
+        
+        <div className="p-2 flex-1 flex flex-col min-w-0">
+          <div className="mb-1">
+             <h3 className={`font-bold text-[10px] leading-tight group-hover:text-[#E50914] transition-colors truncate ${
+               isDarkMode ? 'text-white' : 'text-black'
+             }`}>
+               {project.title}
+             </h3>
+             <p className="text-[9px] text-gray-500 truncate">{project.category}</p>
+          </div>
+          
+          <div className="flex flex-wrap gap-1 mt-auto">
+             <span className="text-[8px] px-1.5 py-0.5 bg-[#E50914]/5 text-[#E50914] rounded font-medium truncate">
+               {project.status}
+             </span>
+             {project.location && (
+               <span className="text-[8px] px-1.5 py-0.5 bg-gray-100 rounded text-gray-600 truncate max-w-full">
+                 {project.location}
+               </span>
+             )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm hover:shadow-md transition-all group">
+    <div className={`rounded-2xl p-6 border shadow-sm hover:shadow-md transition-all group ${
+        isDarkMode ? 'bg-[#111] border-[#333]' : 'bg-white border-gray-100'
+    }`}>
       {/* Card Header */}
-      <div className="flex items-start justify-between mb-4">
-        <h2 className="text-xl font-bold text-black group-hover:text-[#E50914] transition-colors">
+      <div className="flex flex-col gap-3 mb-4">
+        <h2 className={`text-xl font-bold group-hover:text-[#E50914] transition-colors leading-tight ${
+            isDarkMode ? 'text-white' : 'text-black'
+        }`}>
           {project.title}
         </h2>
-        <div className="flex gap-2">
-          <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+        <div className="flex flex-wrap gap-2">
+          <span className={`px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider border whitespace-nowrap ${
             project.status === 'in-progress' ? 'bg-[#E50914]/5 text-[#E50914] border-[#E50914]/20' : 
             project.status === 'open' ? 'bg-[#F4A261]/10 text-[#d98236] border-[#F4A261]/20' : 
             'bg-gray-100 text-gray-500 border-gray-200'
           }`}>
             {project.status}
           </span>
-          <span className="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gray-50 text-gray-500 border border-gray-200">
+          <span className="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider bg-gray-50 text-gray-500 border border-gray-200 whitespace-nowrap">
             {project.level}
           </span>
         </div>

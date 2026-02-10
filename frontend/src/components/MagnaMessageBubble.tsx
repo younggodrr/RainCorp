@@ -4,6 +4,9 @@ import React, { useState } from 'react';
 import { Edit, Loader2, Lock } from 'lucide-react';
 import JobCard, { Job } from './JobCard';
 import BuilderCard, { Builder } from './BuilderCard';
+import ProjectCard, { Project } from './ProjectCard';
+import CourseCard from './CourseCard';
+import { Course } from '@/app/magna-school/constants';
 
 export interface MessageBubbleProps {
   id?: string;
@@ -17,7 +20,10 @@ export interface MessageBubbleProps {
   isDarkMode?: boolean;
   jobResults?: Job[];
   builderResults?: Builder[];
+  projectResults?: Project[];
+  schoolResults?: Course[];
   isLoading?: boolean;
+  loadingIcon?: React.ReactNode;
   onViewMore?: () => void;
 }
 
@@ -33,7 +39,10 @@ export default function MagnaMessageBubble({
   isDarkMode = false,
   jobResults,
   builderResults,
+  projectResults,
+  schoolResults,
   isLoading,
+  loadingIcon,
   onViewMore
 }: MessageBubbleProps) {
   const [isEditing, setIsEditing] = useState(false);
@@ -97,7 +106,14 @@ export default function MagnaMessageBubble({
           
           {isLoading && (
             <div className="flex items-center gap-2 text-[#E50914]">
-               <Loader2 className="animate-spin" size={20} />
+               {loadingIcon ? (
+                 <div className="relative w-5 h-5 flex items-center justify-center">
+                   <div className="absolute inset-0 rounded-full border-2 border-[#E50914] border-t-transparent animate-spin" />
+                   {loadingIcon}
+                 </div>
+               ) : (
+                 <Loader2 className="animate-spin" size={20} />
+               )}
                <span className="text-sm font-medium">{text}</span>
             </div>
           )}
@@ -135,6 +151,54 @@ export default function MagnaMessageBubble({
                        </div>
                        <div className="block md:hidden h-full">
                            <BuilderCard builder={builder} isDarkMode={isDarkMode} isCompact={true} />
+                       </div>
+                   </div>
+                ))}
+                
+                {onViewMore && (
+                    <button 
+                        onClick={onViewMore}
+                        className="col-span-3 w-full py-3 mt-2 rounded-xl border border-dashed border-[#E50914]/50 flex items-center justify-center gap-2 hover:bg-[#E50914]/5 transition-colors group"
+                    >
+                        <Lock size={16} className="text-[#E50914]" />
+                        <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} group-hover:text-[#E50914]`}>View More</span>
+                    </button>
+                )}
+             </div>
+          )}
+          {projectResults && projectResults.length > 0 && (
+             <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-4">
+                {projectResults.slice(0, 5).map(project => (
+                   <div key={project.id} className="h-full">
+                       <div className="hidden md:block h-full">
+                           <ProjectCard project={project} isDarkMode={isDarkMode} isCompact={false} />
+                       </div>
+                       <div className="block md:hidden h-full">
+                           <ProjectCard project={project} isDarkMode={isDarkMode} isCompact={true} />
+                       </div>
+                   </div>
+                ))}
+                
+                {onViewMore && (
+                    <button 
+                        onClick={onViewMore}
+                        className="col-span-3 w-full py-3 mt-2 rounded-xl border border-dashed border-[#E50914]/50 flex items-center justify-center gap-2 hover:bg-[#E50914]/5 transition-colors group"
+                    >
+                        <Lock size={16} className="text-[#E50914]" />
+                        <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} group-hover:text-[#E50914]`}>View More</span>
+                    </button>
+                )}
+             </div>
+          )}
+          {schoolResults && schoolResults.length > 0 && (
+             <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-4">
+                {schoolResults.slice(0, 5).map(course => (
+                   <div key={course.id} className="h-full">
+                       <div className="hidden md:block h-full">
+                           <CourseCard course={course} isDarkMode={isDarkMode} isCompact={false} />
+                       </div>
+                       <div className="block md:hidden h-full">
+                           <CourseCard course={course} isDarkMode={isDarkMode} isCompact={true} />
                        </div>
                    </div>
                 ))}

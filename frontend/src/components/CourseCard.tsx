@@ -6,9 +6,51 @@ import { Course } from '@/app/magna-school/constants';
 interface CourseCardProps {
   course: Course;
   isDarkMode: boolean;
+  isCompact?: boolean;
 }
 
-export default function CourseCard({ course, isDarkMode }: CourseCardProps) {
+export default function CourseCard({ course, isDarkMode, isCompact = false }: CourseCardProps) {
+  if (isCompact) {
+    return (
+      <Link href={`/magna-school/${course.id}`} className="block h-full">
+        <div className={`rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-all group h-full flex flex-col ${
+          isDarkMode 
+            ? 'bg-[#111] border-[#E70008]/20' 
+            : 'bg-white border-gray-100'
+        }`}>
+          {/* Compact Thumbnail */}
+          <div className={`h-16 relative overflow-hidden flex items-center justify-center ${isDarkMode ? 'bg-[#222]' : 'bg-gray-100'}`}>
+             <Video size={24} className={isDarkMode ? 'text-gray-600' : 'text-gray-400'} />
+             {course.bestseller && (
+                <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#F4A261]" title="Bestseller" />
+             )}
+          </div>
+          
+          <div className="p-2 flex-1 flex flex-col min-w-0">
+            <div className="mb-1">
+               <h3 className={`font-bold text-[10px] leading-tight group-hover:text-[#E50914] transition-colors truncate ${
+                 isDarkMode ? 'text-white' : 'text-black'
+               }`}>
+                 {course.title}
+               </h3>
+               <p className="text-[9px] text-gray-500 truncate">{course.instructor}</p>
+            </div>
+            
+            <div className="flex flex-wrap items-center justify-between mt-auto gap-1">
+               <div className="flex items-center gap-0.5 text-[8px] text-[#F4A261] font-bold">
+                 <Star size={8} fill="currentColor" />
+                 <span>{course.rating}</span>
+               </div>
+               <span className={`text-[9px] font-bold truncate ${course.price === 0 ? 'text-[#2ECC71]' : isDarkMode ? 'text-white' : 'text-black'}`}>
+                  {course.price === 0 ? 'Free' : `KES ${course.price.toLocaleString()}`}
+               </span>
+            </div>
+          </div>
+        </div>
+      </Link>
+    );
+  }
+
   return (
     <Link href={`/magna-school/${course.id}`} className="block h-full">
       <div className={`rounded-2xl border overflow-hidden hover:shadow-lg transition-all group cursor-pointer flex flex-col h-full ${
