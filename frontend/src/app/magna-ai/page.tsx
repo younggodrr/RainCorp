@@ -346,7 +346,7 @@ export default function MagnaAIPage() {
               messages={messages}
               handleEditMessage={handleEditMessage}
               isTyping={isTyping}
-              messagesEndRef={messagesEndRef}
+              messagesEndRef={messagesEndRef as React.RefObject<HTMLDivElement>}
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               handleSendMessage={handleSendMessage}

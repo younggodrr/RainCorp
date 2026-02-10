@@ -28,96 +28,149 @@ const BuilderCard: React.FC<BuilderCardProps> = ({ builder, isDarkMode }) => {
   return (
     <Link 
       href={`/user-profile?id=${builder.id}`} 
-      className={`rounded-2xl p-6 border transition-all flex flex-col gap-4 hover:shadow-md ${isDarkMode ? 'bg-[#111] border-[#E70008]/20 shadow-[0_0_15px_rgba(231,0,8,0.1)]' : 'bg-white border-black'}`}
+      className={`group block rounded-[24px] p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col h-full ${
+        isDarkMode 
+          ? 'bg-[#111] border border-[#E70008]/20 shadow-lg shadow-black/50' 
+          : 'bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]'
+      }`}
     >
-      {/* Header: Avatar & Info */}
-      <div className="flex gap-4 items-start">
-        <div className={`w-14 h-14 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 font-bold text-xl relative ${isDarkMode ? 'bg-[#222] text-gray-400' : 'bg-gray-100 text-gray-500'}`}>
-          {/* Placeholder Avatar */}
-          {builder.avatar ? (
-            <Image src={builder.avatar} alt={builder.name} fill sizes="56px" className="object-cover" />
-          ) : (
-            builder.name.substring(0, 2).toUpperCase()
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2">
-            <h3 className={`font-bold truncate ${isDarkMode ? 'text-white' : 'text-black'}`}>{builder.name}</h3>
+      {/* ZONE A: HEADER (Identity) */}
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <div className="flex items-center gap-4">
+          {/* Avatar */}
+          <div className={`w-14 h-14 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 relative shadow-sm ${
+            isDarkMode ? 'bg-[#222] text-gray-400' : 'bg-gray-50 text-gray-500'
+          }`}>
+            {builder.avatar ? (
+              <Image src={builder.avatar} alt={builder.name} fill sizes="56px" className="object-cover" />
+            ) : (
+              <span className="font-bold text-lg">{builder.name.substring(0, 2).toUpperCase()}</span>
+            )}
           </div>
-          <p className={`text-xs truncate ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>{builder.email}</p>
-          <p className={`text-xs mt-1 line-clamp-2 leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>{builder.bio}</p>
+          
+          {/* Name & Email */}
+          <div className="min-w-0">
+            <h3 className={`font-bold text-lg truncate leading-tight mb-0.5 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              {builder.name}
+            </h3>
+            <p className={`text-xs truncate ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+              {builder.email}
+            </p>
+          </div>
         </div>
-        
-        {/* Status & Actions Column */}
-        <div className="flex flex-col items-end gap-3 flex-shrink-0 ml-1">
-          <span className="px-2 py-0.5 bg-[#2ECC71]/10 text-[#2ECC71] rounded-full text-[10px] font-medium whitespace-nowrap">
-            {builder.status}
-          </span>
+
+        {/* Availability Badge */}
+        <div className={`px-2.5 py-1 rounded-full text-[10px] font-medium tracking-wide flex items-center gap-1.5 flex-shrink-0 ${
+          isDarkMode 
+            ? 'bg-green-900/20 text-green-400' 
+            : 'bg-green-50 text-green-700'
+        }`}>
+          <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60"></span>
+          Available
         </div>
       </div>
 
-      {/* Roles */}
-      <div className="flex flex-wrap gap-2">
-        {builder.roles.slice(0, 2).map((role, idx) => (
-          <span key={idx} className={`px-3 py-1 rounded-full text-[10px] font-medium border ${idx === 0 ? 'bg-[#F4A261]/10 text-[#F4A261] border-[#F4A261]/20' : 'bg-[#E50914]/10 text-[#E50914] border-[#E50914]/20'}`}>
-            {role}
-          </span>
-        ))}
-        {builder.roles.length > 2 && (
-          <span className={`px-3 py-1 rounded-full text-[10px] font-medium border ${isDarkMode ? 'bg-[#222] text-gray-400 border-gray-700' : 'bg-gray-100 text-gray-600 border-gray-200'}`}>
-            +{builder.roles.length - 2}
-          </span>
-        )}
+      {/* ZONE B: BODY (About + Roles) */}
+      <div className="mb-6 space-y-4">
+        {/* Tagline */}
+        <p className={`text-sm font-medium line-clamp-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+          {builder.bio.replace(/[\u{1F600}-\u{1F64F}\u{1F300}-\u{1F5FF}\u{1F680}-\u{1F6FF}\u{1F1E0}-\u{1F1FF}]/gu, '')}
+        </p>
+
+        {/* Role Chips */}
+        <div className="flex flex-wrap gap-2">
+          {builder.roles.slice(0, 3).map((role, idx) => (
+            <span 
+              key={idx} 
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${
+                isDarkMode 
+                  ? 'bg-[#222] text-gray-400 group-hover:bg-[#333] group-hover:text-gray-300' 
+                  : 'bg-gray-50 text-gray-600 group-hover:bg-gray-100 group-hover:text-gray-800'
+              }`}
+            >
+              {role}
+            </span>
+          ))}
+        </div>
       </div>
 
-      {/* Looking For */}
-      <div className={`flex gap-3 p-3 rounded-xl ${isDarkMode ? 'bg-[#222]' : 'bg-gray-50'}`}>
-        {/* Action Icons */}
-        <div className={`flex flex-col justify-center gap-2 border-r pr-3 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
-          <button 
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-[#333] text-gray-400 hover:text-white' : 'hover:bg-white text-gray-500 hover:text-[#E50914]'}`}
-          >
-            <UserPlus size={16} />
-          </button>
-          <button 
-            onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-            className={`p-1.5 rounded-lg transition-colors ${isDarkMode ? 'hover:bg-[#333] text-gray-400 hover:text-white' : 'hover:bg-white text-gray-500 hover:text-[#E50914]'}`}
-          >
-            <MessageSquare size={16} />
-          </button>
+      {/* ZONE C: INTENT + FOOTER */}
+      <div className="mt-auto">
+        {/* Looking For Section */}
+        <div className={`p-4 rounded-xl mb-6 flex gap-4 ${isDarkMode ? 'bg-[#1A1A1A]' : 'bg-gray-50/80'}`}>
+          {/* Action Buttons Column */}
+          <div className={`flex flex-col gap-2 border-r pr-4 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+            <button 
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              className={`p-2 rounded-lg transition-colors ${
+                isDarkMode 
+                  ? 'hover:bg-[#333] text-gray-400 hover:text-white bg-[#222]' 
+                  : 'hover:bg-white text-gray-500 hover:text-[#E50914] bg-white border border-gray-100 shadow-sm'
+              }`}
+              title="Connect"
+            >
+              <UserPlus size={16} />
+            </button>
+            <button 
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              className={`p-2 rounded-lg transition-colors ${
+                isDarkMode 
+                  ? 'hover:bg-[#333] text-gray-400 hover:text-white bg-[#222]' 
+                  : 'hover:bg-white text-gray-500 hover:text-[#E50914] bg-white border border-gray-100 shadow-sm'
+              }`}
+              title="Message"
+            >
+              <MessageSquare size={16} />
+            </button>
+          </div>
+
+          {/* Looking For Content */}
+          <div className="flex-1 min-w-0">
+            <h4 className={`text-[10px] uppercase tracking-wider font-bold mb-3 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+              Looking for
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {builder.lookingFor.slice(0, 2).map((item, idx) => (
+                <span 
+                  key={idx} 
+                  className={`px-2.5 py-1 rounded-md text-[10px] font-medium border ${
+                    isDarkMode 
+                      ? 'border-gray-700 text-gray-400' 
+                      : 'border-gray-200 text-gray-600 bg-white'
+                  }`}
+                >
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
         </div>
 
-        {/* Content */}
-        <div className="flex flex-col gap-2 flex-1">
-          <div className="flex items-center justify-between gap-2">
-             <div className={`flex items-center gap-2 text-xs font-bold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
-               <span className="text-sm">👀</span>
-               <span>Looking for:</span>
-             </div>
+        {/* Divider */}
+        <div className={`h-px w-full mb-4 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}></div>
+
+        {/* Footer: Location & Socials */}
+        <div className="flex items-center justify-between">
+          <div className={`flex items-center gap-1.5 text-xs font-medium ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+            <MapPin size={14} className="opacity-70" />
+            <span className="truncate max-w-[120px]">{builder.location}</span>
           </div>
-          <div className="flex flex-wrap gap-1.5">
-            {builder.lookingFor.map((item, idx) => (
-              <span key={idx} className={`px-2 py-0.5 border rounded-md text-[10px] font-medium ${isDarkMode ? 'bg-[#E50914] border-[#E50914] text-black' : 'bg-[#E50914] border-[#E50914] text-black'}`}>
-                {item}
-              </span>
+
+          <div className="flex items-center gap-3">
+            {[Github, Linkedin, Globe, MessageCircle].map((Icon, i) => (
+              <div 
+                key={i}
+                className={`transition-colors ${
+                  isDarkMode 
+                    ? 'text-gray-600 hover:text-gray-300' 
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                <Icon size={16} />
+              </div>
             ))}
           </div>
         </div>
-      </div>
-
-      {/* Details */}
-      <div className="space-y-2 mt-auto">
-         <div className="flex items-center gap-2 text-xs text-gray-500">
-           <MapPin size={14} className="text-[#E50914]" />
-           <span className="truncate">{builder.location}</span>
-         </div>
-         <div className="flex items-center gap-3 text-gray-400">
-            <Globe size={16} className="text-[#F4A261] cursor-pointer transition-colors" />
-            <Github size={16} className={`${isDarkMode ? 'text-white' : 'text-black'} cursor-pointer transition-colors`} />
-            <Linkedin size={16} className="text-[#0077b5] cursor-pointer transition-colors" />
-            <MessageCircle size={16} className="text-[#25D366] cursor-pointer transition-colors" />
-         </div>
       </div>
     </Link>
   );

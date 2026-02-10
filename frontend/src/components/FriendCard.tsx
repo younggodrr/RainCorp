@@ -1,4 +1,10 @@
 import React from 'react';
+import Link from 'next/link';
+import Image from 'next/image';
+import { 
+  UserPlus, MessageSquare, MapPin, 
+  Github, Linkedin, MessageCircle, Globe 
+} from 'lucide-react';
 
 interface Friend {
   id: number;
@@ -7,6 +13,9 @@ interface Friend {
   company: string;
   status: string;
   mutual: number;
+  avatar?: string | null;
+  email?: string;
+  location?: string;
 }
 
 interface FriendCardProps {
@@ -15,71 +24,163 @@ interface FriendCardProps {
 }
 
 export default function FriendCard({ friend, isDarkMode = false }: FriendCardProps) {
+  // Mock data to match BuilderCard structure if missing
+  const builderData = {
+    ...friend,
+    email: friend.email || `${friend.name.toLowerCase().replace(' ', '.')}@example.com`,
+    bio: "Passionate developer focused on creating intuitive user experiences and scalable applications.",
+    roles: [friend.role, "Developer"],
+    lookingFor: ["Collaboration", "Mentorship"],
+    location: friend.location || "Nairobi, Kenya"
+  };
+
   return (
-    <div className={`rounded-2xl p-4 md:p-6 border hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-row md:flex-col items-center text-left md:text-center group relative gap-4 md:gap-0 ${
-      isDarkMode 
-        ? 'bg-[#111] border-[#E70008]/30 shadow-[0_0_15px_rgba(231,0,8,0.1)]' 
-        : 'bg-white border-gray-100'
-    }`}>
-        {/* Status Dot */}
-        <div className={`absolute top-4 right-4 md:top-6 md:right-6 w-3 h-3 rounded-full border-2 ${
-          isDarkMode ? 'border-[#111]' : 'border-white'
-        } ${friend.status === 'online' ? 'bg-green-500' : 'bg-gray-300'}`} title={friend.status}></div>
-        
-        {/* Avatar */}
-        <div className={`w-14 h-14 md:w-24 md:h-24 flex-shrink-0 rounded-full md:mb-4 overflow-hidden relative border-4 group-hover:border-[#E50914]/10 transition-colors ${
-          isDarkMode ? 'bg-[#222] border-[#222]' : 'bg-gray-50 border-gray-50'
-        }`}>
-             <div className={`w-full h-full flex items-center justify-center text-lg md:text-2xl font-bold group-hover:text-[#E50914] transition-colors ${
-               isDarkMode 
-                 ? 'bg-gradient-to-br from-[#222] to-[#333] text-gray-500' 
-                 : 'bg-gradient-to-br from-blue-50 to-purple-50 text-gray-400'
-             }`}>
-                {friend.name.split(' ')[1][0]}
-             </div>
+    <Link 
+      href={`/user-profile?id=${friend.id}`} 
+      className={`group block rounded-[24px] p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl flex flex-col h-full ${
+        isDarkMode 
+          ? 'bg-[#111] border border-[#E70008]/20 shadow-lg shadow-black/50' 
+          : 'bg-white border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)]'
+      }`}
+    >
+      {/* ZONE A: HEADER (Identity) */}
+      <div className="flex items-start justify-between gap-4 mb-6">
+        <div className="flex items-center gap-4">
+          {/* Avatar */}
+          <div className={`w-14 h-14 rounded-full flex items-center justify-center overflow-hidden flex-shrink-0 relative shadow-sm ${
+            isDarkMode ? 'bg-[#222] text-gray-400' : 'bg-gray-50 text-gray-500'
+          }`}>
+            {builderData.avatar ? (
+              <Image src={builderData.avatar} alt={builderData.name} fill sizes="56px" className="object-cover" />
+            ) : (
+              <span className="font-bold text-lg">{builderData.name.substring(0, 2).toUpperCase()}</span>
+            )}
+          </div>
+          
+          {/* Name & Email */}
+          <div className="min-w-0">
+            <h3 className={`font-bold text-lg truncate leading-tight mb-0.5 ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>
+              {builderData.name}
+            </h3>
+            <p className={`text-xs truncate ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+              {builderData.email}
+            </p>
+          </div>
         </div>
 
-        <div className="flex-1 min-w-0 md:w-full">
-            <h3 className={`font-bold text-base md:text-lg mb-0.5 md:mb-1 truncate ${
-              isDarkMode ? 'text-[#F9E4AD]' : 'text-gray-900'
-            }`}>{friend.name}</h3>
-            <p className="text-xs md:text-sm text-[#E50914] font-medium mb-0.5 md:mb-1 truncate">{friend.role}</p>
-            <p className={`text-xs mb-0 md:mb-6 truncate ${
-              isDarkMode ? 'text-gray-500' : 'text-gray-400'
-            }`}>{friend.company}</p>
-            
-            {/* Mobile Action Buttons */}
-            <div className="flex md:hidden gap-2 mt-2">
-                 <button className={`flex-1 py-1.5 text-xs font-bold rounded-lg ${
-                   isDarkMode ? 'bg-[#E50914] text-white' : 'bg-black text-white'
-                 }`}>
-                    Message
-                 </button>
-                 <button className={`flex-1 py-1.5 text-xs font-semibold rounded-lg ${
-                   isDarkMode 
-                     ? 'bg-transparent border border-[#E70008]/40 text-[#F9E4AD]' 
-                     : 'bg-gray-50 text-gray-600'
-                 }`}>
-                    Profile
-                 </button>
+        {/* Availability Badge */}
+        <div className={`px-2.5 py-1 rounded-full text-[10px] font-medium tracking-wide flex items-center gap-1.5 flex-shrink-0 ${
+          isDarkMode 
+            ? 'bg-green-900/20 text-green-400' 
+            : 'bg-green-50 text-green-700'
+        }`}>
+          <span className={`w-1.5 h-1.5 rounded-full ${friend.status === 'online' ? 'bg-green-500' : 'bg-gray-400'}`}></span>
+          {friend.status === 'online' ? 'Online' : 'Offline'}
+        </div>
+      </div>
+
+      {/* ZONE B: BODY (About + Roles) */}
+      <div className="mb-6 space-y-4">
+        {/* Tagline */}
+        <p className={`text-sm font-medium line-clamp-1 ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>
+          {builderData.bio}
+        </p>
+
+        {/* Role Chips */}
+        <div className="flex flex-wrap gap-2">
+          {builderData.roles.slice(0, 3).map((role, idx) => (
+            <span 
+              key={idx} 
+              className={`px-3 py-1.5 rounded-lg text-[11px] font-medium transition-colors ${
+                isDarkMode 
+                  ? 'bg-[#222] text-gray-400 group-hover:bg-[#333] group-hover:text-gray-300' 
+                  : 'bg-gray-50 text-gray-600 group-hover:bg-gray-100 group-hover:text-gray-800'
+              }`}
+            >
+              {role}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      {/* ZONE C: INTENT + FOOTER */}
+      <div className="mt-auto">
+        {/* Looking For Section */}
+        <div className={`p-4 rounded-xl mb-6 flex gap-4 ${isDarkMode ? 'bg-[#1A1A1A]' : 'bg-gray-50/80'}`}>
+          {/* Action Buttons Column */}
+          <div className={`flex flex-col gap-2 border-r pr-4 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+            <button 
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              className={`p-2 rounded-lg transition-colors ${
+                isDarkMode 
+                  ? 'hover:bg-[#333] text-gray-400 hover:text-white bg-[#222]' 
+                  : 'hover:bg-white text-gray-500 hover:text-[#E50914] bg-white border border-gray-100 shadow-sm'
+              }`}
+              title="Connect"
+            >
+              <UserPlus size={16} />
+            </button>
+            <button 
+              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              className={`p-2 rounded-lg transition-colors ${
+                isDarkMode 
+                  ? 'hover:bg-[#333] text-gray-400 hover:text-white bg-[#222]' 
+                  : 'hover:bg-white text-gray-500 hover:text-[#E50914] bg-white border border-gray-100 shadow-sm'
+              }`}
+              title="Message"
+            >
+              <MessageSquare size={16} />
+            </button>
+          </div>
+
+          {/* Looking For Content */}
+          <div className="flex-1 min-w-0">
+            <h4 className={`text-[10px] uppercase tracking-wider font-bold mb-3 ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>
+              Looking for
+            </h4>
+            <div className="flex flex-wrap gap-2">
+              {builderData.lookingFor.slice(0, 2).map((item, idx) => (
+                <span 
+                  key={idx} 
+                  className={`px-2.5 py-1 rounded-md text-[10px] font-medium border ${
+                    isDarkMode 
+                      ? 'border-gray-700 text-gray-400' 
+                      : 'border-gray-200 text-gray-600 bg-white'
+                  }`}
+                >
+                  {item}
+                </span>
+              ))}
             </div>
+          </div>
         </div>
-        
-        {/* Desktop Action Buttons */}
-        <div className="w-full mt-auto space-y-2 hidden md:block">
-             <button className={`w-full py-2.5 text-sm font-bold rounded-xl hover:bg-[#E50914] transition-colors shadow-sm ${
-               isDarkMode ? 'bg-[#E50914] text-white' : 'bg-black text-white'
-             }`}>
-                Message
-             </button>
-             <button className={`w-full py-2.5 text-sm font-semibold rounded-xl transition-colors ${
-               isDarkMode 
-                 ? 'bg-transparent border border-[#E70008]/40 text-[#F9E4AD] hover:bg-[#E70008]/10' 
-                 : 'bg-gray-50 text-gray-600 hover:bg-gray-100'
-             }`}>
-                View Profile
-             </button>
+
+        {/* Divider */}
+        <div className={`h-px w-full mb-4 ${isDarkMode ? 'bg-gray-800' : 'bg-gray-100'}`}></div>
+
+        {/* Footer: Location & Socials */}
+        <div className="flex items-center justify-between">
+          <div className={`flex items-center gap-1.5 text-xs font-medium ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+            <MapPin size={14} className="opacity-70" />
+            <span className="truncate max-w-[120px]">{builderData.location}</span>
+          </div>
+
+          <div className="flex items-center gap-3">
+            {[Github, Linkedin, Globe, MessageCircle].map((Icon, i) => (
+              <div 
+                key={i}
+                className={`transition-colors ${
+                  isDarkMode 
+                    ? 'text-gray-600 hover:text-gray-300' 
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+              >
+                <Icon size={16} />
+              </div>
+            ))}
+          </div>
         </div>
-    </div>
+      </div>
+    </Link>
   );
 }
