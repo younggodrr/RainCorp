@@ -350,7 +350,7 @@ export default function MagnaAIPage() {
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               handleSendMessage={handleSendMessage}
-              inputRef={desktopInputRef}
+              inputRef={desktopInputRef as React.RefObject<HTMLTextAreaElement>}
             />
           ) : (
             /* DEFAULT GREETING VIEW */
@@ -361,7 +361,7 @@ export default function MagnaAIPage() {
               setSearchQuery={setSearchQuery}
               handleSendMessage={handleSendMessage}
               handleServiceClick={handleServiceClick}
-              inputRef={desktopInputRef}
+              inputRef={desktopInputRef as React.RefObject<HTMLTextAreaElement>}
             />
           )}
 
@@ -373,7 +373,7 @@ export default function MagnaAIPage() {
                   setSearchQuery={setSearchQuery}
                   handleSendMessage={handleSendMessage}
                   isDarkMode={isDarkMode}
-                  inputRef={mobileInputRef}
+                  inputRef={mobileInputRef as React.RefObject<HTMLTextAreaElement>}
                   className={isDarkMode ? 'bg-[#111] border border-[#333]' : 'bg-[#F0F4F9]'}
                />
             </div>
