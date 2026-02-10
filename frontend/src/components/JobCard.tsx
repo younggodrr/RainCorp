@@ -21,9 +21,44 @@ interface JobCardProps {
   job: Job;
   isDarkMode: boolean;
   showExpiration?: boolean;
+  isCompact?: boolean;
 }
 
-export default function JobCard({ job, isDarkMode, showExpiration = false }: JobCardProps) {
+export default function JobCard({ job, isDarkMode, showExpiration = false, isCompact = false }: JobCardProps) {
+  if (isCompact) {
+    return (
+      <div className={`rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-all group h-full flex flex-col ${
+        isDarkMode 
+          ? 'bg-[#111] border-[#E70008]/20' 
+          : 'bg-white border-gray-100'
+      }`}>
+        <div className={`h-16 relative overflow-hidden ${job.logoColor} flex items-center justify-center`}>
+          <div className="text-white font-bold text-xl">{job.company.charAt(0)}</div>
+        </div>
+        
+        <div className="p-2 flex-1 flex flex-col min-w-0">
+          <div className="mb-1">
+             <h3 className={`font-bold text-[10px] leading-tight group-hover:text-[#E50914] transition-colors truncate ${
+               isDarkMode ? 'text-white' : 'text-black'
+             }`}>
+               {job.title}
+             </h3>
+             <p className="text-[9px] text-gray-500 truncate">{job.company}</p>
+          </div>
+          
+          <div className="flex flex-wrap gap-1 mt-auto">
+             <span className="text-[8px] px-1.5 py-0.5 bg-gray-100 rounded text-gray-600 truncate max-w-full">
+               {job.location}
+             </span>
+             <span className="text-[8px] px-1.5 py-0.5 bg-[#E50914]/5 text-[#E50914] rounded font-medium">
+               {job.salary.split(' - ')[0]}
+             </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className={`rounded-2xl p-6 border shadow-sm hover:shadow-md transition-all group ${
       isDarkMode 

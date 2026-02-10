@@ -1,7 +1,9 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Edit } from 'lucide-react';
+import { Edit, Loader2, Lock } from 'lucide-react';
+import JobCard, { Job } from './JobCard';
+import BuilderCard, { Builder } from './BuilderCard';
 
 export interface MessageBubbleProps {
   id?: string;
@@ -13,6 +15,10 @@ export interface MessageBubbleProps {
   isMe?: boolean;
   onEdit?: (id: string, newText: string) => void;
   isDarkMode?: boolean;
+  jobResults?: Job[];
+  builderResults?: Builder[];
+  isLoading?: boolean;
+  onViewMore?: () => void;
 }
 
 export default function MagnaMessageBubble({ 
@@ -24,7 +30,11 @@ export default function MagnaMessageBubble({
   color, 
   isMe = false, 
   onEdit, 
-  isDarkMode = false 
+  isDarkMode = false,
+  jobResults,
+  builderResults,
+  isLoading,
+  onViewMore
 }: MessageBubbleProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedText, setEditedText] = useState(text);
@@ -83,7 +93,63 @@ export default function MagnaMessageBubble({
           <span className={`text-xs font-bold ${color ? color.split(' ')[1] : (isDarkMode ? 'text-gray-400' : 'text-gray-700')}`}>{sender}</span>
         </div>
         <div className={`p-4 rounded-2xl rounded-tl-none border shadow-sm ${isDarkMode ? 'bg-[#111] border-[#333] text-gray-200' : 'bg-white border-gray-100 text-gray-700'}`}>
-          <p className="text-sm leading-relaxed">{text}</p>
+          {!isLoading && <p className="text-sm leading-relaxed">{text}</p>}
+          
+          {isLoading && (
+            <div className="flex items-center gap-2 text-[#E50914]">
+               <Loader2 className="animate-spin" size={20} />
+               <span className="text-sm font-medium">{text}</span>
+            </div>
+          )}
+
+          {jobResults && jobResults.length > 0 && (
+             <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-4">
+                {jobResults.slice(0, 5).map(job => (
+                   <div key={job.id} className="h-full">
+                       <div className="hidden md:block h-full">
+                           <JobCard job={job} isDarkMode={isDarkMode} isCompact={false} />
+                       </div>
+                       <div className="block md:hidden h-full">
+                           <JobCard job={job} isDarkMode={isDarkMode} isCompact={true} />
+                       </div>
+                   </div>
+                ))}
+                
+                {onViewMore && (
+                    <button 
+                        onClick={onViewMore}
+                        className="col-span-3 w-full py-3 mt-2 rounded-xl border border-dashed border-[#E50914]/50 flex items-center justify-center gap-2 hover:bg-[#E50914]/5 transition-colors group"
+                    >
+                        <Lock size={16} className="text-[#E50914]" />
+                        <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} group-hover:text-[#E50914]`}>View More</span>
+                    </button>
+                )}
+             </div>
+          )}
+          {builderResults && builderResults.length > 0 && (
+             <div className="mt-4 grid grid-cols-3 gap-2 sm:gap-4">
+                {builderResults.slice(0, 5).map(builder => (
+                   <div key={builder.id} className="h-full">
+                       <div className="hidden md:block h-full">
+                           <BuilderCard builder={builder} isDarkMode={isDarkMode} isCompact={false} />
+                       </div>
+                       <div className="block md:hidden h-full">
+                           <BuilderCard builder={builder} isDarkMode={isDarkMode} isCompact={true} />
+                       </div>
+                   </div>
+                ))}
+                
+                {onViewMore && (
+                    <button 
+                        onClick={onViewMore}
+                        className="col-span-3 w-full py-3 mt-2 rounded-xl border border-dashed border-[#E50914]/50 flex items-center justify-center gap-2 hover:bg-[#E50914]/5 transition-colors group"
+                    >
+                        <Lock size={16} className="text-[#E50914]" />
+                        <span className={`text-sm font-medium ${isDarkMode ? 'text-gray-300' : 'text-gray-700'} group-hover:text-[#E50914]`}>View More</span>
+                    </button>
+                )}
+             </div>
+          )}
         </div>
         <span className="text-[10px] text-gray-400 font-medium ml-1">{time}</span>
       </div>
