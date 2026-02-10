@@ -36,4 +36,4 @@ Quality Check:
 
 Ensure the visual design (Tailwind classes) remains exactly the same.
 Ensure all interactive elements (buttons, links) still function correctly.
-Target File: frontend/src/app/settings/page.tsx 
+Target File: frontend/src/app/user-profile/page.tsx 

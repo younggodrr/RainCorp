@@ -4,7 +4,7 @@ import { faqsData } from '@/app/settings/data';
 
 export default function HelpCenterSettings({ isDarkMode }: { isDarkMode?: boolean }) {
   return (
-    <div className={`rounded-[24px] p-6 md:p-8 shadow-sm ${isDarkMode ? 'bg-[#111] border border-[#E70008]/20' : 'bg-white'}`}>
+    <div className={`lg:rounded-[24px] lg:p-8 lg:shadow-sm ${isDarkMode ? 'lg:bg-[#111] lg:border lg:border-[#E70008]/20' : 'lg:bg-white'}`}>
       <h2 className={`text-xl font-bold mb-6 ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>Help Center</h2>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
