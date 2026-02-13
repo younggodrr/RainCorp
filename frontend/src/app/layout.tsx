@@ -31,6 +31,20 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const savedColor = localStorage.getItem('accentColor');
+                if (savedColor) {
+                  document.documentElement.style.setProperty('--primary-color', savedColor);
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
+      </head>
       <body className={inter.className}>
         <div id="root">
           {children}

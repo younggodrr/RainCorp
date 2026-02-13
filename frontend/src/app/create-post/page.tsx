@@ -22,6 +22,15 @@ export default function CreatePostPage() {
     if (savedTheme === 'dark') {
       setIsDarkMode(true);
     }
+
+    // Check for authentication on mount
+    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+    if (!token) {
+      // If no token, redirect to login immediately
+      // router.push('/login');
+      // For now, we'll just log it, but in a real app you'd redirect
+      console.warn('No access token found on mount. User may need to login.');
+    }
   }, []);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -59,15 +68,79 @@ export default function CreatePostPage() {
     }
   };
 
-  const handlePost = () => {
+  const handlePost = async () => {
     if (!content.trim() && !selectedImage) return;
     
     setIsSubmitting(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+    
+    try {
+      // Get the API URL from env
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      
+      // Try to get token from localStorage first, then check if it's stored in cookies or session if needed
+      // For now, we'll log what we found to help debug
+      const token = localStorage.getItem('accessToken');
+      console.log('Current access token:', token ? 'Found' : 'Missing');
+      
+      // Temporary fallback: if token is missing but user is "logged in" in their mind, 
+      // check if we have any other potential token keys (some backends use 'token')
+      let fallbackToken = token || localStorage.getItem('token');
+
+      // If still no token, try to see if it's inside the user object (sometimes stored there)
+      if (!fallbackToken) {
+        try {
+          const userStr = localStorage.getItem('user');
+          if (userStr) {
+            const userObj = JSON.parse(userStr);
+            if (userObj.token) fallbackToken = userObj.token;
+            if (userObj.accessToken) fallbackToken = userObj.accessToken;
+          }
+        } catch (e) {
+          console.error("Error parsing user object for token", e);
+        }
+      }
+      
+      // FOR DEBUGGING ONLY: Remove this in production!
+      // If no token found, check if we have a userid, if so, maybe we can proceed without a token?
+      // Or maybe the token is in a different format or location?
+      
+      if (!fallbackToken) {
+        // Optional: Redirect to login if no token found
+        // router.push('/login');
+        console.error("Authentication failed: No access token found in localStorage.");
+        throw new Error('You must be logged in to post. Please try logging in again.');
+      }
+
+      const postBody = {
+        title: content.length > 50 ? content.slice(0, 50) + "..." : content,
+        content: content,
+        // image: selectedImage // Optional: handle image upload separately or as base64
+      };
+
+      const response = await fetch(`${apiUrl}/api/posts`, {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${fallbackToken}`
+        },
+        body: JSON.stringify(postBody)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || `Server error: ${response.status}`);
+      }
+
+      console.log('Post created successfully');
       router.push('/feed');
-    }, 1500);
+      
+    } catch (error) {
+      console.error('Error creating post:', error);
+      alert(error instanceof Error ? error.message : 'Failed to create post');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const canPost = Boolean(content.trim() || selectedImage);

@@ -2,6 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { MOCK_CONVERSATIONS, Conversation, Message } from '@/utils/mockData';
 import { MOCK_FRIENDS } from './constants';
+import { chatService } from '@/services/chatService';
+
+const USE_REAL_API = false; // Set to true when backend is ready
 
 export function useMessages() {
   const searchParams = useSearchParams();
@@ -84,6 +87,71 @@ export function useMessages() {
     }
   }, []);
 
+  // API Integration: Fetch Chats
+  useEffect(() => {
+    if (!USE_REAL_API) return;
+
+    const fetchChats = async () => {
+      try {
+        const chats = await chatService.getChats();
+        // Map backend Chat objects to frontend Conversation objects
+        const mappedConversations: Conversation[] = chats.map(chat => ({
+          id: chat.id,
+          name: chat.name || 'Unknown User', // Needs user lookup for direct chats
+          lastMessage: chat.lastMessage?.content || 'No messages yet',
+          time: chat.lastMessage ? new Date(chat.lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+          unread: chat.unreadCount || 0,
+          isTyping: false,
+          pinned: false,
+          isGroup: chat.type === 'GROUP',
+          archived: false,
+          avatarColor: 'bg-gray-100 text-gray-600', // Default
+          messages: [], // Messages would be fetched separately on select
+        }));
+        setConversations(mappedConversations);
+      } catch (error) {
+        console.error('Failed to fetch chats:', error);
+      }
+    };
+
+    fetchChats();
+  }, []);
+
+  // API Integration: Fetch Messages
+  useEffect(() => {
+    if (!USE_REAL_API || !selectedChatId) return;
+
+    const fetchMessages = async () => {
+      try {
+        const currentUserId = localStorage.getItem('userid');
+        const messages = await chatService.getMessages(selectedChatId);
+        
+        setConversations(prev => prev.map(c => {
+          if (c.id === selectedChatId) {
+            return {
+              ...c,
+              messages: messages.map(m => ({
+                id: m.id,
+                sender: m.senderId === currentUserId ? 'Me' : 'Other',
+                text: m.content,
+                time: new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                avatar: m.senderId === currentUserId ? 'ME' : 'O',
+                isMe: m.senderId === currentUserId,
+                type: 'text',
+                read: true
+              }))
+            };
+          }
+          return c;
+        }));
+      } catch (error) {
+        console.error('Failed to fetch messages:', error);
+      }
+    };
+    
+    fetchMessages();
+  }, [selectedChatId]);
+
   const toggleTheme = () => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
@@ -124,14 +192,17 @@ export function useMessages() {
 
   // Handlers
 
-  const handleSendMessage = (e?: React.FormEvent) => {
+  const handleSendMessage = async (e?: React.FormEvent) => {
     e?.preventDefault();
     if (!messageInput.trim() || !selectedChatId) return;
 
+    const content = messageInput;
+    const tempId = `new-${Date.now()}`;
+
     const newMessage: Message = {
-      id: `new-${Date.now()}`,
+      id: tempId,
       sender: 'Me',
-      text: messageInput,
+      text: content,
       time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       avatar: 'ME',
       isMe: true,
@@ -144,7 +215,7 @@ export function useMessages() {
         return {
           ...c,
           messages: [...c.messages, newMessage],
-          lastMessage: messageInput,
+          lastMessage: content,
           time: 'Just now'
         };
       }
@@ -152,6 +223,15 @@ export function useMessages() {
     }));
 
     setMessageInput('');
+
+    if (USE_REAL_API) {
+      try {
+        await chatService.sendMessage(selectedChatId, { content });
+      } catch (error) {
+        console.error('Failed to send message:', error);
+        // TODO: Show error toast and potentially remove the optimistic message
+      }
+    }
   };
 
   const handleDeleteConversation = (id: string) => {

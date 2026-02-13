@@ -67,9 +67,10 @@ export function ThemeCard({ icon, label, active, isDarkMode, onClick }: { icon: 
   );
 }
 
-export function ColorSwatch({ color, active }: { color: string; active?: boolean }) {
+export function ColorSwatch({ color, active, onClick }: { color: string; active?: boolean; onClick?: () => void }) {
   return (
     <div 
+      onClick={onClick}
       className={`w-10 h-10 rounded-full cursor-pointer flex items-center justify-center transition-transform hover:scale-110 ${active ? 'ring-2 ring-offset-2 ring-gray-300' : ''}`}
       style={{ backgroundColor: color }}
     >

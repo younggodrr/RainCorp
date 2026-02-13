@@ -3,7 +3,7 @@
 
 @theme {
   /* Magna Coders Brand Colors */
-  --color-magna-red: #E70008;
+  --color-magna-red: var(--primary-color, #E70008);
   --color-magna-orange: #FF9940;
   --color-magna-cream: #F9E4AD;
   --color-magna-black: #000000;
@@ -51,7 +51,7 @@
   }
   
   .magna-text-accent {
-    color: #E70008;
+    color: var(--primary-color, #E70008);
   }
   
   .magna-text-secondary {
@@ -59,7 +59,7 @@
   }
   
   .magna-border {
-    border-color: #E70008;
+    border-color: var(--primary-color, #E70008);
   }
   
   .magna-border-focus {
@@ -67,7 +67,7 @@
   }
   
   .magna-bg-primary {
-    background-color: #E70008;
+    background-color: var(--primary-color, #E70008);
   }
   
   .magna-bg-secondary {
@@ -76,7 +76,7 @@
   
   .magna-input {
     background-color: #000000 !important;
-    border: 2px solid #E70008 !important;
+    border: 2px solid var(--primary-color, #E70008) !important;
     color: #F9E4AD !important;
   }
   

@@ -91,28 +91,34 @@ export default function LoginPage() {
       console.log('Login successful:', data);
       
       // Store tokens and user data
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
-      localStorage.setItem('userid', data.user.id);
-      if (data.user) {
-        localStorage.setItem('user', JSON.stringify(data.user));
-      } else {
-        // Fallback if user object is at top level
-        localStorage.setItem('user', JSON.stringify({
-          id: data.id,
-          username: data.username,
-          email: data.email,
-          avatar: data.avatar,
-          role: data.role,
-          isVerified: data.isVerified
-        }));
+      // Handle the nested data structure from your response
+      const responseData = data.data || data; // Check if wrapped in "data"
+      
+      if (responseData.accessToken) localStorage.setItem('accessToken', responseData.accessToken);
+      else if (responseData.token) localStorage.setItem('accessToken', responseData.token);
+      
+      if (responseData.refreshToken) localStorage.setItem('refreshToken', responseData.refreshToken);
+      
+      const user = responseData.user || {};
+      const userId = user.id || responseData.userId || responseData.id;
+
+      if (userId) {
+        localStorage.setItem('userid', userId);
       }
       
-      // Navigate to feed
+      if (user && Object.keys(user).length > 0) {
+        localStorage.setItem('user', JSON.stringify(user));
+      } else {
+        // Fallback: create minimal user object from what we have
+        const fallbackUser = { id: userId, email: formData.email };
+        localStorage.setItem('user', JSON.stringify(fallbackUser));
+      }
+
+      // Redirect based on user role or default to feed
       window.location.href = '/feed';
-    } catch (error: any) {
-      console.error('Login error:', error);
-      setErrors({ general: error.message || 'Login failed. Please try again.' });
+    } catch (err: any) {
+      console.error('Login error:', err);
+      setErrors({ form: err.message || 'Something went wrong. Please try again.' });
     } finally {
       setIsLoading(false);
     }

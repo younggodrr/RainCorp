@@ -4,6 +4,9 @@ import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { Heart, MessageSquare, Share2, Send, Edit2, Trash2, Reply } from 'lucide-react';
 import { Comment } from '@/utils/mockData';
 import Image from 'next/image';
+import { commentService } from '@/services/commentService';
+
+const USE_REAL_API = false;
 
 interface PostInteractionBarProps {
   initialLikes: number;
@@ -172,6 +175,23 @@ export default function PostInteractionBar({
   const [sortOrder, setSortOrder] = useState<'recent' | 'relevant'>('recent');
   const [isInputFocused, setIsInputFocused] = useState(false);
 
+  // API Integration: Fetch Comments
+  React.useEffect(() => {
+    if (USE_REAL_API && showComments) {
+      const fetchComments = async () => {
+        try {
+          // @ts-ignore - Ignoring type mismatch for now until backend types are fully aligned
+          const fetchedComments = await commentService.getCommentsByPostId(postId);
+          // In a real app, map backend response to frontend Comment type here
+          console.log('Fetched comments:', fetchedComments);
+        } catch (error) {
+          console.error('Failed to fetch comments:', error);
+        }
+      };
+      fetchComments();
+    }
+  }, [showComments, postId]);
+
   const handleLike = (e: React.MouseEvent) => {
     e.preventDefault();
     setLiked(!liked);
@@ -193,17 +213,19 @@ export default function PostInteractionBar({
     });
   };
   
-  const handleAddComment = (e: React.MouseEvent | React.KeyboardEvent) => {
+  const handleAddComment = async (e: React.MouseEvent | React.KeyboardEvent) => {
     e.preventDefault();
     if (!commentText.trim()) return;
     
+    const content = commentText;
+
     const newComment: Comment = {
         id: `new-${Date.now()}`,
         author: {
             name: 'You',
             avatar: undefined
         },
-        content: commentText,
+        content: content,
         createdAt: 'Just now',
         timestamp: Date.now(),
         likes: 0,
@@ -215,6 +237,15 @@ export default function PostInteractionBar({
     setComments([newComment, ...comments]); // Add to top
     setCommentsCount(prev => prev + 1);
     setCommentText('');
+
+    if (USE_REAL_API) {
+      try {
+        await commentService.createComment(postId, { content });
+      } catch (error) {
+        console.error('Failed to create comment:', error);
+        // TODO: Handle error (revert optimistic update)
+      }
+    }
   };
 
   const handleLikeComment = (commentId: string) => {

@@ -13,9 +13,13 @@ import ProjectsTab from '@/components/ProjectsTab';
 import ActivitiesTab from '@/components/ActivitiesTab';
 import ConnectionsTab from '@/components/ConnectionsTab';
 import { USER_DATA, PROFILE_TABS } from './data';
+import { userService } from '@/services/userService';
+
+const USE_REAL_API = false;
 
 function UserProfileContent() {
   const [activeTab, setActiveTab] = useState('Overview');
+  const [userData, setUserData] = useState(USER_DATA);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const searchParams = useSearchParams();
@@ -26,6 +30,25 @@ function UserProfileContent() {
     if (savedTheme === 'dark') {
       setIsDarkMode(true);
     }
+  }, []);
+
+  // API Integration: Fetch Profile
+  useEffect(() => {
+    if (!USE_REAL_API) return;
+    const fetchProfile = async () => {
+      try {
+        const userId = localStorage.getItem('userid');
+        if (userId) {
+          const profile = await userService.getProfile(userId);
+          // TODO: Map backend profile to frontend structure
+          console.log('Fetched profile:', profile);
+          // setUserData(mappedProfile);
+        }
+      } catch (err) {
+        console.error('Failed to fetch profile:', err);
+      }
+    };
+    fetchProfile();
   }, []);
 
   const toggleTheme = () => {
@@ -77,7 +100,7 @@ function UserProfileContent() {
                 
                 {/* 1. PROFILE HEADER CARD */}
                 <ProfileHeader 
-                  user={USER_DATA} 
+                  user={userData} 
                   isDarkMode={isDarkMode} 
                   isFromNav={isFromNav} 
                 />
@@ -93,23 +116,23 @@ function UserProfileContent() {
                 {/* 3. TAB CONTENT */}
                 <div className="min-h-[300px]">
                     {activeTab === 'Overview' && (
-                      <OverviewTab user={USER_DATA} isDarkMode={isDarkMode} />
+                      <OverviewTab user={userData} isDarkMode={isDarkMode} />
                     )}
 
                     {activeTab === 'Skills' && (
-                      <SkillsTab skills={USER_DATA.skillsList} isDarkMode={isDarkMode} />
+                      <SkillsTab skills={userData.skillsList} isDarkMode={isDarkMode} />
                     )}
 
                     {activeTab === 'Projects' && (
-                      <ProjectsTab projects={USER_DATA.projectsList} isDarkMode={isDarkMode} />
+                      <ProjectsTab projects={userData.projectsList} isDarkMode={isDarkMode} />
                     )}
 
                     {activeTab === 'Activities' && (
-                      <ActivitiesTab activities={USER_DATA.activitiesList} isDarkMode={isDarkMode} />
+                      <ActivitiesTab activities={userData.activitiesList} isDarkMode={isDarkMode} />
                     )}
 
                     {activeTab === 'Connections' && (
-                      <ConnectionsTab connections={USER_DATA.connectionsList} isDarkMode={isDarkMode} />
+                      <ConnectionsTab connections={userData.connectionsList} isDarkMode={isDarkMode} />
                     )}
                 </div>
             </div>
