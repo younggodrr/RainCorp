@@ -64,28 +64,102 @@ export default function FeedPage() {
 
   // Initial Load
   useEffect(() => {
-    setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-        const initialPosts = generateMockPosts(1, 5);
-        setPosts(initialPosts);
+    const fetchPosts = async () => {
+      setLoading(true);
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+        
+        const response = await fetch(`${apiUrl}/api/posts?page=1&limit=5`, {
+          headers: {
+            'accept': 'application/json',
+            ...(process.env.NEXT_PUBLIC_NGROK_SKIP_WARNING === 'true' ? { 'ngrok-skip-browser-warning': 'true' } : {})
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to fetch posts');
+        }
+
+        const data = await response.json();
+        // Handle various response structures (direct array, {posts: []}, {data: []})
+        const postsData = Array.isArray(data) ? data : (data.posts || data.data || []);
+        
+        const mappedPosts = Array.isArray(postsData) ? postsData.map((post: any) => ({
+          id: post.id,
+          type: 'post',
+          author: {
+            name: post.author?.username || post.author?.name || 'Unknown',
+            avatar: post.author?.avatar_url || post.author?.avatar || post.author?.image,
+            role: post.author?.role || 'Member'
+          },
+          createdAt: new Date(post.created_at || post.createdAt).toLocaleDateString(),
+          likes: post.likes || 0,
+          comments: post.comments || 0,
+          title: post.title,
+          content: post.content,
+          image: post.image
+        })) : [];
+
+        setPosts(mappedPosts.length > 0 ? mappedPosts : generateMockPosts(1, 5)); 
+      } catch (error) {
+        console.error('Error fetching posts:', error);
+        setPosts(generateMockPosts(1, 5));
+      } finally {
         setLoading(false);
-    }, 1000);
+      }
+    };
+
+    fetchPosts();
   }, []);
 
   // Load More
-  const loadMorePosts = useCallback(() => {
+  const loadMorePosts = useCallback(async () => {
     if (loading || !hasMore) return;
     setLoading(true);
     
-    // Simulate API call
-    setTimeout(() => {
-        const newPosts = generateMockPosts(page + 1, 5);
-        setPosts(prev => [...prev, ...newPosts]);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const nextPage = page + 1;
+      const response = await fetch(`${apiUrl}/api/posts?page=${nextPage}&limit=5`, {
+        headers: { 
+          'accept': 'application/json',
+          ...(process.env.NEXT_PUBLIC_NGROK_SKIP_WARNING === 'true' ? { 'ngrok-skip-browser-warning': 'true' } : {})
+        }
+      });
+
+      if (!response.ok) throw new Error('Failed to fetch more posts');
+
+      const data = await response.json();
+      const postsData = Array.isArray(data) ? data : (data.posts || data.data || []);
+
+      if (!Array.isArray(postsData) || postsData.length === 0) {
+        setHasMore(false);
+      } else {
+        const mappedPosts = postsData.map((post: any) => ({
+          id: post.id,
+          type: 'post',
+          author: {
+            name: post.author?.username || post.author?.name || 'Unknown',
+            avatar: post.author?.avatar_url || post.author?.avatar,
+            role: post.author?.role || 'Member'
+          },
+          createdAt: new Date(post.created_at || post.createdAt).toLocaleDateString(),
+          likes: post.likes || 0,
+          comments: post.comments || 0,
+          title: post.title,
+          content: post.content,
+          image: post.image
+        }));
+        
+        setPosts(prev => [...prev, ...mappedPosts]);
         setPage(prev => prev + 1);
-        setLoading(false);
-        if (page > 10) setHasMore(false); // Limit for demo
-    }, 1500);
+      }
+    } catch (error) {
+      console.error('Error loading more posts:', error);
+      setHasMore(false);
+    } finally {
+      setLoading(false);
+    }
   }, [loading, hasMore, page]);
 
   // Observer
