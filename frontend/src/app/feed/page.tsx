@@ -14,6 +14,15 @@ import FeedFilters from '@/components/FeedFilters';
 
 export default function FeedPage() {
   const router = useRouter();
+  // Auth check
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        router.replace('/login');
+      }
+    }
+  }, [router]);
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -68,47 +77,55 @@ export default function FeedPage() {
       setLoading(true);
       try {
         const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        
         const response = await fetch(`${apiUrl}/api/posts?page=1&limit=5`, {
           headers: {
             'accept': 'application/json',
             ...(process.env.NEXT_PUBLIC_NGROK_SKIP_WARNING === 'true' ? { 'ngrok-skip-browser-warning': 'true' } : {})
           }
         });
-
         if (!response.ok) {
           throw new Error('Failed to fetch posts');
         }
-
         const data = await response.json();
-        // Handle various response structures (direct array, {posts: []}, {data: []})
         const postsData = Array.isArray(data) ? data : (data.posts || data.data || []);
-        
         const mappedPosts = Array.isArray(postsData) ? postsData.map((post: any) => ({
           id: post.id,
-          type: 'post',
+          type: post.post_type || post.type || 'post',
           author: {
             name: post.author?.username || post.author?.name || 'Unknown',
             avatar: post.author?.avatar_url || post.author?.avatar || post.author?.image,
             role: post.author?.role || 'Member'
           },
-          createdAt: new Date(post.created_at || post.createdAt).toLocaleDateString(),
-          likes: post.likes || 0,
-          comments: post.comments || 0,
+          createdAt: post.created_at || post.createdAt,
+          likes: post.likesCount || post.likes || 0,
+          comments: post.commentsCount || post.comments || 0,
           title: post.title,
           content: post.content,
-          image: post.image
+          image: post.image,
+          company: post.company,
+          description: post.description,
+          location: post.location,
+          salary: post.salary,
+          tags: post.tags,
+          jobType: post.jobType,
+          deadlineProgress: post.deadlineProgress,
+          timeLeft: post.timeLeft,
+          summary: post.summary,
+          source: post.source,
+          url: post.url,
+          imageUrl: post.imageUrl,
+          membersNeeded: post.membersNeeded,
+          requestsSent: post.requestsSent,
+          membersJoined: post.membersJoined
         })) : [];
-
-        setPosts(mappedPosts.length > 0 ? mappedPosts : generateMockPosts(1, 5)); 
+        setPosts(mappedPosts);
       } catch (error) {
         console.error('Error fetching posts:', error);
-        setPosts(generateMockPosts(1, 5));
+        setPosts([]);
       } finally {
         setLoading(false);
       }
     };
-
     fetchPosts();
   }, []);
 
@@ -126,31 +143,42 @@ export default function FeedPage() {
           ...(process.env.NEXT_PUBLIC_NGROK_SKIP_WARNING === 'true' ? { 'ngrok-skip-browser-warning': 'true' } : {})
         }
       });
-
       if (!response.ok) throw new Error('Failed to fetch more posts');
-
       const data = await response.json();
       const postsData = Array.isArray(data) ? data : (data.posts || data.data || []);
-
       if (!Array.isArray(postsData) || postsData.length === 0) {
         setHasMore(false);
       } else {
         const mappedPosts = postsData.map((post: any) => ({
           id: post.id,
-          type: 'post',
+          type: post.post_type || post.type || 'post',
           author: {
             name: post.author?.username || post.author?.name || 'Unknown',
-            avatar: post.author?.avatar_url || post.author?.avatar,
+            avatar: post.author?.avatar_url || post.author?.avatar || post.author?.image,
             role: post.author?.role || 'Member'
           },
-          createdAt: new Date(post.created_at || post.createdAt).toLocaleDateString(),
-          likes: post.likes || 0,
-          comments: post.comments || 0,
+          createdAt: post.created_at || post.createdAt,
+          likes: post.likesCount || post.likes || 0,
+          comments: post.commentsCount || post.comments || 0,
           title: post.title,
           content: post.content,
-          image: post.image
+          image: post.image,
+          company: post.company,
+          description: post.description,
+          location: post.location,
+          salary: post.salary,
+          tags: post.tags,
+          jobType: post.jobType,
+          deadlineProgress: post.deadlineProgress,
+          timeLeft: post.timeLeft,
+          summary: post.summary,
+          source: post.source,
+          url: post.url,
+          imageUrl: post.imageUrl,
+          membersNeeded: post.membersNeeded,
+          requestsSent: post.requestsSent,
+          membersJoined: post.membersJoined
         }));
-        
         setPosts(prev => [...prev, ...mappedPosts]);
         setPage(prev => prev + 1);
       }

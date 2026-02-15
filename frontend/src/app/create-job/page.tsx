@@ -7,9 +7,11 @@ import TopNavigation from '@/components/TopNavigation';
 import MobileDrawer from '@/components/MobileDrawer';
 import PageHeader from '@/components/PageHeader';
 import JobForm from '@/components/JobForm';
+import { useSearchParams } from 'next/navigation';
 
 export default function CreateJobPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Jobs');
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -28,10 +30,8 @@ export default function CreateJobPage() {
     window.dispatchEvent(new Event('themeChanged'));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle form submission logic here
-    console.log("Form submitted");
+  const handleSuccess = () => {
+    router.push('/feed');
   };
 
   return (
@@ -85,7 +85,8 @@ export default function CreateJobPage() {
             <JobForm 
               isDarkMode={isDarkMode} 
               onCancel={() => router.back()} 
-              onSubmit={handleSubmit} 
+              onSuccess={handleSuccess}
+              jobId={searchParams?.get('editId') || undefined}
             />
             
           </div>

@@ -1,4 +1,4 @@
-import apiClient from './apiClient';
+import { apiFetch } from './apiClient';
 
 export interface UserProfile {
   id: string;
@@ -11,12 +11,10 @@ export interface UserProfile {
 
 export const userService = {
   getProfile: async (userId: string) => {
-    const response = await apiClient.get<UserProfile>(`/api/auth/profile/${userId}`);
-    return response.data;
+    return apiFetch<UserProfile>(`/auth/profile/${userId}`);
   },
 
   updateProfile: async (userId: string, data: Partial<UserProfile>) => {
-    const response = await apiClient.put<UserProfile>(`/api/auth/profile/${userId}`, data);
-    return response.data;
+    return apiFetch<UserProfile>(`/auth/profile/${userId}`, { method: 'PUT', body: data });
   },
 };

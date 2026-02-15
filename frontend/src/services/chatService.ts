@@ -1,4 +1,4 @@
-import apiClient from './apiClient';
+import { apiFetch } from './apiClient';
 
 export interface Chat {
   id: string;
@@ -36,27 +36,23 @@ export interface SendMessageDto {
 export const chatService = {
   // Get all chats for current user
   getChats: async (type?: 'DIRECT' | 'GROUP') => {
-    const params = type ? { type } : {};
-    const response = await apiClient.get<Chat[]>('/api/chat', { params });
-    return response.data;
+    const url = type ? `/chat?type=${type}` : '/chat';
+    return apiFetch<Chat[]>(url);
   },
 
   // Create a direct chat
   createDirectChat: async (data: CreateDirectChatDto) => {
-    const response = await apiClient.post<Chat>('/api/chat/direct', data);
-    return response.data;
+    return apiFetch<Chat>('/chat/direct', { method: 'POST', body: data });
   },
 
   // Create a group chat
   createGroupChat: async (data: CreateGroupChatDto) => {
-    const response = await apiClient.post<Chat>('/api/chat/group', data);
-    return response.data;
+    return apiFetch<Chat>('/chat/group', { method: 'POST', body: data });
   },
 
   // Get messages for a specific chat
   getMessages: async (chatId: string) => {
-    const response = await apiClient.get<Message[]>(`/api/chat/${chatId}/messages`);
-    return response.data;
+    return apiFetch<Message[]>(`/chat/${chatId}/messages`);
   },
 
   // Send a message

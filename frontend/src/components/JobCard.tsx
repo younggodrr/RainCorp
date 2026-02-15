@@ -15,6 +15,8 @@ export interface Job {
   category: string;
   isExpired?: boolean;
   timeLeft?: string;
+  isOwner?: boolean;
+  opportunityId?: string | number;
 }
 
 interface JobCardProps {
@@ -151,9 +153,16 @@ export default function JobCard({ job, isDarkMode, showExpiration = false, isCom
 
       {/* Actions */}
       <div className="flex gap-3">
-        <button className="flex-1 py-2.5 bg-[#E50914] text-white rounded-xl font-bold text-sm shadow-sm hover:bg-[#cc0812] transition-colors">
-          Apply Now
-        </button>
+        {job.isOwner ? (
+          <a href={`/create-job?editId=${job.opportunityId || job.id}`} className="flex-1 py-2.5 bg-white border border-gray-200 text-black rounded-xl font-bold text-sm shadow-sm hover:shadow-md transition-colors flex items-center justify-center">
+            Edit Job
+          </a>
+        ) : (
+          <button className="flex-1 py-2.5 bg-[#E50914] text-white rounded-xl font-bold text-sm shadow-sm hover:bg-[#cc0812] transition-colors">
+            Apply Now
+          </button>
+        )}
+
         <button className={`flex-1 py-2.5 border rounded-xl font-bold text-sm transition-colors ${
           isDarkMode 
             ? 'bg-transparent border-[#E70008]/40 text-[#F9E4AD] hover:bg-[#E70008]/10' 

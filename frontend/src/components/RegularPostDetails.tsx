@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { RegularPost, generateMockComments } from '@/utils/mockData';
+import { RegularPost } from '@/utils/mockData';
 import PostInteractionBar from './PostInteractionBar';
 
 interface RegularPostDetailsProps {
@@ -23,7 +23,7 @@ export default function RegularPostDetails({ post }: RegularPostDetailsProps) {
           </div>
       )}
       
-      <PostInteractionBar initialLikes={post.likes} initialComments={post.comments} initialCommentsData={generateMockComments(post.id, post.comments)} postId={post.id} />
+      <PostInteractionBar initialLikes={post.likes} initialComments={post.comments} postId={post.id} />
     </div>
   );
 }

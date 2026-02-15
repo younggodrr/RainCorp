@@ -1,4 +1,4 @@
-import apiClient from './apiClient';
+import { apiFetch } from './apiClient';
 
 export interface CommentAuthor {
   id?: string;
@@ -27,45 +27,38 @@ export interface UpdateCommentDto {
 }
 
 export const commentService = {
-  // Get all comments for a post
-  getCommentsByPostId: async (postId: string) => {
-    const response = await apiClient.get<Comment[]>(`/api/comments/post/${postId}`);
-    return response.data;
+  // Get all comments for a post (paginated, nested replies)
+  getCommentsByPostId: async (postId: string, page = 1, limit = 10) => {
+    return apiFetch(`/posts/${postId}/comments?page=${page}&limit=${limit}`);
   },
 
-  // Create a new comment on a post
-  createComment: async (postId: string, data: CreateCommentDto) => {
-    const response = await apiClient.post<Comment>(`/api/comments/post/${postId}`, data);
-    return response.data;
+  // Create a new comment on a post (or reply if parentId is set)
+  createComment: async (postId: string, data: { content: string; parentId?: string | null }) => {
+    return apiFetch(`/posts/${postId}/comments`, { method: 'POST', body: data });
   },
 
   // Update a comment
-  updateComment: async (commentId: string, data: UpdateCommentDto) => {
-    const response = await apiClient.put<Comment>(`/api/comments/${commentId}`, data);
-    return response.data;
+  updateComment: async (postId: string, commentId: string, data: UpdateCommentDto) => {
+    return apiFetch(`/posts/${postId}/comments/${commentId}`, { method: 'PUT', body: data });
   },
 
   // Delete a comment
-  deleteComment: async (commentId: string) => {
-    const response = await apiClient.delete(`/api/comments/${commentId}`);
-    return response.data;
+  deleteComment: async (postId: string, commentId: string) => {
+    return apiFetch(`/posts/${postId}/comments/${commentId}`, { method: 'DELETE' });
   },
 
-  // Reply to a comment
-  replyToComment: async (commentId: string, data: CreateCommentDto) => {
-    const response = await apiClient.post<Comment>(`/api/comments/${commentId}/reply`, data);
-    return response.data;
+  // Reply to a comment (just call createComment with parentId)
+  replyToComment: async (postId: string, parentId: string, content: string) => {
+    return apiFetch(`/posts/${postId}/comments`, { method: 'POST', body: { content, parentId } });
   },
 
   // Like/Unlike a comment
   toggleCommentLike: async (commentId: string) => {
-    const response = await apiClient.post<{ liked: boolean; likes: number }>(`/api/comments/${commentId}/like`);
-    return response.data;
+    return apiFetch(`/comments/${commentId}/like`, { method: 'POST' });
   },
 
   // Like/Unlike a reply
   toggleReplyLike: async (replyId: string) => {
-    const response = await apiClient.post<{ liked: boolean; likes: number }>(`/api/comments/reply/${replyId}/like`);
-    return response.data;
+    return apiFetch(`/comments/reply/${replyId}/like`, { method: 'POST' });
   }
 };

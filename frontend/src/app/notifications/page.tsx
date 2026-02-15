@@ -15,6 +15,14 @@ import { MOCK_NOTIFICATIONS, Notification } from './data';
 
 export default function NotificationsPage() {
   const router = useRouter();
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        router.replace('/login');
+      }
+    }
+  }, [router]);
   const [activeTab, setActiveTab] = useState('Notifications');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);

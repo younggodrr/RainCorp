@@ -29,11 +29,8 @@ export default function CreateProjectPage() {
     window.dispatchEvent(new Event('themeChanged'));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Handle form submission
-    console.log("Project created");
-    router.push('/my-projects');
+  const handleSuccess = () => {
+    router.push('/feed');
   };
 
   return (
@@ -88,9 +85,9 @@ export default function CreateProjectPage() {
 
             {/* FORM */}
             <ProjectForm 
-              onSubmit={handleSubmit}
               onCancel={() => router.push('/my-projects')}
               isDarkMode={isDarkMode}
+              onSuccess={handleSuccess}
             />
           </div>
         </div>

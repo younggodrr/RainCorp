@@ -18,6 +18,15 @@ import { userService } from '@/services/userService';
 const USE_REAL_API = false;
 
 function UserProfileContent() {
+  const router = require('next/navigation').useRouter();
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        router.replace('/login');
+      }
+    }
+  }, [router]);
   const [activeTab, setActiveTab] = useState('Overview');
   const [userData, setUserData] = useState(USER_DATA);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

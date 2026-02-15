@@ -6,7 +6,7 @@ import { Comment } from '@/utils/mockData';
 import Image from 'next/image';
 import { commentService } from '@/services/commentService';
 
-const USE_REAL_API = false;
+const USE_REAL_API = true;
 
 interface PostInteractionBarProps {
   initialLikes: number;
@@ -167,7 +167,7 @@ export default function PostInteractionBar({
   const [likes, setLikes] = useState(initialLikes);
   const [commentsCount, setCommentsCount] = useState(initialComments);
   const [showComments, setShowComments] = useState(false);
-  const [comments, setComments] = useState<Comment[]>(initialCommentsData || []);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [commentText, setCommentText] = useState('');
   
   // Pagination & Sorting State
@@ -176,14 +176,13 @@ export default function PostInteractionBar({
   const [isInputFocused, setIsInputFocused] = useState(false);
 
   // API Integration: Fetch Comments
+  // Fetch comments from backend (paginated, nested)
   React.useEffect(() => {
     if (USE_REAL_API && showComments) {
       const fetchComments = async () => {
         try {
-          // @ts-ignore - Ignoring type mismatch for now until backend types are fully aligned
-          const fetchedComments = await commentService.getCommentsByPostId(postId);
-          // In a real app, map backend response to frontend Comment type here
-          console.log('Fetched comments:', fetchedComments);
+          const res = await commentService.getCommentsByPostId(postId, 1, 20);
+          setComments(res.comments || []);
         } catch (error) {
           console.error('Failed to fetch comments:', error);
         }
@@ -216,118 +215,90 @@ export default function PostInteractionBar({
   const handleAddComment = async (e: React.MouseEvent | React.KeyboardEvent) => {
     e.preventDefault();
     if (!commentText.trim()) return;
-    
-    const content = commentText;
-
-    const newComment: Comment = {
-        id: `new-${Date.now()}`,
-        author: {
-            name: 'You',
-            avatar: undefined
-        },
-        content: content,
-        createdAt: 'Just now',
-        timestamp: Date.now(),
-        likes: 0,
-        isLiked: false,
-        isOwner: true,
-        replies: []
-    };
-
-    setComments([newComment, ...comments]); // Add to top
-    setCommentsCount(prev => prev + 1);
-    setCommentText('');
-
-    if (USE_REAL_API) {
-      try {
-        await commentService.createComment(postId, { content });
-      } catch (error) {
-        console.error('Failed to create comment:', error);
-        // TODO: Handle error (revert optimistic update)
-      }
+    try {
+      const newComment = await commentService.createComment(postId, { content: commentText });
+      setComments([newComment, ...comments]);
+      setCommentsCount(prev => prev + 1);
+      setCommentText('');
+    } catch (err) {
+      alert('Failed to add comment');
     }
   };
 
-  const handleLikeComment = (commentId: string) => {
-    const toggleLike = (list: Comment[]): Comment[] => {
-      return list.map(c => {
-        if (c.id === commentId) {
-          return {
-            ...c,
-            isLiked: !c.isLiked,
-            likes: c.isLiked ? c.likes - 1 : c.likes + 1
-          };
-        }
-        if (c.replies && c.replies.length > 0) {
-          return { ...c, replies: toggleLike(c.replies) };
-        }
-        return c;
-      });
-    };
-    setComments(toggleLike(comments));
+  const handleLikeComment = async (commentId: string) => {
+    try {
+      const res = await commentService.toggleCommentLike(commentId);
+      const updateLikes = (list: Comment[]): Comment[] =>
+        list.map(c => {
+          if (c.id === commentId) {
+            return { ...c, isLiked: res.liked, likes: res.likesCount };
+          }
+          if (c.replies && c.replies.length > 0) {
+            return { ...c, replies: updateLikes(c.replies) };
+          }
+          return c;
+        });
+      setComments(updateLikes(comments));
+    } catch (err) {
+      alert('Failed to like comment');
+    }
   };
 
-  const handleDeleteComment = (commentId: string) => {
-    const deleteFromList = (list: Comment[]): Comment[] => {
-      return list.filter(c => {
-        if (c.id === commentId) return false;
-        if (c.replies && c.replies.length > 0) {
-          c.replies = deleteFromList(c.replies);
-        }
-        return true;
-      });
-    };
-    setComments(deleteFromList(comments));
-    setCommentsCount(prev => prev - 1);
+  const handleDeleteComment = async (commentId: string) => {
+    try {
+      await commentService.deleteComment(postId, commentId);
+      const deleteFromList = (list: Comment[]): Comment[] =>
+        list.filter(c => {
+          if (c.id === commentId) return false;
+          if (c.replies && c.replies.length > 0) {
+            c.replies = deleteFromList(c.replies);
+          }
+          return true;
+        });
+      setComments(deleteFromList(comments));
+      setCommentsCount(prev => prev - 1);
+    } catch (err) {
+      alert('Failed to delete comment');
+    }
   };
 
-  const handleEditComment = (commentId: string, newContent: string) => {
-    const editInList = (list: Comment[]): Comment[] => {
-      return list.map(c => {
-        if (c.id === commentId) {
-          return { ...c, content: newContent };
-        }
-        if (c.replies && c.replies.length > 0) {
-          return { ...c, replies: editInList(c.replies) };
-        }
-        return c;
-      });
-    };
-    setComments(editInList(comments));
+  const handleEditComment = async (commentId: string, newContent: string) => {
+    try {
+      const updated = await commentService.updateComment(postId, commentId, { content: newContent });
+      const editInList = (list: Comment[]): Comment[] =>
+        list.map(c => {
+          if (c.id === commentId) {
+            return { ...c, content: updated.content };
+          }
+          if (c.replies && c.replies.length > 0) {
+            return { ...c, replies: editInList(c.replies) };
+          }
+          return c;
+        });
+      setComments(editInList(comments));
+    } catch (err) {
+      alert('Failed to edit comment');
+    }
   };
 
-  const handleReplyComment = (parentId: string, replyContent: string) => {
-    const newReply: Comment = {
-      id: `reply-${Date.now()}`,
-      author: {
-        name: 'You',
-        avatar: undefined
-      },
-      content: replyContent,
-      createdAt: 'Just now',
-      timestamp: Date.now(),
-      likes: 0,
-      isLiked: false,
-      isOwner: true,
-      replies: []
-    };
-
-    const addReply = (list: Comment[]): Comment[] => {
-      return list.map(c => {
-        if (c.id === parentId) {
-          return {
-            ...c,
-            replies: [...(c.replies || []), newReply]
-          };
-        }
-        if (c.replies && c.replies.length > 0) {
-          return { ...c, replies: addReply(c.replies) };
-        }
-        return c;
-      });
-    };
-    setComments(addReply(comments));
-    setCommentsCount(prev => prev + 1);
+  const handleReplyComment = async (parentId: string, replyContent: string) => {
+    try {
+      const reply = await commentService.replyToComment(postId, parentId, replyContent);
+      const addReply = (list: Comment[]): Comment[] =>
+        list.map(c => {
+          if (c.id === parentId) {
+            return { ...c, replies: [...(c.replies || []), reply] };
+          }
+          if (c.replies && c.replies.length > 0) {
+            return { ...c, replies: addReply(c.replies) };
+          }
+          return c;
+        });
+      setComments(addReply(comments));
+      setCommentsCount(prev => prev + 1);
+    } catch (err) {
+      alert('Failed to reply to comment');
+    }
   };
 
   const sortedComments = useMemo(() => {

@@ -10,14 +10,22 @@ import {
 } from 'lucide-react';
 import LeftPanel from '@/components/LeftPanel';
 import TopNavigation from '@/components/TopNavigation';
-import { TRENDING_PROJECTS } from './data';
+
+import { apiFetch } from '@/services/apiClient';
 
 export default function ProjectsPage() {
+
+  const router = require('next/navigation').useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Projects');
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [projects, setProjects] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const tabs = ['All projects', 'Search trending projects', 'Completed projects'];
+  const [activeFilterTab, setActiveFilterTab] = useState('All projects');
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -26,14 +34,37 @@ export default function ProjectsPage() {
     }
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        router.replace('/login');
+      }
+    }
+  }, [router]);
+
+  useEffect(() => {
+    async function fetchProjects() {
+      setLoading(true);
+      setError(null);
+      try {
+        const params = searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : '';
+        const data = await apiFetch<{ projects: any[] }>(`/projects${params}`);
+        setProjects(data.projects || []);
+      } catch (err: any) {
+        setError(err?.message || 'Failed to load projects');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProjects();
+  }, [searchQuery]);
+
   const toggleTheme = () => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
     localStorage.setItem('theme', newMode ? 'dark' : 'light');
   };
-
-  const tabs = ['All projects', 'Search trending projects', 'Completed projects'];
-  const [activeFilterTab, setActiveFilterTab] = useState('All projects');
 
   return (
     <div className={`h-screen font-sans flex overflow-hidden transition-colors duration-300 ${isDarkMode ? 'bg-black text-[#F9E4AD]' : 'bg-[#FDF8F5] text-[#444444]'}`}>
@@ -151,107 +182,127 @@ export default function ProjectsPage() {
 
             {/* PROJECTS GRID */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {TRENDING_PROJECTS.map(project => (
-                <div key={project.id} className={`rounded-2xl p-6 border shadow-sm hover:shadow-md transition-all group ${
-                  isDarkMode 
-                    ? 'bg-[#111] border-[#E70008]/30 shadow-[0_0_15px_rgba(231,0,8,0.1)]' 
-                    : 'bg-white border-gray-100'
-                }`}>
-                  {/* Card Header */}
-                  <div className="flex items-start justify-between mb-4">
-                    <h2 className={`text-xl font-bold transition-colors group-hover:text-[#E50914] ${
-                      isDarkMode ? 'text-[#F9E4AD]' : 'text-black'
-                    }`}>
-                      {project.title}
-                    </h2>
-                    <div className="flex gap-2">
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                        project.status === 'in-progress' 
-                          ? isDarkMode ? 'bg-[#E70008]/10 text-[#E70008] border-[#E70008]/30' : 'bg-[#E50914]/5 text-[#E50914] border-[#E50914]/20'
-                          : project.status === 'open' 
-                            ? isDarkMode ? 'bg-[#FF9940]/10 text-[#FF9940] border-[#FF9940]/30' : 'bg-[#F4A261]/10 text-[#d98236] border-[#F4A261]/20'
-                            : isDarkMode ? 'bg-gray-800 text-gray-400 border-gray-700' : 'bg-gray-100 text-gray-500 border-gray-200'
-                      }`}>
-                        {project.status}
-                      </span>
-                      <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
-                        isDarkMode ? 'bg-[#222] text-gray-400 border-gray-700' : 'bg-gray-50 text-gray-500 border-gray-200'
-                      }`}>
-                        {project.level}
-                      </span>
-                    </div>
-                  </div>
-
-                  {/* Description */}
-                  <p className={`text-sm mb-6 leading-relaxed ${
-                    isDarkMode ? 'text-gray-400' : 'text-gray-600'
-                  }`}>
-                    {project.description}
-                  </p>
-
-                  {/* Category */}
-                  <div className="mb-6">
-                    <span className={`text-xs font-bold uppercase tracking-wider mb-2 block ${
-                      isDarkMode ? 'text-gray-500' : 'text-gray-400'
-                    }`}>Category</span>
-                    <span className={`text-sm font-bold ${
-                      isDarkMode ? 'text-[#FF9940]' : 'text-[#F4A261]'
-                    }`}>{project.category}</span>
-                  </div>
-
-                  {/* Tech Stack */}
-                  <div className="mb-6">
-                    <span className={`text-xs font-bold uppercase tracking-wider mb-2 block ${
-                      isDarkMode ? 'text-gray-500' : 'text-gray-400'
-                    }`}>Tech Stack</span>
-                    <div className="flex flex-wrap gap-2">
-                      {project.techStack.map(tech => (
-                        <span key={tech} className={`px-2 py-1 rounded-md text-xs font-medium border ${
-                          isDarkMode 
-                            ? 'bg-[#222] text-gray-300 border-gray-800' 
-                            : 'bg-gray-50 text-gray-600 border-gray-100'
-                        }`}>
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Footer Info */}
-                  <div className={`flex items-center justify-between text-xs font-medium mb-6 ${
-                    isDarkMode ? 'text-gray-500' : 'text-gray-400'
-                  }`}>
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center gap-2">
-                        <Users size={14} />
-                        <span>{project.teamCount} members</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <MapPin size={14} />
-                        <span>{project.location}</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Calendar size={14} />
-                      <span>{project.date}</span>
-                    </div>
-                  </div>
-
-                  {/* Actions */}
-                  <div className="flex gap-3">
-                    <button className="flex-1 py-2.5 bg-[#E50914] text-white rounded-xl font-bold text-sm shadow-sm hover:bg-[#cc0812] transition-colors">
-                      Edit
-                    </button>
-                    <button className={`flex-1 py-2.5 border rounded-xl font-bold text-sm transition-colors ${
+              {loading ? (
+                <div className="col-span-2 text-center py-12 text-lg">Loading projects...</div>
+              ) : error ? (
+                <div className="col-span-2 text-center py-12 text-red-500">{error}</div>
+              ) : projects.length === 0 ? (
+                <div className="col-span-2 text-center py-12 text-gray-400">No projects found.</div>
+              ) : (
+                projects.map(project => (
+                  <Link href={`/projects/${project.id}`} key={project.id} className="block">
+                    <div className={`rounded-2xl p-6 border shadow-sm hover:shadow-md transition-all group ${
                       isDarkMode 
-                        ? 'bg-transparent border-[#E70008]/40 text-[#F9E4AD] hover:bg-[#E70008]/10' 
-                        : 'bg-white border-gray-200 text-black hover:bg-gray-50'
+                        ? 'bg-[#111] border-[#E70008]/30 shadow-[0_0_15px_rgba(231,0,8,0.1)]' 
+                        : 'bg-white border-gray-100'
                     }`}>
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              ))}
+                      {/* Card Header */}
+                      <div className="flex items-start justify-between mb-4">
+                        <h2 className={`text-xl font-bold transition-colors group-hover:text-[#E50914] ${
+                          isDarkMode ? 'text-[#F9E4AD]' : 'text-black'
+                        }`}>
+                          {project.name || project.title}
+                        </h2>
+                        <div className="flex gap-2">
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                            project.status === 'in-progress' 
+                              ? isDarkMode ? 'bg-[#E70008]/10 text-[#E70008] border-[#E70008]/30' : 'bg-[#E50914]/5 text-[#E50914] border-[#E50914]/20'
+                              : project.status === 'open' 
+                                ? isDarkMode ? 'bg-[#FF9940]/10 text-[#FF9940] border-[#FF9940]/30' : 'bg-[#F4A261]/10 text-[#d98236] border-[#F4A261]/20'
+                                : isDarkMode ? 'bg-gray-800 text-gray-400 border-gray-700' : 'bg-gray-100 text-gray-500 border-gray-200'
+                          }`}>
+                            {project.status || 'open'}
+                          </span>
+                          {project.level && (
+                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider border ${
+                              isDarkMode ? 'bg-[#222] text-gray-400 border-gray-700' : 'bg-gray-50 text-gray-500 border-gray-200'
+                            }`}>
+                              {project.level}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Description */}
+                      <p className={`text-sm mb-6 leading-relaxed ${
+                        isDarkMode ? 'text-gray-400' : 'text-gray-600'
+                      }`}>
+                        {project.description}
+                      </p>
+
+                      {/* Category */}
+                      {project.category && (
+                        <div className="mb-6">
+                          <span className={`text-xs font-bold uppercase tracking-wider mb-2 block ${
+                            isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                          }`}>Category</span>
+                          <span className={`text-sm font-bold ${
+                            isDarkMode ? 'text-[#FF9940]' : 'text-[#F4A261]'
+                          }`}>{project.category}</span>
+                        </div>
+                      )}
+
+                      {/* Tech Stack */}
+                      {project.techStack && Array.isArray(project.techStack) && (
+                        <div className="mb-6">
+                          <span className={`text-xs font-bold uppercase tracking-wider mb-2 block ${
+                            isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                          }`}>Tech Stack</span>
+                          <div className="flex flex-wrap gap-2">
+                            {project.techStack.map((tech: string) => (
+                              <span key={tech} className={`px-2 py-1 rounded-md text-xs font-medium border ${
+                                isDarkMode 
+                                  ? 'bg-[#222] text-gray-300 border-gray-800' 
+                                  : 'bg-gray-50 text-gray-600 border-gray-100'
+                              }`}>
+                                {tech}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Footer Info */}
+                      <div className={`flex items-center justify-between text-xs font-medium mb-6 ${
+                        isDarkMode ? 'text-gray-500' : 'text-gray-400'
+                      }`}>
+                        <div className="flex items-center gap-4">
+                          <div className="flex items-center gap-2">
+                            <Users size={14} />
+                            <span>{project.teamCount || (project.members ? project.members.length : 0)} members</span>
+                          </div>
+                          {project.location && (
+                            <div className="flex items-center gap-2">
+                              <MapPin size={14} />
+                              <span>{project.location}</span>
+                            </div>
+                          )}
+                        </div>
+                        {project.date && (
+                          <div className="flex items-center gap-2">
+                            <Calendar size={14} />
+                            <span>{project.date}</span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Actions */}
+                      <div className="flex gap-3 mt-4">
+                        <button className="flex-1 py-2.5 bg-[#E50914] text-white rounded-xl font-bold text-sm shadow-sm hover:bg-[#cc0812] transition-colors">
+                          Edit
+                        </button>
+                        <button className={`flex-1 py-2.5 border rounded-xl font-bold text-sm transition-colors ${
+                          isDarkMode 
+                            ? 'bg-transparent border-[#E70008]/40 text-[#F9E4AD] hover:bg-[#E70008]/10' 
+                            : 'bg-white border-gray-200 text-black hover:bg-gray-50'
+                        }`}>
+                          Delete
+                        </button>
+                      </div>
+                    </div>
+                  </Link>
+                ))
+              )}
             </div>
 
           </div>
