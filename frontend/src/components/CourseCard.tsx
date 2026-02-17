@@ -60,7 +60,7 @@ export default function CourseCard({ course, isDarkMode, isCompact = false, onSe
   }
 
   return (
-    <Link href={`/magna-school/${course.id}`} className="block h-full" onClick={handleClick}>
+    <div className="block h-full">
       <div className={`rounded-2xl border overflow-hidden hover:shadow-lg transition-all group cursor-pointer flex flex-col h-full ${
         isDarkMode ? 'bg-[#111] border-[#E70008]/20' : 'bg-white border-gray-100'
       }`}>
@@ -118,12 +118,30 @@ export default function CourseCard({ course, isDarkMode, isCompact = false, onSe
                 </div>
               )}
             </div>
-            <button className="px-4 py-2 rounded-lg bg-[#E50914] text-white text-xs font-bold hover:bg-[#cc0812] transition-colors shadow-sm">
-              Enroll
-            </button>
+            <div className="flex gap-2">
+              <Link 
+                href={`/magna-school/${course.id}`}
+                className={`px-3 py-2 rounded-lg text-xs font-bold transition-colors shadow-sm flex items-center gap-1 ${
+                  isDarkMode ? 'bg-[#333] text-white hover:bg-[#444]' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+                onClick={(e) => e.stopPropagation()}
+              >
+                Learn More
+              </Link>
+              <button 
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onSelect?.();
+                }}
+                className="px-4 py-2 rounded-lg bg-[#E50914] text-white text-xs font-bold hover:bg-[#cc0812] transition-colors shadow-sm"
+              >
+                Enroll
+              </button>
+            </div>
           </div>
         </div>
       </div>
-    </Link>
+    </div>
   );
 }

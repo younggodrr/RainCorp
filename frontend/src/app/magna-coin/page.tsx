@@ -51,7 +51,7 @@ export default function MagnaCoinPage() {
         note
       };
 
-      const response = await fetch(`${apiUrl}/integrations/payments/wallet-transfer`, {
+      const response = await fetch('https://magna-coders-backend-1.onrender.com/api/integrations/payments/wallet-transfer', {
         method: 'POST',
         headers: {
           'accept': 'application/json',
@@ -112,6 +112,41 @@ export default function MagnaCoinPage() {
   const [selectedPayment, setSelectedPayment] = useState<string | null>(null);
   const [availablePaymentMethods, setAvailablePaymentMethods] = useState(paymentMethods);
   const [transactionHistory, setTransactionHistory] = useState(transactions);
+
+  useEffect(() => {
+    const fetchWalletBalance = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
+        if (!apiUrl || !token) return;
+
+        const response = await fetch('https://magna-coders-backend-1.onrender.com/api/integrations/wallet/balance', {
+          method: 'GET',
+          headers: {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Assuming response structure: { balance: number } or { data: { balance: number } }
+          const balance = typeof data.balance === 'number' ? data.balance : (data.data?.balance || 0);
+          
+          setWallets(prev => prev.map(w => {
+            if (w.id === 'main') {
+              return { ...w, balance };
+            }
+            return w;
+          }));
+        }
+      } catch (error) {
+        console.error('Failed to fetch wallet balance', error);
+      }
+    };
+
+    fetchWalletBalance();
+  }, []);
 
   useEffect(() => {
     const fetchHistory = async () => {
@@ -200,6 +235,7 @@ export default function MagnaCoinPage() {
         isDarkMode={isDarkMode}
         balance={wallets.find(w => w.id === selectedWalletId)?.balance || 0}
         walletName={wallets.find(w => w.id === selectedWalletId)?.name || ''}
+        wallets={wallets.filter(w => w.id !== selectedWalletId)}
       />
 
       <CreateWalletModal
@@ -283,6 +319,7 @@ export default function MagnaCoinPage() {
                   maxCoins={maxCoins} 
                   isDarkMode={isDarkMode} 
                   walletName={wallet.name}
+                  walletId={wallet.id}
                   onSendClick={() => {
                     setSelectedWalletId(wallet.id);
                     setIsSendModalOpen(true);

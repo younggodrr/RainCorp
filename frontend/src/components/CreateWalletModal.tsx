@@ -88,7 +88,7 @@ export default function CreateWalletModal({
                 
                 <h3 className="font-bold mb-2">2. User Responsibilities</h3>
                 <p className="mb-4">
-                  You are responsible for maintaining the confidentiality of your wallet credentials. Magna Coders is not liable for any loss of funds due to unauthorized access resulting from user negligence.
+                  You are responsible for maintaining the confidentiality of your wallet credentials and Wallet ID. Do not share your Wallet ID or private keys with anyone you do not trust. Magna Coders is not liable for any loss of funds due to unauthorized access resulting from user negligence.
                 </p>
 
                 <h3 className="font-bold mb-2">3. Virtual Currency</h3>

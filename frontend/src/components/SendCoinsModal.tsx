@@ -11,9 +11,10 @@ interface SendCoinsModalProps {
   isDarkMode?: boolean;
   balance?: number;
   walletName?: string;
+  wallets?: Array<{ id: string; name: string; balance: number }>;
 }
 
-type RecipientMode = 'manual' | 'friend';
+type RecipientMode = 'manual' | 'friend' | 'self';
 
 export default function SendCoinsModal({ 
   isOpen, 
@@ -21,7 +22,8 @@ export default function SendCoinsModal({
   onSend,
   isDarkMode = false,
   balance = 2500,
-  walletName = 'Main Wallet'
+  walletName = 'Main Wallet',
+  wallets = []
 }: SendCoinsModalProps) {
   const [mode, setMode] = useState<RecipientMode>('manual');
   const [amount, setAmount] = useState<string>('');
@@ -61,6 +63,11 @@ export default function SendCoinsModal({
   const selectFriend = (friend: typeof MOCK_FRIENDS[0]) => {
     setRecipientId(friend.username || friend.id.toString());
     setMode('manual'); // Switch back to manual view to show selected recipient
+  };
+
+  const selectWallet = (wallet: { id: string; name: string }) => {
+    setRecipientId(wallet.id);
+    setMode('manual');
   };
 
   if (!isOpen) return null;
@@ -113,6 +120,17 @@ export default function SendCoinsModal({
             >
               <Users size={16} />
               Select Friend
+            </button>
+            <button
+              onClick={() => setMode('self')}
+              className={`flex-1 py-2 px-4 rounded-lg text-sm font-medium transition-all flex items-center justify-center gap-2 ${
+                mode === 'self'
+                  ? (isDarkMode ? 'bg-[#333] text-white shadow-sm' : 'bg-white text-black shadow-sm')
+                  : (isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-500 hover:text-black')
+              }`}
+            >
+              <Wallet size={16} />
+              My Wallets
             </button>
           </div>
 
@@ -207,7 +225,7 @@ export default function SendCoinsModal({
                 </button>
               </form>
             </>
-          ) : (
+          ) : mode === 'friend' ? (
             <div className="flex flex-col h-[400px]">
               {/* Friend Search */}
               <div className="relative mb-4">
@@ -259,6 +277,44 @@ export default function SendCoinsModal({
                 ) : (
                   <div className="text-center py-8 text-gray-500 text-sm">
                     No friends found matching "{friendSearch}"
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col h-[400px]">
+              {/* My Wallets List */}
+              <div className="flex-1 overflow-y-auto space-y-2 pr-2">
+                {wallets && wallets.length > 0 ? (
+                  wallets.map(wallet => (
+                    <button
+                      key={wallet.id}
+                      onClick={() => selectWallet(wallet)}
+                      className={`w-full p-3 rounded-xl flex items-center gap-3 transition-all ${
+                        isDarkMode 
+                          ? 'hover:bg-[#222] border border-transparent hover:border-[#333]' 
+                          : 'hover:bg-gray-50 border border-transparent hover:border-gray-200'
+                      }`}
+                    >
+                      <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                        isDarkMode ? 'bg-[#333] text-[#E50914]' : 'bg-gray-100 text-[#E50914]'
+                      }`}>
+                         <Wallet size={20} />
+                      </div>
+                      <div className="flex-1 text-left">
+                        <p className={`font-medium text-sm ${isDarkMode ? 'text-white' : 'text-gray-900'}`}>{wallet.name}</p>
+                        <p className={`text-xs ${isDarkMode ? 'text-gray-500' : 'text-gray-500'}`}>
+                          Balance: {wallet.balance.toLocaleString()} MC
+                        </p>
+                      </div>
+                      {recipientId === wallet.id && (
+                        <Check size={18} className="text-[#E50914]" />
+                      )}
+                    </button>
+                  ))
+                ) : (
+                  <div className="text-center py-8 text-gray-500 text-sm">
+                    No other wallets available.
                   </div>
                 )}
               </div>

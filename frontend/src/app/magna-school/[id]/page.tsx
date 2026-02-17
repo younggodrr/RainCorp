@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ChevronLeft } from 'lucide-react';
 import { useParams } from 'next/navigation';
@@ -28,8 +28,19 @@ export default function CourseDetailPage() {
   const [isDarkMode, setIsDarkMode] = useState(false); // Add isDarkMode state (you might want to sync this with context or local storage as in other pages)
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
 
-  // Add dummy functions for MobileDrawer props if they are not used in this specific page context but required by the component
-  const toggleTheme = () => setIsDarkMode(!isDarkMode); 
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark') {
+      setIsDarkMode(true);
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const newMode = !isDarkMode;
+    setIsDarkMode(newMode);
+    localStorage.setItem('theme', newMode ? 'dark' : 'light');
+    window.dispatchEvent(new Event('themeChanged'));
+  }; 
 
   const totalVideos = course.curriculum.reduce((acc, section) => acc + section.videos, 0);
 
