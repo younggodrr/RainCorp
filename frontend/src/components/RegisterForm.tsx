@@ -50,6 +50,65 @@ export default function RegisterForm({ isDarkMode, onRegisterSuccess }: Register
     if (!validateForm()) return;
     setIsLoading(true);
     try {
+      // MOCK REGISTER IMPLEMENTATION (Bypassing backend as requested)
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      const data = {
+        jwt: "mock-jwt-token-" + Date.now(),
+        user: {
+          id: Date.now(),
+          username: formData.username,
+          email: formData.email,
+          provider: "local",
+          confirmed: true,
+          blocked: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      };
+
+      console.log('Mock Register success:', data);
+      
+      // Store tokens and user data
+      localStorage.setItem('accessToken', data.jwt);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('userid', String(data.user.id));
+      
+      onRegisterSuccess();
+      return;
+
+      /* REAL BACKEND CODE COMMENTED OUT
+      // MOCK REGISTRATION IMPLEMENTATION (Bypassing backend as requested)
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Mock successful response
+      const data = {
+        jwt: "mock-jwt-token-" + Date.now(),
+        user: {
+          id: Date.now(),
+          username: formData.username,
+          email: formData.email,
+          provider: "local",
+          confirmed: true,
+          blocked: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      };
+
+      console.log('Mock Register success:', data);
+      
+      // Store tokens and user data if needed immediately, though usually login handles this
+      // But for better UX, we can auto-login
+      localStorage.setItem('accessToken', data.jwt);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('userid', String(data.user.id));
+
+      onRegisterSuccess();
+      return;
+
+      /* REAL BACKEND CODE COMMENTED OUT
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
       if (!apiUrl) throw new Error('API URL is not defined');
       
@@ -81,12 +140,51 @@ export default function RegisterForm({ isDarkMode, onRegisterSuccess }: Register
 
       console.log('Register success:', data);
       onRegisterSuccess();
+      */
     } catch (error: any) {
       console.error('Register error:', error);
       setErrors({ general: error.message || 'Registration failed. Please try again.' });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleGoogleLogin = () => {
+    // MOCK GOOGLE LOGIN
+    const data = {
+      jwt: "mock-google-jwt-" + Date.now(),
+      user: {
+        id: "google-user-" + Date.now(),
+        username: "GoogleUser",
+        email: "google@example.com",
+        provider: "google",
+        confirmed: true,
+        blocked: false
+      }
+    };
+    localStorage.setItem('accessToken', data.jwt);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.setItem('userid', String(data.user.id));
+    onRegisterSuccess();
+  };
+
+  const handleGithubLogin = () => {
+    // MOCK GITHUB LOGIN
+    const data = {
+      jwt: "mock-github-jwt-" + Date.now(),
+      user: {
+        id: "github-user-" + Date.now(),
+        username: "GithubUser",
+        email: "github@example.com",
+        provider: "github",
+        confirmed: true,
+        blocked: false
+      }
+    };
+    localStorage.setItem('accessToken', data.jwt);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.setItem('userid', String(data.user.id));
+    onRegisterSuccess();
   };
 
   // Theme constants
@@ -242,7 +340,11 @@ export default function RegisterForm({ isDarkMode, onRegisterSuccess }: Register
         </div>
 
         {/* Social Buttons */}
-        <SocialAuthButtons isDarkMode={isDarkMode} />
+        <SocialAuthButtons 
+          isDarkMode={isDarkMode} 
+          onGoogleClick={handleGoogleLogin}
+          onGithubClick={handleGithubLogin}
+        />
       </form>
 
       {/* Footer */}

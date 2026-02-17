@@ -61,6 +61,38 @@ export default function LoginPage() {
     if (!validateForm()) return;
     setIsLoading(true);
     try {
+      // MOCK LOGIN IMPLEMENTATION (Bypassing backend as requested)
+      // Simulate network delay
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      // Mock successful response
+      // You can add logic here to validate specific mock credentials if needed
+      const data = {
+        jwt: "mock-jwt-token-" + Date.now(),
+        user: {
+          id: 1,
+          username: formData.email.split('@')[0],
+          email: formData.email,
+          provider: "local",
+          confirmed: true,
+          blocked: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      };
+
+      console.log('Mock Login successful:', data);
+      
+      // Store tokens and user data
+      localStorage.setItem('accessToken', data.jwt);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      localStorage.setItem('userid', String(data.user.id));
+
+      // Redirect to feed
+      window.location.href = '/feed';
+      return;
+
+      /* REAL BACKEND CODE COMMENTED OUT
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
       if (!apiUrl) throw new Error('API URL is not defined');
       
@@ -118,6 +150,7 @@ export default function LoginPage() {
 
       // Redirect based on user role or default to feed
       window.location.href = '/feed';
+      */
     } catch (err: any) {
       console.error('Login error:', err);
       setErrors({ form: err.message || 'Something went wrong. Please try again.' });
@@ -127,13 +160,51 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
+    // MOCK GOOGLE LOGIN
+    const data = {
+      jwt: "mock-google-jwt-" + Date.now(),
+      user: {
+        id: "google-user-" + Date.now(),
+        username: "GoogleUser",
+        email: "google@example.com",
+        provider: "google",
+        confirmed: true,
+        blocked: false
+      }
+    };
+    localStorage.setItem('accessToken', data.jwt);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.setItem('userid', String(data.user.id));
+    window.location.href = '/feed';
+    
+    /* REAL BACKEND
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
     window.location.href = `${apiUrl}/auth/social/google`;
+    */
   };
 
   const handleGithubLogin = () => {
+    // MOCK GITHUB LOGIN
+    const data = {
+      jwt: "mock-github-jwt-" + Date.now(),
+      user: {
+        id: "github-user-" + Date.now(),
+        username: "GithubUser",
+        email: "github@example.com",
+        provider: "github",
+        confirmed: true,
+        blocked: false
+      }
+    };
+    localStorage.setItem('accessToken', data.jwt);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    localStorage.setItem('userid', String(data.user.id));
+    window.location.href = '/feed';
+
+    /* REAL BACKEND
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
     window.location.href = `${apiUrl}/auth/social/github`;
+    */
   };
 
 

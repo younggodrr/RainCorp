@@ -1,9 +1,13 @@
 import React from 'react';
 import { PlayCircle } from 'lucide-react';
 
-export default function VideoPreview() {
+interface VideoPreviewProps {
+  isDarkMode?: boolean;
+}
+
+export default function VideoPreview({ isDarkMode }: VideoPreviewProps) {
   return (
-    <div className="aspect-video bg-black rounded-2xl overflow-hidden relative group cursor-pointer shadow-lg">
+    <div className={`aspect-video rounded-2xl overflow-hidden relative group cursor-pointer shadow-lg ${isDarkMode ? 'bg-[#111]' : 'bg-black'}`}>
        <div className="absolute inset-0 flex items-center justify-center">
           <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center group-hover:scale-110 transition-transform">
             <PlayCircle size={48} className="text-white fill-white" />

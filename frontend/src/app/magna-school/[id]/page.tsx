@@ -82,23 +82,24 @@ export default function CourseDetailPage() {
         <div className="lg:col-span-2 space-y-8">
           
           {/* Video Player Placeholder */}
-          <VideoPreview />
+          <VideoPreview isDarkMode={isDarkMode} />
 
           {/* Course Header Info */}
-          <CourseHeader course={course} />
+          <CourseHeader course={course} isDarkMode={isDarkMode} />
 
           {/* What you'll learn */}
-          <WhatYouWillLearn />
+          <WhatYouWillLearn isDarkMode={isDarkMode} />
 
           {/* Course Content / Syllabus */}
           <CourseCurriculum 
             curriculum={course.curriculum} 
             totalVideos={totalVideos}
             totalDuration={course.duration}
+            isDarkMode={isDarkMode}
           />
           
           {/* Instructor Bio */}
-          <InstructorBio instructor={course.instructor} />
+          <InstructorBio instructor={course.instructor} isDarkMode={isDarkMode} />
 
         </div>
 
@@ -106,7 +107,7 @@ export default function CourseDetailPage() {
         <div className="lg:col-span-1">
            <div className="sticky top-24 space-y-6">
              {/* Preview/Enroll Card */}
-             <EnrollmentCard course={course} />
+             <EnrollmentCard course={course} isDarkMode={isDarkMode} />
 
              {/* Business Card */}
              <div className="bg-black rounded-2xl p-6 text-white relative overflow-hidden">
