@@ -7,12 +7,20 @@ interface CourseCardProps {
   course: Course;
   isDarkMode: boolean;
   isCompact?: boolean;
+  onSelect?: () => void;
 }
 
-export default function CourseCard({ course, isDarkMode, isCompact = false }: CourseCardProps) {
+export default function CourseCard({ course, isDarkMode, isCompact = false, onSelect }: CourseCardProps) {
+  const handleClick = (e: React.MouseEvent) => {
+    if (onSelect) {
+      e.preventDefault();
+      onSelect();
+    }
+  };
+
   if (isCompact) {
     return (
-      <Link href={`/magna-school/${course.id}`} className="block h-full">
+      <Link href={`/magna-school/${course.id}`} className="block h-full" onClick={handleClick}>
         <div className={`rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-all group h-full flex flex-col ${
           isDarkMode 
             ? 'bg-[#111] border-[#E70008]/20' 
@@ -52,7 +60,7 @@ export default function CourseCard({ course, isDarkMode, isCompact = false }: Co
   }
 
   return (
-    <Link href={`/magna-school/${course.id}`} className="block h-full">
+    <Link href={`/magna-school/${course.id}`} className="block h-full" onClick={handleClick}>
       <div className={`rounded-2xl border overflow-hidden hover:shadow-lg transition-all group cursor-pointer flex flex-col h-full ${
         isDarkMode ? 'bg-[#111] border-[#E70008]/20' : 'bg-white border-gray-100'
       }`}>

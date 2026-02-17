@@ -1,8 +1,206 @@
-import React from 'react';
-import { Camera, Chrome, ChevronRight, Github } from 'lucide-react';
+import React, { useState } from 'react';
+import { Camera, Chrome, ChevronRight, Github, Loader2, Linkedin, Twitter, MessageCircle, RefreshCw } from 'lucide-react';
 import { InputField, Button } from './SettingsHelpers';
 
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+
 export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }) {
+  const [isConnectingGitHub, setIsConnectingGitHub] = useState(false);
+  const [githubConnected, setGithubConnected] = useState(false);
+  const [isConnectingLinkedIn, setIsConnectingLinkedIn] = useState(false);
+  const [linkedinConnected, setLinkedinConnected] = useState(false);
+  const [isConnectingTwitter, setIsConnectingTwitter] = useState(false);
+  const [twitterConnected, setTwitterConnected] = useState(false);
+  const [isConnectingDiscord, setIsConnectingDiscord] = useState(false);
+  const [discordConnected, setDiscordConnected] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
+
+  React.useEffect(() => {
+    // Check for success/error query params from backend redirect
+    const urlParams = new URLSearchParams(window.location.search);
+    const status = urlParams.get('status');
+    const platform = urlParams.get('platform');
+    const message = urlParams.get('message');
+
+    if (status === 'success' && platform) {
+      const setStateMap: Record<string, (val: boolean) => void> = {
+        'github': setGithubConnected,
+        'linkedin': setLinkedinConnected,
+        'twitter': setTwitterConnected,
+        'discord': setDiscordConnected
+      };
+      
+      if (setStateMap[platform.toLowerCase()]) {
+        setStateMap[platform.toLowerCase()](true);
+        alert(`${platform} connected successfully!`);
+        // Clean up URL
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    } else if (status === 'error') {
+      alert(`Failed to connect ${platform || 'account'}: ${message || 'Unknown error'}`);
+      // Clean up URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
+  React.useEffect(() => {
+    // Fetch connected social platforms on mount
+    const fetchPlatforms = async () => {
+      try {
+        if (!API_BASE) return;
+        const token = localStorage.getItem('accessToken');
+        if (!token) return;
+
+        const response = await fetch(`${API_BASE}/integrations/social/platforms`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Assuming response structure: { data: [{ provider: 'github', ... }, ...] } 
+          // or similar array of connected providers
+          const platforms = Array.isArray(data) ? data : (data.data || []);
+          
+          platforms.forEach((p: any) => {
+            const provider = (p.provider || p.name || '').toLowerCase();
+            if (provider === 'github') setGithubConnected(true);
+            if (provider === 'linkedin') setLinkedinConnected(true);
+            if (provider === 'twitter') setTwitterConnected(true);
+            if (provider === 'discord') setDiscordConnected(true);
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch connected platforms', error);
+      }
+    };
+
+    fetchPlatforms();
+  }, []);
+
+  const handleSync = async () => {
+    // Get list of connected platforms
+    const platformsToSync: string[] = [];
+    if (githubConnected) platformsToSync.push('github');
+    if (linkedinConnected) platformsToSync.push('linkedin');
+    if (twitterConnected) platformsToSync.push('twitter');
+    if (discordConnected) platformsToSync.push('discord');
+
+    if (platformsToSync.length === 0) {
+      alert('No connected platforms to sync.');
+      return;
+    }
+
+    setIsSyncing(true);
+    try {
+      if (!API_BASE) throw new Error('API URL is not defined');
+      
+      const token = localStorage.getItem('accessToken');
+      if (!token) throw new Error('Not authenticated');
+
+      const response = await fetch(`${API_BASE}/integrations/social/sync`, {
+        method: 'POST',
+        headers: {
+          'accept': '*/*',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({ platforms: platformsToSync })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to sync data');
+      }
+
+      alert('Sync started successfully! Your profile data will be updated shortly.');
+    } catch (error: any) {
+      console.error('Sync error:', error);
+      alert(error.message || 'Failed to sync data');
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const handleDisconnect = async (platform: string) => {
+    if (!confirm(`Are you sure you want to disconnect ${platform}?`)) return;
+
+    // Map platform name to state setters
+    const setStateMap: Record<string, (val: boolean) => void> = {
+      'github': setGithubConnected,
+      'linkedin': setLinkedinConnected,
+      'twitter': setTwitterConnected,
+      'discord': setDiscordConnected
+    };
+
+    try {
+      if (!API_BASE) throw new Error('API URL is not defined');
+      
+      const token = localStorage.getItem('accessToken');
+      if (!token) throw new Error('Not authenticated');
+
+      const response = await fetch(`${API_BASE}/integrations/social/platforms/${platform.toLowerCase()}`, {
+        method: 'DELETE',
+        headers: {
+          'accept': '*/*',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        // Success - update state
+        if (setStateMap[platform.toLowerCase()]) {
+          setStateMap[platform.toLowerCase()](false);
+        }
+        alert(`${platform} disconnected successfully`);
+      } else {
+        // Handle errors based on status code
+        if (response.status === 401) throw new Error('Unauthorized');
+        if (response.status === 404) throw new Error('Platform not found');
+        if (response.status === 500) throw new Error('Server error');
+        throw new Error('Failed to disconnect');
+      }
+    } catch (error: any) {
+      console.error(`Error disconnecting ${platform}:`, error);
+      alert(error.message || `Failed to disconnect ${platform}`);
+    }
+  };
+
+  const handleGitHubConnect = () => {
+    if (!API_BASE) {
+      alert('API URL is not defined');
+      return;
+    }
+    // Redirect to backend to initiate OAuth flow
+    // Assuming the backend endpoint is /integrations/social/{platform}/auth or similar
+    // Based on the callback URL provided, we'll target the initiation route
+    window.location.href = `${API_BASE}/integrations/social/github/auth`;
+  };
+
+  const handleLinkedInConnect = () => {
+    if (!API_BASE) {
+      alert('API URL is not defined');
+      return;
+    }
+    window.location.href = `${API_BASE}/integrations/social/linkedin/auth`;
+  };
+
+  const handleTwitterConnect = () => {
+    if (!API_BASE) {
+      alert('API URL is not defined');
+      return;
+    }
+    window.location.href = `${API_BASE}/integrations/social/twitter/auth`;
+  };
+
+  const handleDiscordConnect = () => {
+    if (!API_BASE) {
+      alert('API URL is not defined');
+      return;
+    }
+    window.location.href = `${API_BASE}/integrations/social/discord/auth`;
+  };
+
   return (
     <div className="space-y-6">
       <div className={`rounded-[24px] p-6 md:p-8 shadow-sm ${isDarkMode ? 'bg-[#111] border border-[#E70008]/20' : 'bg-white'}`}>
@@ -70,7 +268,22 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
       </div>
 
       <div className={`rounded-[24px] p-6 md:p-8 shadow-sm ${isDarkMode ? 'bg-[#111] border border-[#E70008]/20' : 'bg-white'}`}>
-        <h2 className={`text-lg font-bold mb-6 ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>Connected Accounts</h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className={`text-lg font-bold ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>Connected Accounts</h2>
+          <button 
+            onClick={handleSync}
+            disabled={isSyncing}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
+              isDarkMode 
+                ? 'bg-[#222] text-gray-300 hover:text-white hover:bg-[#333] disabled:opacity-50' 
+                : 'bg-gray-100 text-gray-600 hover:text-black hover:bg-gray-200 disabled:opacity-50'
+            }`}
+            title="Sync data from all connected platforms"
+          >
+            <RefreshCw size={14} className={isSyncing ? "animate-spin" : ""} />
+            {isSyncing ? 'Syncing...' : 'Sync Data'}
+          </button>
+        </div>
         <div className="space-y-4">
           {/* Google */}
           <div className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${
@@ -100,19 +313,79 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
           }`}>
             <div className="flex items-center gap-4">
               <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-[#222]' : 'bg-gray-50'}`}>
-                <Github className={`w-5 h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-700'}`} />
+                <Linkedin className={`w-5 h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-700'}`} />
               </div>
               <div>
-                <h3 className={`font-semibold text-sm ${isDarkMode ? 'text-white' : 'text-black'}`}>GitHub</h3>
-                <p className="text-xs text-gray-500">Connect your GitHub account</p>
+                <h3 className={`font-semibold text-sm ${isDarkMode ? 'text-white' : 'text-black'}`}>LinkedIn</h3>
+                <p className="text-xs text-gray-500">{linkedinConnected ? 'Connected' : 'Connect your LinkedIn account'}</p>
               </div>
             </div>
-            <button className={`px-4 py-2 rounded-full border text-xs font-semibold transition-all ${
-              isDarkMode 
-                ? 'bg-[#E50914] border-[#E50914] text-white hover:bg-[#cc0812]' 
-                : 'bg-black border-black text-white hover:bg-gray-800'
+            <button 
+              onClick={() => linkedinConnected ? handleDisconnect('linkedin') : handleLinkedInConnect()}
+              disabled={isConnectingLinkedIn}
+              className={`px-4 py-2 rounded-full border text-xs font-semibold transition-all flex items-center gap-2 ${
+              linkedinConnected
+                ? (isDarkMode ? 'border-green-500 text-green-500 bg-green-500/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500' : 'border-green-600 text-green-600 bg-green-50 hover:bg-red-50 hover:text-red-600 hover:border-red-600')
+                : (isDarkMode 
+                  ? 'bg-[#E50914] border-[#E50914] text-white hover:bg-[#cc0812]' 
+                  : 'bg-black border-black text-white hover:bg-gray-800')
             }`}>
-              Connect
+              {isConnectingLinkedIn ? <Loader2 size={14} className="animate-spin" /> : null}
+              {linkedinConnected ? 'Disconnect' : (isConnectingLinkedIn ? 'Connecting...' : 'Connect')}
+            </button>
+          </div>
+          {/* Twitter */}
+          <div className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${
+            isDarkMode ? 'border-gray-700 hover:border-gray-600' : 'border-gray-100 hover:border-gray-200'
+          }`}>
+            <div className="flex items-center gap-4">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-[#222]' : 'bg-gray-50'}`}>
+                <Twitter className={`w-5 h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-700'}`} />
+              </div>
+              <div>
+                <h3 className={`font-semibold text-sm ${isDarkMode ? 'text-white' : 'text-black'}`}>Twitter</h3>
+                <p className="text-xs text-gray-500">{twitterConnected ? 'Connected' : 'Connect your Twitter account'}</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => twitterConnected ? handleDisconnect('twitter') : handleTwitterConnect()}
+              disabled={isConnectingTwitter}
+              className={`px-4 py-2 rounded-full border text-xs font-semibold transition-all flex items-center gap-2 ${
+              twitterConnected
+                ? (isDarkMode ? 'border-green-500 text-green-500 bg-green-500/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500' : 'border-green-600 text-green-600 bg-green-50 hover:bg-red-50 hover:text-red-600 hover:border-red-600')
+                : (isDarkMode 
+                  ? 'bg-[#E50914] border-[#E50914] text-white hover:bg-[#cc0812]' 
+                  : 'bg-black border-black text-white hover:bg-gray-800')
+            }`}>
+              {isConnectingTwitter ? <Loader2 size={14} className="animate-spin" /> : null}
+              {twitterConnected ? 'Disconnect' : (isConnectingTwitter ? 'Connecting...' : 'Connect')}
+            </button>
+          </div>
+          {/* Discord */}
+          <div className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${
+            isDarkMode ? 'border-gray-700 hover:border-gray-600' : 'border-gray-100 hover:border-gray-200'
+          }`}>
+            <div className="flex items-center gap-4">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${isDarkMode ? 'bg-[#222]' : 'bg-gray-50'}`}>
+                <MessageCircle className={`w-5 h-5 ${isDarkMode ? 'text-gray-400' : 'text-gray-700'}`} />
+              </div>
+              <div>
+                <h3 className={`font-semibold text-sm ${isDarkMode ? 'text-white' : 'text-black'}`}>Discord</h3>
+                <p className="text-xs text-gray-500">{discordConnected ? 'Connected' : 'Connect your Discord account'}</p>
+              </div>
+            </div>
+            <button 
+              onClick={() => discordConnected ? handleDisconnect('discord') : handleDiscordConnect()}
+              disabled={isConnectingDiscord}
+              className={`px-4 py-2 rounded-full border text-xs font-semibold transition-all flex items-center gap-2 ${
+              discordConnected
+                ? (isDarkMode ? 'border-green-500 text-green-500 bg-green-500/10 hover:bg-red-500/10 hover:text-red-500 hover:border-red-500' : 'border-green-600 text-green-600 bg-green-50 hover:bg-red-50 hover:text-red-600 hover:border-red-600')
+                : (isDarkMode 
+                  ? 'bg-[#E50914] border-[#E50914] text-white hover:bg-[#cc0812]' 
+                  : 'bg-black border-black text-white hover:bg-gray-800')
+            }`}>
+              {isConnectingDiscord ? <Loader2 size={14} className="animate-spin" /> : null}
+              {discordConnected ? 'Disconnect' : (isConnectingDiscord ? 'Connecting...' : 'Connect')}
             </button>
           </div>
         </div>

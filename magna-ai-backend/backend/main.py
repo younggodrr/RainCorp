@@ -95,12 +95,14 @@ async def health_check():
 # Register API routers
 from .api import chat_router, health_router, websocket_router, user_data_router
 from .api.models_api import router as models_router
+from .api.integrations import router as integrations_router
 
 app.include_router(chat_router, prefix="/api/chat", tags=["chat"])
 app.include_router(health_router, prefix="/api", tags=["health"])
 app.include_router(websocket_router, tags=["websocket"])
 app.include_router(models_router, prefix="/api", tags=["models"])
 app.include_router(user_data_router, prefix="/api/user", tags=["user-data"])
+app.include_router(integrations_router, prefix="/api/integrations", tags=["integrations"])
 
 
 if __name__ == "__main__":

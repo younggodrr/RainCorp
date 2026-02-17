@@ -2,7 +2,15 @@
 'use client';
 import React, { useEffect, useState } from 'react';
 import FilterPill from './FilterPill';
-import { tagService, Tag } from '@/services/tagService';
+
+// Types
+export interface Tag {
+  id: string;
+  name: string;
+  count?: number;
+}
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
 
 interface FeedFiltersProps {
   activeFilter: string;
@@ -15,7 +23,19 @@ export default function FeedFilters({ activeFilter, setActiveFilter, isDarkMode 
   const filters = ['All', 'Projects', 'Opportunities', 'Posts', 'Tech News'];
 
   useEffect(() => {
-    tagService.getAll().then(setTags).catch(() => setTags([]));
+    const fetchTags = async () => {
+      try {
+        const res = await fetch(`${API_BASE}/tags`);
+        if (!res.ok) throw new Error('Failed to fetch tags');
+        const data = await res.json();
+        setTags(data);
+      } catch (error) {
+        console.error('Failed to fetch tags:', error);
+        setTags([]);
+      }
+    };
+    
+    fetchTags();
   }, []);
 
   return (

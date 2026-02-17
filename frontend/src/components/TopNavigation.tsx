@@ -32,7 +32,38 @@ export default function TopNavigation({
   showBack = false,
   hideBackOnMobile = false
 }: TopNavigationProps) {
-  const router = useRouter();
+  const [unreadCount, setUnreadCount] = React.useState(0);
+
+  React.useEffect(() => {
+    const fetchUnreadCount = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
+        if (!apiUrl || !token) return;
+
+        const response = await fetch(`${apiUrl}/social/notifications/unread`, {
+          headers: {
+            'accept': '*/*',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Assuming response: { count: 5 } or { unread_count: 5 }
+          setUnreadCount(data.count || data.unread_count || 0);
+        }
+      } catch (error) {
+        console.error('Failed to fetch unread notifications count', error);
+      }
+    };
+
+    fetchUnreadCount();
+    
+    // Optional: Poll every minute
+    const interval = setInterval(fetchUnreadCount, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className={`fixed top-0 right-0 z-30 backdrop-blur-sm border-b px-4 md:px-8 py-4 flex items-center justify-between transition-all duration-300 left-0 md:left-[88px] lg:left-[260px] ${className} ${isDarkMode ? 'bg-black/90 border-[#E70008]/20' : 'bg-white/90 border-gray-100'}`}>
@@ -94,9 +125,11 @@ export default function TopNavigation({
         {/* Notification Icon */}
         <Link href="/notifications" className={`relative p-2 rounded-full transition-colors ${isDarkMode ? 'hover:bg-[#E70008]/10 text-gray-400' : 'hover:bg-gray-100 text-gray-600'}`}>
           <Bell size={24} />
-          <div className="absolute top-1 right-1 w-5 h-5 bg-[#E50914] rounded-full flex items-center justify-center text-white text-[10px] font-bold border-2 border-white shadow-sm">
-            3
-          </div>
+          {unreadCount > 0 && (
+            <div className="absolute top-1 right-1 w-5 h-5 bg-[#E50914] rounded-full flex items-center justify-center text-white text-[10px] font-bold border-2 border-white shadow-sm">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </div>
+          )}
         </Link>
         
         {/* Custom Action */}

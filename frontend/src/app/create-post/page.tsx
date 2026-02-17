@@ -12,6 +12,7 @@ export default function CreatePostPage() {
   const router = useRouter();
   const [content, setContent] = useState('');
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [selectedGistId, setSelectedGistId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [privacy, setPrivacy] = useState('Public');
   const [isDragOver, setIsDragOver] = useState(false);
@@ -75,54 +76,80 @@ export default function CreatePostPage() {
     
     try {
       // Get the API URL from env
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
+      if (!apiUrl) throw new Error('API URL is not defined');
       
-      // Try to get token from localStorage first, then check if it's stored in cookies or session if needed
-      // For now, we'll log what we found to help debug
-      const token = localStorage.getItem('accessToken');
-      console.log('Current access token:', token ? 'Found' : 'Missing');
+      // Try to get token from localStorage first
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
       
-      // Temporary fallback: if token is missing but user is "logged in" in their mind, 
-      // check if we have any other potential token keys (some backends use 'token')
-      let fallbackToken = token || localStorage.getItem('token');
-
-      // If still no token, try to see if it's inside the user object (sometimes stored there)
-      if (!fallbackToken) {
-        try {
-          const userStr = localStorage.getItem('user');
-          if (userStr) {
-            const userObj = JSON.parse(userStr);
-            if (userObj.token) fallbackToken = userObj.token;
-            if (userObj.accessToken) fallbackToken = userObj.accessToken;
-          }
-        } catch (e) {
-          console.error("Error parsing user object for token", e);
-        }
-      }
-      
-      // FOR DEBUGGING ONLY: Remove this in production!
-      // If no token found, check if we have a userid, if so, maybe we can proceed without a token?
-      // Or maybe the token is in a different format or location?
-      
-      if (!fallbackToken) {
-        // Optional: Redirect to login if no token found
-        // router.push('/login');
+      if (!token) {
         console.error("Authentication failed: No access token found in localStorage.");
         throw new Error('You must be logged in to post. Please try logging in again.');
       }
 
+      // Handle file upload if image is selected
+      let imageUrl = null;
+      if (selectedImage && selectedImage.startsWith('data:')) {
+         try {
+             // Convert base64 to blob
+             const res = await fetch(selectedImage);
+             const blob = await res.blob();
+             
+             // This endpoint expects JSON with file metadata, but typically file uploads 
+             // require either multipart/form-data OR a pre-signed URL flow.
+             // Given the user provided a JSON structure: { url, filename, mime_type, size, purpose }
+             // It seems this endpoint registers a file, but doesn't upload the content directly?
+             // OR it might be a placeholder. 
+             
+             // However, for a real file upload to work with the provided curl example which sends JSON,
+             // it usually implies we are sending a link (url) to an already hosted file, 
+             // OR base64 content if the API supports it in the JSON body.
+             
+             // BUT, standard file upload is usually multipart.
+             // If the user insists on the JSON structure for `/api/files`:
+             
+             const uploadBody = {
+                 url: selectedImage, // Sending base64 as URL (if supported) or this is a metadata registration
+                 filename: "image.jpg",
+                 mime_type: blob.type,
+                 size: blob.size,
+                 purpose: "post_image"
+             };
+
+             const uploadRes = await fetch(`${apiUrl}/files`, {
+                method: 'POST',
+                headers: {
+                    'accept': '*/*',
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify(uploadBody)
+             });
+             
+             if (uploadRes.ok) {
+                const data = await uploadRes.json();
+                imageUrl = data.url || data.fileUrl; // Adjust based on actual response
+             } else {
+                 console.warn('Image upload/registration failed, proceeding without image');
+             }
+         } catch (e) {
+             console.error('Failed to upload image', e);
+         }
+      }
+
       const postBody = {
-        title: content.length > 50 ? content.slice(0, 50) + "..." : content,
+        title: content.length > 50 ? content.slice(0, 50) + "..." : "New Post",
         content: content,
-        // image: selectedImage // Optional: handle image upload separately or as base64
+        image: imageUrl, // Use the uploaded image URL
+        gistId: selectedGistId // Include Gist ID
       };
 
-      const response = await fetch(`${apiUrl}/api/posts`, {
+      const response = await fetch(`${apiUrl}/posts`, {
         method: 'POST',
         headers: {
           'accept': 'application/json',
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${fallbackToken}`
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(postBody)
       });
@@ -195,6 +222,8 @@ export default function CreatePostPage() {
             setContent={setContent}
             selectedImage={selectedImage}
             setSelectedImage={setSelectedImage}
+            selectedGistId={selectedGistId}
+            setSelectedGistId={setSelectedGistId}
             isDragOver={isDragOver}
             onDragOver={handleDragOver}
             onDragLeave={handleDragLeave}
@@ -210,6 +239,7 @@ export default function CreatePostPage() {
             onPost={handlePost}
             canPost={canPost}
             isDarkMode={isDarkMode}
+            onAddGist={(id) => setSelectedGistId(id)}
           />
 
         </div>

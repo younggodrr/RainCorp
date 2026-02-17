@@ -61,8 +61,10 @@ export default function LoginPage() {
     if (!validateForm()) return;
     setIsLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/auth/login`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
+      if (!apiUrl) throw new Error('API URL is not defined');
+      
+      const response = await fetch(`${apiUrl}/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -125,13 +127,13 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    window.location.href = `${apiUrl}api/auth/social/google`;
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
+    window.location.href = `${apiUrl}/auth/social/google`;
   };
 
   const handleGithubLogin = () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-    window.location.href = `${apiUrl}api/auth/social/github`;
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
+    window.location.href = `${apiUrl}/auth/social/github`;
   };
 
 

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Smile, Paperclip, Mic, Send } from 'lucide-react';
+import { Smile, Paperclip, Mic, Send, Coins } from 'lucide-react';
 
 interface ChatInputProps {
   isDarkMode: boolean;
@@ -7,6 +7,7 @@ interface ChatInputProps {
   setMessageInput: (value: string) => void;
   onSendMessage: (e?: React.FormEvent) => void;
   onAttachClick: () => void;
+  onSendCoinsClick: () => void;
   onFileSelect: (e: React.ChangeEvent<HTMLInputElement>) => void;
   fileInputRef: React.RefObject<HTMLInputElement | null>;
 }
@@ -17,6 +18,7 @@ export default function ChatInput({
   setMessageInput,
   onSendMessage,
   onAttachClick,
+  onSendCoinsClick,
   onFileSelect,
   fileInputRef
 }: ChatInputProps) {
@@ -42,6 +44,15 @@ export default function ChatInput({
           onClick={onAttachClick}
         >
           <Paperclip size={24} />
+        </button>
+        
+        <button 
+          type="button" 
+          className={`p-2 transition-colors ${isDarkMode ? 'text-[#F4A261] hover:text-[#E50914]' : 'text-gray-400 hover:text-[#E50914]'}`}
+          onClick={onSendCoinsClick}
+          title="Send Coins"
+        >
+          <Coins size={24} />
         </button>
         
         <input 

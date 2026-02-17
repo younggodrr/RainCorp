@@ -5,9 +5,11 @@ interface MagnaCoinBalanceCardProps {
   balance: number;
   maxCoins: number;
   isDarkMode: boolean;
+  onSendClick?: () => void;
+  walletName?: string;
 }
 
-export default function MagnaCoinBalanceCard({ balance, maxCoins, isDarkMode }: MagnaCoinBalanceCardProps) {
+export default function MagnaCoinBalanceCard({ balance, maxCoins, isDarkMode, onSendClick, walletName }: MagnaCoinBalanceCardProps) {
   return (
     <div className={`rounded-3xl p-5 md:p-8 mb-6 md:mb-8 relative overflow-hidden ${
       isDarkMode 
@@ -21,12 +23,20 @@ export default function MagnaCoinBalanceCard({ balance, maxCoins, isDarkMode }: 
         <div>
           <div className="flex items-center gap-2 mb-2 text-gray-400 font-medium">
             <Wallet size={20} />
-            <span>Current Balance</span>
+            <span>{walletName ? `${walletName} Balance` : 'Current Balance'}</span>
           </div>
-          <div className="flex items-baseline gap-2">
+          <div className="flex items-baseline gap-2 mb-4">
             <span className={`text-4xl md:text-5xl font-bold ${isDarkMode ? 'text-[#F4A261]' : 'text-white'}`}>{balance.toLocaleString()}</span>
             <span className="text-lg md:text-xl font-bold text-[#E50914]">MC</span>
           </div>
+          {onSendClick && (
+            <button 
+              onClick={onSendClick}
+              className="px-4 py-2 bg-[#E50914] hover:bg-[#cc0812] text-white rounded-lg text-sm font-bold shadow-lg shadow-red-500/20 transition-all flex items-center gap-2"
+            >
+              Send Coins
+            </button>
+          )}
         </div>
         
         <div className="w-full md:w-1/2">

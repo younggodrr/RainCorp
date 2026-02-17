@@ -76,13 +76,31 @@ export default function FeedPage() {
     const fetchPosts = async () => {
       setLoading(true);
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-        const response = await fetch(`${apiUrl}/api/posts?page=1&limit=5`, {
+        const token = localStorage.getItem('accessToken');
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
+        if (!apiUrl) throw new Error('API URL is not defined');
+        
+        // Try fetching social feed first (posts from followed users)
+        // If that fails or returns empty, fallback to general posts
+        let response = await fetch(`${apiUrl}/social/feed`, {
           headers: {
-            'accept': 'application/json',
-            ...(process.env.NEXT_PUBLIC_NGROK_SKIP_WARNING === 'true' ? { 'ngrok-skip-browser-warning': 'true' } : {})
+            'accept': '*/*',
+            'Authorization': `Bearer ${token}`
           }
         });
+
+        // If social feed endpoint is not available or fails, fallback to general posts
+        if (!response.ok) {
+           console.warn('Social feed fetch failed, falling back to general posts');
+           response = await fetch(`${apiUrl}/posts?page=1&limit=5`, {
+            headers: {
+              'accept': 'application/json',
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+        }
+        
         if (!response.ok) {
           throw new Error('Failed to fetch posts');
         }
@@ -135,12 +153,16 @@ export default function FeedPage() {
     setLoading(true);
     
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      const token = localStorage.getItem('accessToken');
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
+      if (!apiUrl) throw new Error('API URL is not defined');
+
       const nextPage = page + 1;
-      const response = await fetch(`${apiUrl}/api/posts?page=${nextPage}&limit=5`, {
+      const response = await fetch(`${apiUrl}/posts?page=${nextPage}&limit=5`, {
         headers: { 
           'accept': 'application/json',
-          ...(process.env.NEXT_PUBLIC_NGROK_SKIP_WARNING === 'true' ? { 'ngrok-skip-browser-warning': 'true' } : {})
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         }
       });
       if (!response.ok) throw new Error('Failed to fetch more posts');

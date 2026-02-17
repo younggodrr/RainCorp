@@ -50,8 +50,10 @@ export default function RegisterForm({ isDarkMode, onRegisterSuccess }: Register
     if (!validateForm()) return;
     setIsLoading(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      const response = await fetch(`${apiUrl}/api/auth/register`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
+      if (!apiUrl) throw new Error('API URL is not defined');
+      
+      const response = await fetch(`${apiUrl}/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

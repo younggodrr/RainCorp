@@ -6,8 +6,7 @@ import { BadgeCheck, Star, X } from 'lucide-react';
 import LeftPanel from '@/components/LeftPanel';
 import TopNavigation from '@/components/TopNavigation';
 import PricingCard from '@/components/PricingCard';
-
-
+import Checkout from '@/components/Checkout';
 
 export default function GetVerificationPage() {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
@@ -15,12 +14,44 @@ export default function GetVerificationPage() {
   const [activeTab, setActiveTab] = useState(''); 
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [selectedPlan, setSelectedPlan] = useState<{title: string, price: number} | null>(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       setIsDarkMode(true);
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchPaymentMethods = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
+        if (!apiUrl || !token) return;
+
+        const response = await fetch(`${apiUrl}/integrations/payments/methods`, {
+          headers: {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const methods = Array.isArray(data) ? data : (data.data || []);
+          if (methods.length > 0) {
+            setPaymentMethods(methods);
+            console.log('GetVerification - Fetched payment methods:', methods);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch payment methods in GetVerification', error);
+      }
+    };
+
+    fetchPaymentMethods();
   }, []);
 
   const toggleTheme = () => {
@@ -75,6 +106,16 @@ export default function GetVerificationPage() {
       {/* MAIN CONTENT */}
       <div className={`flex-1 flex flex-col h-full overflow-hidden relative md:ml-[88px] ${isSidebarExpanded ? 'lg:ml-[260px]' : 'lg:ml-[88px]'} transition-all duration-300`}>
         
+        {selectedPlan && (
+          <Checkout 
+            amount={selectedPlan.price}
+            itemTitle={`${selectedPlan.title} Verification`}
+            itemDescription={`${billingCycle === 'yearly' ? 'Yearly' : 'Monthly'} Subscription`}
+            onClose={() => setSelectedPlan(null)}
+            isDarkMode={isDarkMode}
+          />
+        )}
+
         {/* TOP NAVIGATION BAR */}
         <TopNavigation 
           title="Get Verified" 
@@ -174,6 +215,10 @@ export default function GetVerificationPage() {
                 checkColorClass="text-[#E50914]"
                 checkBgClass="bg-[#E50914]/10"
                 isDarkMode={isDarkMode}
+                onSelect={() => setSelectedPlan({
+                  title: 'Personal',
+                  price: billingCycle === 'yearly' ? pricing.personal.yearly.total : pricing.personal.monthly.price
+                })}
               />
 
               {/* BUSINESS PLAN */}
@@ -192,6 +237,10 @@ export default function GetVerificationPage() {
                 checkColorClass="text-blue-500"
                 checkBgClass="bg-blue-500/10"
                 isDarkMode={isDarkMode}
+                onSelect={() => setSelectedPlan({
+                  title: 'Business',
+                  price: billingCycle === 'yearly' ? pricing.business.yearly.total : pricing.business.monthly.price
+                })}
               />
 
             </div>

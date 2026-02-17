@@ -11,6 +11,7 @@ import GroupInfoModal from '@/components/GroupInfoModal';
 import StartChatModal from '@/components/StartChatModal';
 import ContactInfoModal from '@/components/ContactInfoModal';
 import AttachmentModal from '@/components/AttachmentModal';
+import SendCoinsModal from '@/components/SendCoinsModal';
 import DiscoverGroupsModal from '@/components/DiscoverGroupsModal';
 import ConversationItem from '@/components/ConversationItem';
 import MessageBubble from '@/components/MessageBubble';
@@ -57,6 +58,8 @@ function MessagesContent() {
     setIsContactInfoModalOpen,
     isAttachmentModalOpen,
     setIsAttachmentModalOpen,
+    isSendCoinsModalOpen,
+    setIsSendCoinsModalOpen,
     isDiscoverGroupsModalOpen,
     setIsDiscoverGroupsModalOpen,
     isDarkMode,
@@ -72,6 +75,7 @@ function MessagesContent() {
 
     // Handlers
     handleSendMessage,
+    handleSendCoins,
     handleDeleteConversation,
     handleDeleteMessage,
     handleArchiveConversation,
@@ -83,7 +87,8 @@ function MessagesContent() {
     handlePromoteMember,
     handleAttachmentSelect,
     handleStartChat,
-    handleJoinGroup
+    handleJoinGroup,
+    chatDetails
   } = useMessages();
 
   return (
@@ -99,6 +104,7 @@ function MessagesContent() {
           searchValue={searchQuery}
           onSearchChange={(e) => setSearchQuery(e.target.value)}
           isDarkMode={isDarkMode}
+          showBack={true}
         />
       </div>
 
@@ -122,6 +128,8 @@ function MessagesContent() {
             filter={filter}
             setFilter={setFilter}
             onOpenDiscoverGroups={() => setIsDiscoverGroupsModalOpen(true)}
+            onCreateChat={() => setIsStartChatModalOpen(true)}
+            onCreateGroup={() => setIsCreateGroupModalOpen(true)}
           >
             {filteredConversations.length === 0 ? (
               <div className="text-center py-10 text-gray-400">
@@ -185,6 +193,7 @@ function MessagesContent() {
                 setMessageInput={setMessageInput}
                 onSendMessage={handleSendMessage}
                 onAttachClick={() => setIsAttachmentModalOpen(true)}
+                onSendCoinsClick={() => setIsSendCoinsModalOpen(true)}
                 onFileSelect={handleFileUpload}
                 fileInputRef={fileInputRef}
               />
@@ -205,6 +214,7 @@ function MessagesContent() {
           <ChatDetailPanel 
             selectedChat={selectedChat}
             isDarkMode={isDarkMode}
+            description={chatDetails?.description}
           />
         )}
 
@@ -266,6 +276,13 @@ function MessagesContent() {
         isOpen={isAttachmentModalOpen}
         onClose={() => setIsAttachmentModalOpen(false)}
         onSelectType={handleAttachmentSelect}
+      />
+
+      <SendCoinsModal
+        isOpen={isSendCoinsModalOpen}
+        onClose={() => setIsSendCoinsModalOpen(false)}
+        onSend={handleSendCoins}
+        isDarkMode={isDarkMode}
       />
 
       <DiscoverGroupsModal

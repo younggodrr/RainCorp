@@ -7,6 +7,7 @@ import MobileDrawer from '@/components/MobileDrawer';
 import CategoryFilter from '@/components/CategoryFilter';
 import CourseCard from '@/components/CourseCard';
 import EmptyState from '@/components/EmptyState';
+import Checkout from '@/components/Checkout';
 import { COURSES, CATEGORIES } from './constants';
 
 export default function MagnaSchoolPage() {
@@ -15,12 +16,44 @@ export default function MagnaSchoolPage() {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Magna School');
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState<any | null>(null);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme === 'dark') {
       setIsDarkMode(true);
     }
+  }, []);
+
+  useEffect(() => {
+    const fetchPaymentMethods = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
+        if (!apiUrl || !token) return;
+
+        const response = await fetch(`${apiUrl}/integrations/payments/methods`, {
+          headers: {
+            'accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const methods = Array.isArray(data) ? data : (data.data || []);
+          if (methods.length > 0) {
+            setPaymentMethods(methods);
+            console.log('MagnaSchool - Fetched payment methods:', methods);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch payment methods in MagnaSchool', error);
+      }
+    };
+
+    fetchPaymentMethods();
   }, []);
 
   const toggleTheme = () => {
@@ -55,6 +88,16 @@ export default function MagnaSchoolPage() {
       {/* MAIN CONTENT */}
       <div className="flex-1 flex flex-col h-full overflow-hidden relative">
         
+        {selectedCourse && (
+          <Checkout 
+            amount={selectedCourse.price}
+            itemTitle={selectedCourse.title}
+            itemDescription={`Instructor: ${selectedCourse.instructor}`}
+            onClose={() => setSelectedCourse(null)}
+            isDarkMode={isDarkMode}
+          />
+        )}
+
         {/* HEADER */}
         <TopNavigation 
           title="Magna School" 
@@ -82,6 +125,7 @@ export default function MagnaSchoolPage() {
                 key={course.id}
                 course={course}
                 isDarkMode={isDarkMode}
+                onSelect={() => setSelectedCourse(course)}
               />
             ))}
           </div>

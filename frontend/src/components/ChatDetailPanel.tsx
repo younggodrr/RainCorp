@@ -5,9 +5,10 @@ import { Conversation } from '@/utils/mockData';
 interface ChatDetailPanelProps {
   selectedChat: Conversation;
   isDarkMode: boolean;
+  description?: string;
 }
 
-export default function ChatDetailPanel({ selectedChat, isDarkMode }: ChatDetailPanelProps) {
+export default function ChatDetailPanel({ selectedChat, isDarkMode, description }: ChatDetailPanelProps) {
   return (
     <div className={`w-[300px] border-l hidden xl:flex flex-col h-full overflow-y-auto ${isDarkMode ? 'bg-[#111] border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
       <div className={`p-6 border-b ${isDarkMode ? 'border-[#E70008]/20' : 'border-gray-100'}`}>
@@ -45,7 +46,7 @@ export default function ChatDetailPanel({ selectedChat, isDarkMode }: ChatDetail
         <div>
            <h4 className="text-xs font-bold text-gray-400 uppercase mb-3">Description</h4>
            <p className={`text-sm leading-relaxed ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
-             Where Creativity Meets Strategy. Elevating brands through innovative design and captivating storytelling.
+             {description || "No description available."}
            </p>
         </div>
 

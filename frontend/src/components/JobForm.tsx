@@ -3,7 +3,41 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import FileUpload from './FileUpload';
-import { apiFetch } from '@/services/apiClient';
+
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+
+// Helper for authenticated requests
+const getAuthToken = () => {
+  if (typeof window !== 'undefined') {
+    return localStorage.getItem('accessToken') || localStorage.getItem('token') || localStorage.getItem('authToken');
+  }
+  return null;
+};
+
+const authenticatedFetch = async (endpoint: string, options: RequestInit = {}) => {
+  if (!API_BASE) throw new Error('API URL is not defined');
+  const token = getAuthToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string> || {}),
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`API Error ${response.status}: ${errorText}`);
+  }
+
+  return response.json();
+};
 
 interface JobFormProps {
   isDarkMode: boolean;
@@ -34,7 +68,7 @@ export default function JobForm({ isDarkMode, onCancel, onSuccess, jobId }: JobF
       if (!jobId) return;
       setLoadingJob(true);
       try {
-        const data = await apiFetch(`/jobs/${encodeURIComponent(String(jobId))}`);
+        const data = await authenticatedFetch(`/jobs/${encodeURIComponent(String(jobId))}`);
         if (!mounted) return;
         setForm(prev => ({
           ...prev,
@@ -56,6 +90,7 @@ export default function JobForm({ isDarkMode, onCancel, onSuccess, jobId }: JobF
     loadJob();
     return () => { mounted = false; };
   }, [jobId]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setForm(prev => ({ ...prev, [name]: value }));
@@ -77,15 +112,16 @@ export default function JobForm({ isDarkMode, onCancel, onSuccess, jobId }: JobF
         tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
       };
       if (jobId) {
-        await apiFetch(`/jobs/${encodeURIComponent(String(jobId))}`, { method: 'PATCH', body });
+        await authenticatedFetch(`/jobs/${encodeURIComponent(String(jobId))}`, { method: 'PATCH', body: JSON.stringify(body) });
       } else {
-        await apiFetch('/jobs', { method: 'POST', body });
+        await authenticatedFetch('/jobs', { method: 'POST', body: JSON.stringify(body) });
       }
       if (onSuccess) onSuccess();
       // Redirect back to jobs list after successful create/update
       router.push('/jobs');
     } catch (err) {
       alert('Failed to create job');
+      console.error(err);
     } finally {
       setLoading(false);
     }

@@ -4,9 +4,43 @@ import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { Heart, MessageSquare, Share2, Send, Edit2, Trash2, Reply } from 'lucide-react';
 import { Comment } from '@/utils/mockData';
 import Image from 'next/image';
-import { commentService } from '@/services/commentService';
+// import { commentService } from '@/services/commentService'; // REMOVED
 
 const USE_REAL_API = true;
+const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+
+// Helper for authenticated requests
+const getAuthToken = () => {
+  if (typeof window !== 'undefined') {
+    // Check common keys
+    return localStorage.getItem('accessToken') || localStorage.getItem('token') || localStorage.getItem('authToken');
+  }
+  return null;
+};
+
+const authenticatedFetch = async (endpoint: string, options: RequestInit = {}) => {
+  const token = getAuthToken();
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string> || {}),
+  };
+
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`API Error ${response.status}: ${errorText}`);
+  }
+
+  return response.json();
+};
 
 interface PostInteractionBarProps {
   initialLikes: number;
@@ -181,7 +215,7 @@ export default function PostInteractionBar({
     if (USE_REAL_API && showComments) {
       const fetchComments = async () => {
         try {
-          const res = await commentService.getCommentsByPostId(postId, 1, 20);
+          const res = await authenticatedFetch(`/posts/${postId}/comments?page=1&limit=20`);
           setComments(res.comments || []);
         } catch (error) {
           console.error('Failed to fetch comments:', error);
@@ -216,7 +250,10 @@ export default function PostInteractionBar({
     e.preventDefault();
     if (!commentText.trim()) return;
     try {
-      const newComment = await commentService.createComment(postId, { content: commentText });
+      const newComment: Comment = await authenticatedFetch(`/posts/${postId}/comments`, {
+        method: 'POST',
+        body: JSON.stringify({ content: commentText })
+      });
       setComments([newComment, ...comments]);
       setCommentsCount(prev => prev + 1);
       setCommentText('');
@@ -227,7 +264,9 @@ export default function PostInteractionBar({
 
   const handleLikeComment = async (commentId: string) => {
     try {
-      const res = await commentService.toggleCommentLike(commentId);
+      const res = await authenticatedFetch(`/comments/${commentId}/like`, {
+        method: 'POST'
+      });
       const updateLikes = (list: Comment[]): Comment[] =>
         list.map(c => {
           if (c.id === commentId) {
@@ -246,7 +285,9 @@ export default function PostInteractionBar({
 
   const handleDeleteComment = async (commentId: string) => {
     try {
-      await commentService.deleteComment(postId, commentId);
+      await authenticatedFetch(`/comments/${commentId}`, {
+        method: 'DELETE'
+      });
       const deleteFromList = (list: Comment[]): Comment[] =>
         list.filter(c => {
           if (c.id === commentId) return false;
@@ -264,7 +305,10 @@ export default function PostInteractionBar({
 
   const handleEditComment = async (commentId: string, newContent: string) => {
     try {
-      const updated = await commentService.updateComment(postId, commentId, { content: newContent });
+      const updated: Comment = await authenticatedFetch(`/comments/${commentId}`, {
+        method: 'PUT',
+        body: JSON.stringify({ content: newContent })
+      });
       const editInList = (list: Comment[]): Comment[] =>
         list.map(c => {
           if (c.id === commentId) {
@@ -283,7 +327,10 @@ export default function PostInteractionBar({
 
   const handleReplyComment = async (parentId: string, replyContent: string) => {
     try {
-      const reply = await commentService.replyToComment(postId, parentId, replyContent);
+      const reply: Comment = await authenticatedFetch(`/posts/${postId}/comments`, {
+        method: 'POST',
+        body: JSON.stringify({ content: replyContent, parentId })
+      });
       const addReply = (list: Comment[]): Comment[] =>
         list.map(c => {
           if (c.id === parentId) {

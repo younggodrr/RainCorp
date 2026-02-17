@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
 import { 
   Image as ImageIcon, 
   Video, 
@@ -7,7 +7,8 @@ import {
   Hash, 
   Smile, 
   Calendar,
-  Loader2
+  Loader2,
+  Code
 } from 'lucide-react';
 
 interface PostToolbarProps {
@@ -17,6 +18,7 @@ interface PostToolbarProps {
   onPost: () => void;
   canPost: boolean;
   isDarkMode: boolean;
+  onAddGist?: (gistId: string) => void;
 }
 
 export default function PostToolbar({
@@ -25,9 +27,25 @@ export default function PostToolbar({
   isSubmitting,
   onPost,
   canPost,
-  isDarkMode
+  isDarkMode,
+  onAddGist
 }: PostToolbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [showGistInput, setShowGistInput] = useState(false);
+  const [gistUrl, setGistUrl] = useState('');
+
+  const handleGistSubmit = () => {
+    if (!gistUrl.trim() || !onAddGist) return;
+    
+    // Extract ID from URL if full URL is pasted
+    // e.g. https://gist.github.com/username/gistId
+    const parts = gistUrl.split('/');
+    const gistId = parts[parts.length - 1];
+    
+    onAddGist(gistId);
+    setGistUrl('');
+    setShowGistInput(false);
+  };
 
   return (
     <div className="p-4 md:p-6 pt-2">
@@ -37,6 +55,13 @@ export default function PostToolbar({
           </button>
           <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'text-gray-400 hover:bg-[#222] hover:text-[#E50914]' : 'text-gray-500 hover:bg-gray-100 hover:text-[#E50914]'}`} title="Add Video">
             <Video size={22} />
+          </button>
+          <button 
+            className={`p-2 rounded-full transition-colors ${isDarkMode ? 'text-gray-400 hover:bg-[#222] hover:text-[#E50914]' : 'text-gray-500 hover:bg-gray-100 hover:text-[#E50914]'}`} 
+            title="Add Gist"
+            onClick={() => setShowGistInput(!showGistInput)}
+          >
+            <Code size={22} />
           </button>
           <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'text-gray-400 hover:bg-[#222] hover:text-[#E50914]' : 'text-gray-500 hover:bg-gray-100 hover:text-[#E50914]'}`} title="Create Poll">
             <BarChart2 size={22} />
@@ -55,6 +80,26 @@ export default function PostToolbar({
             <Calendar size={22} />
           </button>
        </div>
+
+       {showGistInput && (
+         <div className={`mb-4 p-3 rounded-xl border flex gap-2 ${isDarkMode ? 'bg-[#222] border-gray-700' : 'bg-gray-50 border-gray-200'}`}>
+           <input 
+             type="text" 
+             placeholder="Paste GitHub Gist URL or ID..." 
+             className={`flex-1 bg-transparent focus:outline-none text-sm ${isDarkMode ? 'text-white placeholder-gray-500' : 'text-black placeholder-gray-400'}`}
+             value={gistUrl}
+             onChange={(e) => setGistUrl(e.target.value)}
+             onKeyDown={(e) => e.key === 'Enter' && handleGistSubmit()}
+           />
+           <button 
+             onClick={handleGistSubmit}
+             disabled={!gistUrl.trim()}
+             className={`px-3 py-1 rounded-lg text-xs font-bold ${isDarkMode ? 'bg-[#E50914] text-white disabled:opacity-50' : 'bg-[#E50914] text-white disabled:opacity-50'}`}
+           >
+             Add
+           </button>
+         </div>
+       )}
 
       <div className={`flex items-center justify-between border-t pt-4 ${isDarkMode ? 'border-[#333]' : 'border-gray-100'}`}>
         <div className="flex items-center gap-2">

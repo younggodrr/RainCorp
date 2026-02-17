@@ -8,15 +8,10 @@ import TopNavigation from '../../components/TopNavigation';
 import FriendCard from '../../components/FriendCard';
 import Pagination from '../../components/Pagination';
 
-// Mock Data
-const MOCK_FRIENDS = Array.from({ length: 50 }).map((_, i) => ({
-  id: i + 1,
-  name: `Friend ${i + 1}`,
-  role: ['Full Stack Developer', 'UI/UX Designer', 'Backend Engineer', 'DevOps Specialist'][i % 4],
-  company: ['Tech Corp', 'Startup Inc', 'Freelance', 'Global Systems'][i % 4],
-  status: i % 3 === 0 ? 'online' : 'offline',
-  mutual: Math.floor(Math.random() * 20) + 1
-}));
+import { MOCK_FRIENDS } from '../../utils/friendsData';
+
+// Mock Data removed - using imported MOCK_FRIENDS
+
 
 export default function FriendsPage() {
   const [currentPage, setCurrentPage] = useState(1);

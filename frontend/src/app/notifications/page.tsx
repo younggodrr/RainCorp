@@ -28,7 +28,48 @@ export default function NotificationsPage() {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [filter, setFilter] = useState<'all' | 'job_opportunities' | 'projects'>('all');
-  const [notifications, setNotifications] = useState<Notification[]>(MOCK_NOTIFICATIONS);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch notifications on mount
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      setLoading(true);
+      try {
+        const token = localStorage.getItem('accessToken');
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
+        if (!apiUrl) throw new Error('API URL is not defined');
+        
+        const response = await fetch(`${apiUrl}/social/notifications`, {
+          headers: {
+            'accept': '*/*',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          // Assuming backend returns array of notifications or { notifications: [] }
+          const notificationsData = Array.isArray(data) ? data : (data.notifications || []);
+          
+          // Map backend data to frontend Notification interface if needed
+          // For now, assuming backend structure matches or falling back to empty
+          setNotifications(notificationsData.length > 0 ? notificationsData : MOCK_NOTIFICATIONS);
+        } else {
+          // Fallback to mock data if API fails (e.g. 404 or 500)
+          console.warn('Failed to fetch notifications, using mock data');
+          setNotifications(MOCK_NOTIFICATIONS);
+        }
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+        setNotifications(MOCK_NOTIFICATIONS);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');

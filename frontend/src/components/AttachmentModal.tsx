@@ -1,12 +1,12 @@
 'use client';
 
 import React from 'react';
-import { X, FileText, Image as ImageIcon, Coins } from 'lucide-react';
+import { X, FileText, Image as ImageIcon } from 'lucide-react';
 
 interface AttachmentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSelectType: (type: 'document' | 'media' | 'coin') => void;
+  onSelectType: (type: 'document' | 'media') => void;
 }
 
 export default function AttachmentModal({ 
@@ -30,13 +30,6 @@ export default function AttachmentModal({
       icon: ImageIcon, 
       color: 'bg-pink-100 text-pink-600',
       description: 'Share images or videos'
-    },
-    { 
-      id: 'coin' as const, 
-      label: 'Magna Coin', 
-      icon: Coins, 
-      color: 'bg-yellow-100 text-yellow-600',
-      description: 'Send coins securely'
     }
   ];
 

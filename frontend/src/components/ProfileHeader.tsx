@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { BadgeCheck, MapPin, MoreHorizontal, Edit } from 'lucide-react';
+import { BadgeCheck, MapPin, MoreHorizontal, Edit, Github, Linkedin, Globe } from 'lucide-react';
 import { UserProfile } from '@/app/user-profile/data';
 
 interface ProfileHeaderProps {
@@ -60,6 +60,30 @@ export default function ProfileHeader({ user, isDarkMode, isFromNav }: ProfileHe
             <span className="hover:text-[#E50914] cursor-pointer transition-colors">
               <span className={`font-bold ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>{user.stats.mutualConnections}</span> mutual connections
             </span>
+          </div>
+          
+          {/* Social Links */}
+          <div className="flex items-center justify-center md:justify-start gap-3 mt-4">
+             {user.socials?.map((social, index) => {
+               const Icon = social.name === 'GitHub' ? Github : 
+                            social.name === 'LinkedIn' ? Linkedin : Globe;
+               return (
+                 <a 
+                   key={index} 
+                   href={social.url}
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   className={`p-2 rounded-lg border transition-all hover:-translate-y-1 ${
+                     isDarkMode 
+                       ? 'bg-[#222] border-gray-700 text-gray-400 hover:text-white hover:bg-[#333] hover:border-[#E50914]/50' 
+                       : 'bg-white border-gray-200 text-gray-500 hover:text-[#E50914] hover:bg-gray-50 hover:border-[#E50914]/50'
+                   }`}
+                   title={social.name}
+                 >
+                   <Icon size={18} />
+                 </a>
+               );
+             })}
           </div>
         </div>
 

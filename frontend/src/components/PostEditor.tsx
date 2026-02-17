@@ -7,6 +7,8 @@ interface PostEditorProps {
   setContent: (content: string) => void;
   selectedImage: string | null;
   setSelectedImage: (image: string | null) => void;
+  selectedGistId?: string | null;
+  setSelectedGistId?: (gistId: string | null) => void;
   isDragOver: boolean;
   onDragOver: (e: React.DragEvent) => void;
   onDragLeave: (e: React.DragEvent) => void;
@@ -19,6 +21,8 @@ export default function PostEditor({
   setContent,
   selectedImage,
   setSelectedImage,
+  selectedGistId,
+  setSelectedGistId,
   isDragOver,
   onDragOver,
   onDragLeave,
@@ -51,6 +55,32 @@ export default function PostEditor({
           adjustTextareaHeight();
         }}
       />
+
+      {/* Gist Preview */}
+      {selectedGistId && (
+        <div className="relative mt-4 rounded-xl overflow-hidden border border-gray-200 dark:border-gray-800">
+          <div className={`p-3 text-xs font-mono flex justify-between items-center ${isDarkMode ? 'bg-[#222] text-gray-400' : 'bg-gray-100 text-gray-600'}`}>
+            <span>gist.github.com/{selectedGistId}</span>
+            <button 
+              onClick={() => setSelectedGistId && setSelectedGistId(null)}
+              className="hover:text-red-500"
+            >
+              <X size={14} />
+            </button>
+          </div>
+          {/* We can't easily embed the script tag directly in React without danger/complexity, 
+              so we'll show a static preview or iframe. For now, a placeholder card. */}
+          <div className={`p-4 flex flex-col items-center justify-center gap-2 ${isDarkMode ? 'bg-[#1a1a1a]' : 'bg-white'}`}>
+             <div className="w-12 h-12 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+               <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" className={isDarkMode ? 'text-white' : 'text-black'}>
+                 <path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path>
+               </svg>
+             </div>
+             <p className={`text-sm font-medium ${isDarkMode ? 'text-white' : 'text-black'}`}>GitHub Gist Attached</p>
+             <p className="text-xs text-gray-500">ID: {selectedGistId}</p>
+          </div>
+        </div>
+      )}
 
       {/* Image Preview */}
       {selectedImage && (
