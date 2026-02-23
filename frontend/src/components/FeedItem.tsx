@@ -78,14 +78,46 @@ export default function FeedItem({ post, onRequestJoin, isDarkMode }: FeedItemPr
     onRequestJoin?.(post.author.name);
   };
 
-  const handleApply = (e: React.MouseEvent) => {
+  const handleApply = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsApplied(true);
-    // Add a small delay to ensure the toast shows after state update
-    setTimeout(() => {
-      onRequestJoin?.(post.author.name);
-    }, 100);
+    
+    if (isApplied) return;
+
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        alert('Please login to apply');
+        return;
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/applications/${post.id}/apply`, {
+        method: 'POST',
+        headers: {
+          'Accept': '*/*',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          resumeUrl: "string", 
+          coverLetter: "string", 
+          metadata: {}
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to apply');
+      }
+
+      setIsApplied(true);
+      // Add a small delay to ensure the toast shows after state update
+      setTimeout(() => {
+        onRequestJoin?.(post.author.name);
+      }, 100);
+    } catch (error) {
+      console.error('Error applying for job:', error);
+      alert('Failed to apply for job. Please try again.');
+    }
   };
 
   const cardClassName = `block rounded-2xl p-4 md:p-6 shadow-sm mt-6 cursor-pointer hover:shadow-md transition-all text-left w-full ${isDarkMode ? 'bg-[#111] border border-[#E70008]/20 shadow-[0_0_15px_rgba(231,0,8,0.1)] text-[#F4A261]' : 'bg-white'}`;

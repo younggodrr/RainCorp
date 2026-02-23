@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
 import { ToggleLeft, ToggleRight } from 'lucide-react';
 
-export function InputField({ label, type = "text", defaultValue, placeholder, isDarkMode }: { label: string; type?: string; defaultValue?: string; placeholder?: string; isDarkMode?: boolean }) {
+export function InputField({ label, type = "text", defaultValue, placeholder, isDarkMode, onChange, name }: { label: string; type?: string; defaultValue?: string; placeholder?: string; isDarkMode?: boolean; onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void; name?: string }) {
   return (
     <div className="space-y-2">
       <label className={`text-sm font-semibold ${isDarkMode ? 'text-[#F4A261]' : 'text-gray-700'}`}>{label}</label>
       <input 
+        name={name}
         type={type}  
         defaultValue={defaultValue}
         placeholder={placeholder}
+        onChange={onChange}
         className={`w-full px-4 py-3 rounded-xl border focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm ${
           isDarkMode ? 'bg-[#222] border-gray-700 text-[#F4A261] placeholder-gray-600' : 'bg-gray-50 border-gray-100 text-black'
         }`}
@@ -17,9 +19,13 @@ export function InputField({ label, type = "text", defaultValue, placeholder, is
   );
 }
 
-export function Button({ children, primary, icon, isDarkMode }: { children: React.ReactNode; primary?: boolean; icon?: React.ReactNode; isDarkMode?: boolean }) {
+export function Button({ children, primary, icon, isDarkMode, onClick, type = "button", disabled }: { children: React.ReactNode; primary?: boolean; icon?: React.ReactNode; isDarkMode?: boolean; onClick?: () => void; type?: "button" | "submit" | "reset"; disabled?: boolean }) {
   return (
-    <button className={`px-6 py-3 rounded-full text-sm font-semibold shadow-sm transition-all flex items-center gap-2 ${
+    <button 
+      type={type}
+      onClick={onClick}
+      disabled={disabled}
+      className={`px-6 py-3 rounded-full text-sm font-semibold shadow-sm transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ${
       primary 
         ? 'bg-[#E50914] text-white hover:bg-[#cc0812] shadow-md' 
         : isDarkMode 

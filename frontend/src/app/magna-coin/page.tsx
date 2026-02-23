@@ -113,75 +113,72 @@ export default function MagnaCoinPage() {
   const [availablePaymentMethods, setAvailablePaymentMethods] = useState(paymentMethods);
   const [transactionHistory, setTransactionHistory] = useState(transactions);
 
-  useEffect(() => {
-    const fetchWalletBalance = async () => {
-      try {
-        const token = localStorage.getItem('accessToken');
-        const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
-        if (!apiUrl || !token) return;
+  const fetchWalletBalance = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
+      if (!apiUrl || !token) return;
 
-        const response = await fetch('https://magna-coders-backend-1.onrender.com/api/integrations/wallet/balance', {
-          method: 'GET',
-          headers: {
-            'accept': 'application/json',
-            'Authorization': `Bearer ${token}`
+      const response = await fetch(`${apiUrl}/integrations/wallet/balance`, {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        // Assuming response structure: { balance: number } or { data: { balance: number } }
+        const balance = typeof data.balance === 'number' ? data.balance : (data.data?.balance || 0);
+        
+        setWallets(prev => prev.map(w => {
+          if (w.id === 'main') {
+            return { ...w, balance };
           }
-        });
+          return w;
+        }));
+      }
+    } catch (error) {
+      console.error('Failed to fetch wallet balance', error);
+    }
+  };
 
-        if (response.ok) {
-          const data = await response.json();
-          // Assuming response structure: { balance: number } or { data: { balance: number } }
-          const balance = typeof data.balance === 'number' ? data.balance : (data.data?.balance || 0);
-          
-          setWallets(prev => prev.map(w => {
-            if (w.id === 'main') {
-              return { ...w, balance };
-            }
-            return w;
+  const fetchHistory = async () => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
+      if (!apiUrl || !token) return;
+
+      const response = await fetch(`${apiUrl}/integrations/payments/history`, {
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const historyData = Array.isArray(data) ? data : (data.data || []);
+        
+        if (historyData.length > 0) {
+          const mappedTransactions = historyData.map((item: any, index: number) => ({
+            id: item.id || `txn-${index}`,
+            type: item.type || (item.amount > 0 ? 'Recharge' : 'Spent'),
+            amount: Math.abs(item.amount),
+            date: item.created_at ? new Date(item.created_at).toLocaleDateString() : 'Just now',
+            status: item.status || 'Completed'
           }));
+          setTransactionHistory(mappedTransactions);
         }
-      } catch (error) {
-        console.error('Failed to fetch wallet balance', error);
       }
-    };
-
-    fetchWalletBalance();
-  }, []);
+    } catch (error) {
+      console.error('Failed to fetch transaction history', error);
+    }
+  };
 
   useEffect(() => {
-    const fetchHistory = async () => {
-      try {
-        const token = localStorage.getItem('accessToken');
-        const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
-        if (!apiUrl || !token) return;
-
-        const response = await fetch(`${apiUrl}/integrations/payments/history`, {
-          headers: {
-            'accept': 'application/json',
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const historyData = Array.isArray(data) ? data : (data.data || []);
-          
-          if (historyData.length > 0) {
-            const mappedTransactions = historyData.map((item: any, index: number) => ({
-              id: item.id || `txn-${index}`,
-              type: item.type || (item.amount > 0 ? 'Recharge' : 'Spent'),
-              amount: Math.abs(item.amount),
-              date: item.created_at ? new Date(item.created_at).toLocaleDateString() : 'Just now',
-              status: item.status || 'Completed'
-            }));
-            setTransactionHistory(mappedTransactions);
-          }
-        }
-      } catch (error) {
-        console.error('Failed to fetch transaction history', error);
-      }
-    };
-
+    fetchWalletBalance();
     fetchHistory();
   }, []);
 
@@ -251,6 +248,11 @@ export default function MagnaCoinPage() {
           itemTitle={`${coinPackages.find(p => p.id === selectedPackage)?.coins} Coins`}
           itemDescription="Magna Coin Purchase"
           onClose={() => setIsCheckoutOpen(false)}
+          onSuccess={() => {
+            setIsCheckoutOpen(false);
+            fetchWalletBalance();
+            fetchHistory();
+          }}
           isDarkMode={isDarkMode}
         />
       )}

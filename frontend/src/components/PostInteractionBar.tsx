@@ -22,6 +22,7 @@ const authenticatedFetch = async (endpoint: string, options: RequestInit = {}) =
   const token = getAuthToken();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
     ...(options.headers as Record<string, string> || {}),
   };
 
@@ -215,7 +216,7 @@ export default function PostInteractionBar({
     if (USE_REAL_API && showComments) {
       const fetchComments = async () => {
         try {
-          const res = await authenticatedFetch(`/posts/${postId}/comments?page=1&limit=20`);
+          const res = await authenticatedFetch(`/comments/post/${postId}?page=1&limit=20`);
           setComments(res.comments || []);
         } catch (error) {
           console.error('Failed to fetch comments:', error);
@@ -250,7 +251,7 @@ export default function PostInteractionBar({
     e.preventDefault();
     if (!commentText.trim()) return;
     try {
-      const newComment: Comment = await authenticatedFetch(`/posts/${postId}/comments`, {
+      const newComment: Comment = await authenticatedFetch(`/comments/post/${postId}`, {
         method: 'POST',
         body: JSON.stringify({ content: commentText })
       });
@@ -286,7 +287,10 @@ export default function PostInteractionBar({
   const handleDeleteComment = async (commentId: string) => {
     try {
       await authenticatedFetch(`/comments/${commentId}`, {
-        method: 'DELETE'
+        method: 'DELETE',
+        headers: {
+          'Accept': '*/*'
+        }
       });
       const deleteFromList = (list: Comment[]): Comment[] =>
         list.filter(c => {
@@ -305,14 +309,14 @@ export default function PostInteractionBar({
 
   const handleEditComment = async (commentId: string, newContent: string) => {
     try {
-      const updated: Comment = await authenticatedFetch(`/comments/${commentId}`, {
+      const updated = await authenticatedFetch(`/comments/${commentId}`, {
         method: 'PUT',
         body: JSON.stringify({ content: newContent })
       });
       const editInList = (list: Comment[]): Comment[] =>
         list.map(c => {
           if (c.id === commentId) {
-            return { ...c, content: updated.content };
+            return { ...c, content: updated.content || newContent };
           }
           if (c.replies && c.replies.length > 0) {
             return { ...c, replies: editInList(c.replies) };
@@ -327,7 +331,7 @@ export default function PostInteractionBar({
 
   const handleReplyComment = async (parentId: string, replyContent: string) => {
     try {
-      const reply: Comment = await authenticatedFetch(`/posts/${postId}/comments`, {
+      const reply: Comment = await authenticatedFetch(`/comments/post/${postId}`, {
         method: 'POST',
         body: JSON.stringify({ content: replyContent, parentId })
       });

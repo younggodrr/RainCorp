@@ -14,6 +14,108 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
   const [isConnectingDiscord, setIsConnectingDiscord] = useState(false);
   const [discordConnected, setDiscordConnected] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  
+  // Profile Update State
+  const [isSaving, setIsSaving] = useState(false);
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    bio: '',
+    location: '',
+    website: '',
+    github: '',
+    linkedin: '',
+    twitter: '',
+    whatsapp: ''
+  });
+
+  // Fetch initial profile data
+  React.useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const userId = localStorage.getItem('userid');
+        const token = localStorage.getItem('accessToken');
+        if (!userId || !token || !API_BASE) return;
+
+        const response = await fetch(`${API_BASE}/auth/profile/${userId}`, {
+          headers: {
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          // Split full name if needed
+          const [firstName, ...lastNameParts] = (data.name || '').split(' ');
+          
+          setFormData({
+            firstName: firstName || '',
+            lastName: lastNameParts.join(' ') || '',
+            email: data.email || '',
+            bio: data.bio || '',
+            location: data.location || '',
+            website: data.website || '',
+            github: data.github || '',
+            linkedin: data.linkedin || '',
+            twitter: data.twitter || '',
+            whatsapp: data.whatsapp || ''
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch profile', error);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSaveProfile = async () => {
+    setIsSaving(true);
+    try {
+      const userId = localStorage.getItem('userid');
+      const token = localStorage.getItem('accessToken');
+      
+      if (!userId || !token || !API_BASE) {
+        alert('Authentication error');
+        return;
+      }
+
+      const payload = {
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        bio: formData.bio,
+        location: formData.location,
+        website: formData.website,
+        // Add other fields as per API spec
+      };
+
+      const response = await fetch(`${API_BASE}/auth/profile/${userId}`, {
+        method: 'PUT',
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        alert('Profile updated successfully!');
+      } else {
+        throw new Error('Failed to update profile');
+      }
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      alert('Failed to update profile. Please try again.');
+    } finally {
+      setIsSaving(false);
+    }
+  };
 
   React.useEffect(() => {
     // Check for success/error query params from backend redirect
@@ -219,31 +321,39 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
           </div>
           <div className="flex-1 w-full space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField label="First Name" defaultValue="John" isDarkMode={isDarkMode} />
-              <InputField label="Last Name" defaultValue="Doe" isDarkMode={isDarkMode} />
+              <InputField label="First Name" name="firstName" defaultValue={formData.firstName} onChange={handleInputChange} isDarkMode={isDarkMode} />
+              <InputField label="Last Name" name="lastName" defaultValue={formData.lastName} onChange={handleInputChange} isDarkMode={isDarkMode} />
             </div>
-            <InputField label="Email Address" defaultValue="john.doe@example.com" type="email" isDarkMode={isDarkMode} />
+            <InputField label="Email Address" name="email" defaultValue={formData.email} type="email" isDarkMode={isDarkMode} />
             <div className="space-y-2">
               <label className={`text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Bio</label>
               <textarea 
+                name="bio"
                 rows={4}
-                defaultValue="Full Stack Developer passionate about building scalable applications."
+                defaultValue={formData.bio}
+                onChange={handleInputChange}
                 className={`w-full px-4 py-3 rounded-xl border focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm resize-none ${
                   isDarkMode ? 'bg-[#222] border-gray-700 text-white' : 'bg-gray-50 border-gray-100 text-black'
                 }`}
               ></textarea>
             </div>
-            <InputField label="Location" defaultValue="Nairobi, Kenya" isDarkMode={isDarkMode} />
+            <InputField label="Location" name="location" defaultValue={formData.location} onChange={handleInputChange} isDarkMode={isDarkMode} />
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InputField label="Website (optional)" placeholder="https://yourwebsite.com" isDarkMode={isDarkMode} />
-                <InputField label="GitHub (optional)" placeholder="https://github.com/username" isDarkMode={isDarkMode} />
+                <InputField label="Website (optional)" name="website" placeholder="https://yourwebsite.com" defaultValue={formData.website} onChange={handleInputChange} isDarkMode={isDarkMode} />
+                <InputField label="GitHub (optional)" name="github" placeholder="https://github.com/username" defaultValue={formData.github} onChange={handleInputChange} isDarkMode={isDarkMode} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InputField label="LinkedIn (optional)" placeholder="https://linkedin.com/in/username" isDarkMode={isDarkMode} />
-                <InputField label="Twitter (optional)" placeholder="https://twitter.com/username" isDarkMode={isDarkMode} />
+                <InputField label="LinkedIn (optional)" name="linkedin" placeholder="https://linkedin.com/in/username" defaultValue={formData.linkedin} onChange={handleInputChange} isDarkMode={isDarkMode} />
+                <InputField label="Twitter (optional)" name="twitter" placeholder="https://twitter.com/username" defaultValue={formData.twitter} onChange={handleInputChange} isDarkMode={isDarkMode} />
             </div>
-            <InputField label="WhatsApp (optional)" placeholder="+254..." isDarkMode={isDarkMode} />
+            <InputField label="WhatsApp (optional)" name="whatsapp" placeholder="+254..." defaultValue={formData.whatsapp} onChange={handleInputChange} isDarkMode={isDarkMode} />
+
+            <div className="pt-4 flex justify-end">
+              <Button primary onClick={handleSaveProfile} disabled={isSaving} isDarkMode={isDarkMode}>
+                {isSaving ? 'Saving...' : 'Save Changes'}
+              </Button>
+            </div>
 
             <div className="space-y-2">
               <label className={`text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Your Availability</label>

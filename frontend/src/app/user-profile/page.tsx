@@ -13,9 +13,6 @@ import ProjectsTab from '@/components/ProjectsTab';
 import ActivitiesTab from '@/components/ActivitiesTab';
 import ConnectionsTab from '@/components/ConnectionsTab';
 import { USER_DATA, PROFILE_TABS } from './data';
-import { userService } from '@/services/userService';
-
-const USE_REAL_API = false;
 
 function UserProfileContent() {
   const router = require('next/navigation').useRouter();
@@ -43,22 +40,41 @@ function UserProfileContent() {
 
   // API Integration: Fetch Profile
   useEffect(() => {
-    if (!USE_REAL_API) return;
     const fetchProfile = async () => {
       try {
-        const userId = localStorage.getItem('userid');
+        const userId = searchParams?.get('id') || localStorage.getItem('userid');
         if (userId) {
-          const profile = await userService.getProfile(userId);
-          // TODO: Map backend profile to frontend structure
-          console.log('Fetched profile:', profile);
-          // setUserData(mappedProfile);
+          const token = localStorage.getItem('accessToken');
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/auth/profile/${userId}`, {
+            method: 'GET',
+            headers: {
+              'Accept': 'application/json',
+              'Authorization': `Bearer ${token}`
+            }
+          });
+          
+          if (response.ok) {
+            const profileData = await response.json();
+            console.log('Fetched profile:', profileData);
+            
+            // Map backend data to frontend structure
+            setUserData(prevData => ({
+              ...prevData,
+              name: profileData.name || prevData.name,
+              username: profileData.username || profileData.email || prevData.username,
+              role: profileData.role || prevData.role,
+              location: profileData.location || prevData.location,
+              bio: profileData.bio || prevData.bio,
+              // Update other fields if backend provides them
+            }));
+          }
         }
       } catch (err) {
         console.error('Failed to fetch profile:', err);
       }
     };
     fetchProfile();
-  }, []);
+  }, [searchParams]);
 
   const toggleTheme = () => {
     const newMode = !isDarkMode;

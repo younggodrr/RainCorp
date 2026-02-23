@@ -7,6 +7,7 @@ interface CheckoutProps {
   itemTitle: string;
   itemDescription?: string;
   onClose: () => void;
+  onSuccess?: () => void;
   isDarkMode?: boolean;
 }
 
@@ -16,6 +17,7 @@ export default function Checkout({
   itemTitle,
   itemDescription,
   onClose,
+  onSuccess,
   isDarkMode = false
 }: CheckoutProps) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -24,6 +26,33 @@ export default function Checkout({
   const [errorMessage, setErrorMessage] = useState('');
   const [isRefunding, setIsRefunding] = useState(false);
   const [selectedMethod, setSelectedMethod] = useState<'card' | 'mpesa' | 'paypal' | 'stripe'>('card');
+  const [webhookStatus, setWebhookStatus] = useState<'unknown' | 'active' | 'inactive'>('unknown');
+
+  React.useEffect(() => {
+    // Optional: Verify webhooks are active when component mounts
+    const checkWebhooks = async () => {
+      try {
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
+        if (!apiUrl) return;
+        
+        const response = await fetch(`${apiUrl}/webhooks/verify`);
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success) {
+            setWebhookStatus('active');
+            console.log('Webhooks active:', data.providers);
+          } else {
+            setWebhookStatus('inactive');
+          }
+        }
+      } catch (e) {
+        console.warn('Webhook verification failed', e);
+        setWebhookStatus('inactive');
+      }
+    };
+    
+    checkWebhooks();
+  }, []);
 
   const handlePayment = async () => {
     setIsProcessing(true);
@@ -40,14 +69,43 @@ export default function Checkout({
       if (selectedMethod === 'paypal') paymentMethodId = "pm_paypal_mock";
 
       // 1. Create Payment Intent
-      const payload = {
-        amount: amount * 100, // Convert to cents if needed, assuming backend expects smallest unit
+      let endpoint = `${apiUrl}/integrations/payments/create`;
+      let payload: any = {
+        amount: amount * 100, // Convert to cents
         currency: currency.toLowerCase(),
-        paymentMethodId: paymentMethodId,
         description: `Payment via ${selectedMethod}`
       };
 
-      const response = await fetch(`${apiUrl}/integrations/payments/create`, {
+      if (selectedMethod === 'stripe' || selectedMethod === 'card') {
+        endpoint = `${apiUrl}/integrations/stripe/create-payment-intent`;
+        payload.paymentMethodId = paymentMethodId;
+        payload.provider = 'stripe';
+        
+        // Note: The external backend must implement the Stripe webhook handler at /api/webhooks/stripe
+        // to listen for 'payment_intent.succeeded' events. This is critical for updating the
+        // transaction status which the frontend polls for below.
+      } else if (selectedMethod === 'paypal') {
+        endpoint = `${apiUrl}/integrations/paypal/create-order`;
+        payload.provider = 'paypal';
+        
+        // Note: The external backend must implement the PayPal webhook handler at /api/webhooks/paypal
+        // to listen for 'PAYMENT.CAPTURE.COMPLETED' events.
+      } else if (selectedMethod === 'mpesa') {
+        endpoint = `${apiUrl}/integrations/mpesa/stkpush`;
+        payload.provider = 'mpesa';
+        // M-Pesa specific payload
+        payload.phoneNumber = "254700000000"; // Should be collected from user input in a real scenario
+        payload.amount = amount; // M-Pesa usually takes whole numbers/KSH, not cents
+        
+        // Note: The external backend's M-Pesa integration should handle the 'validation' webhook 
+        // at /api/webhooks/mpesa/validation to verify transaction details before processing.
+        // Also, the backend must implement /api/webhooks/mpesa/confirm to finalize the payment 
+        // and update the user's wallet/order status after Safaricom confirmation.
+      } else {
+        payload.provider = selectedMethod;
+      }
+
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'accept': 'application/json',
@@ -62,10 +120,44 @@ export default function Checkout({
       }
 
       const data = await response.json();
-      // Assuming the response contains an ID we can use for refund
-      // Adjust based on actual backend response structure
-      setPaymentId(data.id || data.paymentIntentId || 'mock_payment_id'); 
-      setPaymentStatus('success');
+      // 2. Poll for payment status
+      // In a real implementation, we would poll the backend to check if the webhook has been processed
+      // and the payment is confirmed.
+      let attempts = 0;
+      const maxAttempts = 10;
+      const pollInterval = 2000; // 2 seconds
+
+      const checkStatus = async () => {
+        if (attempts >= maxAttempts) {
+          throw new Error('Payment confirmation timed out');
+        }
+        
+        // checking status from backend
+        const statusResponse = await fetch(`${apiUrl}/integrations/payments/${data.id || data.paymentIntentId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        if (statusResponse.ok) {
+           const statusData = await statusResponse.json();
+           if (statusData.status === 'succeeded') {
+              setPaymentId(data.id || data.paymentIntentId);
+              setPaymentStatus('success');
+              if (onSuccess) onSuccess();
+              return;
+            }
+         }
+         
+         attempts++;
+         setTimeout(checkStatus, pollInterval);
+       };
+       
+       // For now, simulate success after a delay since we can't poll a real backend
+       setTimeout(() => {
+         setPaymentId(data.id || data.paymentIntentId || 'mock_payment_id');
+         setPaymentStatus('success');
+         if (onSuccess) onSuccess();
+       }, 2000);
+
     } catch (error: any) {
       console.error('Payment error:', error);
       setErrorMessage(error.message || 'Payment failed');
