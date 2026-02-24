@@ -32,6 +32,7 @@ export default function TopNavigation({
   showBack = false,
   hideBackOnMobile = false
 }: TopNavigationProps) {
+  const router = useRouter();
   const [unreadCount, setUnreadCount] = React.useState(0);
 
   React.useEffect(() => {

@@ -43,16 +43,16 @@ export default function ProjectDetailPage() {
       setTabError(null);
       try {
         if (tab === "members") {
-          const data = await apiFetch(`/projects/${projectId}/members`);
+          const data = await apiFetch<any>(`/projects/${projectId}/members`);
           setMembers(data.members || []);
         } else if (tab === "files") {
-          const data = await apiFetch(`/projects/${projectId}/files`);
+          const data = await apiFetch<any>(`/projects/${projectId}/files`);
           setFiles(data.files || []);
         } else if (tab === "tasks") {
-          const data = await apiFetch(`/projects/${projectId}/tasks`);
+          const data = await apiFetch<any>(`/projects/${projectId}/tasks`);
           setTasks(data.tasks || []);
         } else if (tab === "activity") {
-          const data = await apiFetch(`/projects/${projectId}/activity`);
+          const data = await apiFetch<any>(`/projects/${projectId}/activity`);
           setActivity(data.activity || []);
         }
       } catch (err: any) {
