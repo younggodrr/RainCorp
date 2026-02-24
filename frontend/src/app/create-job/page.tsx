@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import LeftPanel from '@/components/LeftPanel';
 import TopNavigation from '@/components/TopNavigation';
@@ -9,7 +9,7 @@ import PageHeader from '@/components/PageHeader';
 import JobForm from '@/components/JobForm';
 import { useSearchParams } from 'next/navigation';
 
-export default function CreateJobPage() {
+function CreateJobContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -93,5 +93,13 @@ export default function CreateJobPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CreateJobPage() {
+  return (
+    <Suspense fallback={null}>
+      <CreateJobContent />
+    </Suspense>
   );
 }
