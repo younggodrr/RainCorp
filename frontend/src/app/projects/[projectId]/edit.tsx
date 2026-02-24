@@ -41,7 +41,7 @@ export default function EditProjectPage() {
     try {
       await apiFetch(`/projects/${projectId}`, {
         method: "PUT",
-        body: {
+        data: {
           name: form.name,
           description: form.description,
           tags: form.tags,
