@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Trash2, CheckCheck, FileText, Download } from 'lucide-react';
-import { Message } from '@/utils/mockData';
+import type { Message } from '@/types';
 
 interface MessageBubbleProps {
   message: Message;

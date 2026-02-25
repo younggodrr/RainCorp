@@ -1,6 +1,6 @@
 import React from 'react';
 import Image from 'next/image';
-import { RegularPost } from '@/utils/mockData';
+import type { RegularPost } from '@/types';
 import PostInteractionBar from './PostInteractionBar';
 
 interface RegularPostDetailsProps {

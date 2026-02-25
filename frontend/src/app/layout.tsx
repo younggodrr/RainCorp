@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import BottomNavigation from '@/components/BottomNavigation'
+import { AuthProvider } from '@/contexts/AuthContext'
+import { EnvValidator } from '@/components/EnvValidator'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -46,10 +48,13 @@ export default function RootLayout({
         />
       </head>
       <body className={inter.className}>
-        <div id="root">
-          {children}
-        </div>
-        <BottomNavigation />
+        <AuthProvider>
+          <EnvValidator />
+          <div id="root">
+            {children}
+          </div>
+          <BottomNavigation />
+        </AuthProvider>
       </body>
     </html>
   )

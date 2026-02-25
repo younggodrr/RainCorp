@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProjectPost, generateMockComments } from '@/utils/mockData';
+import type { ProjectPost } from '@/types';
 import PostInteractionBar from '@/components/PostInteractionBar';
 
 interface ProjectPostDetailProps {

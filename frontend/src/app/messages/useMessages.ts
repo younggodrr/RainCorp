@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { MOCK_CONVERSATIONS, Conversation, Message } from '@/utils/mockData';
+import { getUserChats, getChatMessages, sendMessage as sendMessageService } from '@/services/messages';
+import type { Conversation, Message } from '@/types';
 import { MOCK_FRIENDS } from './constants';
 
 const USE_REAL_API = true; // Set to true when backend is ready
@@ -76,7 +77,7 @@ export function useMessages() {
   const searchParams = useSearchParams();
   
   // State
-  const [conversations, setConversations] = useState<Conversation[]>(MOCK_CONVERSATIONS);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
   const [selectedChatId, setSelectedChatId] = useState<string | null>(null);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('Messages');
@@ -98,6 +99,20 @@ export function useMessages() {
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  // Load conversations from backend
+  useEffect(() => {
+    const loadConversations = async () => {
+      try {
+        const chats = await getUserChats();
+        setConversations(chats as any);
+      } catch (error) {
+        console.error('Error loading conversations:', error);
+        // Keep empty array on error
+      }
+    };
+    loadConversations();
+  }, []);
 
   // Derived State
   const selectedChat = conversations.find(c => c.id === selectedChatId);

@@ -22,21 +22,23 @@ export default function OverviewTab({ user, isDarkMode }: OverviewTabProps) {
         </div>
 
         {/* Social Links Card */}
-        <div className={`rounded-2xl p-4 md:p-6 border shadow-sm ${isDarkMode ? 'bg-[#111] border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
-          <h3 className={`font-bold text-lg mb-4 ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>Social Links</h3>
-          <div className="flex flex-wrap gap-4">
-            {user.socials.map(social => (
-              <a 
-                key={social.name}
-                href={social.url}
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors group ${isDarkMode ? 'bg-[#222] hover:bg-[#333]' : 'bg-gray-50 hover:bg-gray-100'}`}
-              >
-                <social.icon size={18} className={`${social.color}`} />
-                <span className={`text-sm font-medium ${social.color}`}>{social.name}</span>
-              </a>
-            ))}
+        {user.socials && user.socials.length > 0 && (
+          <div className={`rounded-2xl p-4 md:p-6 border shadow-sm ${isDarkMode ? 'bg-[#111] border-[#E70008]/20' : 'bg-white border-gray-100'}`}>
+            <h3 className={`font-bold text-lg mb-4 ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>Social Links</h3>
+            <div className="flex flex-wrap gap-4">
+              {user.socials.map(social => (
+                <a 
+                  key={social.name}
+                  href={social.url}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-xl transition-colors group ${isDarkMode ? 'bg-[#222] hover:bg-[#333]' : 'bg-gray-50 hover:bg-gray-100'}`}
+                >
+                  <social.icon size={18} className={`${social.color}`} />
+                  <span className={`text-sm font-medium ${social.color}`}>{social.name}</span>
+                </a>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
 
       {/* RIGHT COLUMN */}

@@ -1,6 +1,7 @@
 import React from 'react';
 import { ShieldCheck } from 'lucide-react';
 import { InputField, Button } from './SettingsHelpers';
+import AccountLinking from './AccountLinking';
 
 export default function SecuritySettings({ isDarkMode }: { isDarkMode?: boolean }) {
   return (
@@ -17,6 +18,9 @@ export default function SecuritySettings({ isDarkMode }: { isDarkMode?: boolean 
             </div>
           </div>
         </div>
+
+        <h3 className={`text-sm font-bold uppercase ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Account Security</h3>
+        <AccountLinking isDarkMode={isDarkMode} />
         
         <h3 className={`text-sm font-bold uppercase ${isDarkMode ? 'text-gray-500' : 'text-gray-400'}`}>Change Password</h3>
         <InputField label="Current Password" type="password" isDarkMode={isDarkMode} />

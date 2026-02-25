@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image';
 import { Globe } from 'lucide-react';
-import { TechNewsPost, generateMockComments } from '@/utils/mockData';
+import type { TechNewsPost } from '@/types';
 import PostInteractionBar from '@/components/PostInteractionBar';
 
 interface TechNewsPostDetailProps {

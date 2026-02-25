@@ -31,71 +31,6 @@ interface DiscoverGroupsModalProps {
   isDarkMode?: boolean;
 }
 
-// --- MOCK GROUPS DATA ---
-const MOCK_GROUPS: Group[] = [
-  { 
-    id: 'g1', 
-    name: 'Frontend Masters', 
-    description: 'Advanced React, Next.js patterns and UI/UX discussions.', 
-    memberCount: 1240, 
-    avatarColor: 'bg-blue-100 text-blue-600', 
-    accessType: 'request',
-    dateCreated: 'Jan 2024',
-    messagesPerDay: 150,
-    activeMembers: 45,
-    adminName: 'Sarah Chen'
-  },
-  { 
-    id: 'g2', 
-    name: 'Crypto Insiders', 
-    description: 'Exclusive trading signals and market analysis.', 
-    memberCount: 56, 
-    avatarColor: 'bg-yellow-100 text-yellow-600', 
-    accessType: 'paid',
-    cost: 50,
-    dateCreated: 'Dec 2023',
-    messagesPerDay: 80,
-    activeMembers: 12,
-    adminName: 'Mike Ross'
-  },
-  { 
-    id: 'g3', 
-    name: 'Design Systems', 
-    description: 'Building scalable design systems with Figma and code.', 
-    memberCount: 890, 
-    avatarColor: 'bg-pink-100 text-pink-600', 
-    accessType: 'request',
-    dateCreated: 'Feb 2024',
-    messagesPerDay: 210,
-    activeMembers: 67,
-    adminName: 'Jessica Lee'
-  },
-  { 
-    id: 'g4', 
-    name: 'AI Researchers', 
-    description: 'Deep learning papers discussion and implementation.', 
-    memberCount: 230, 
-    avatarColor: 'bg-purple-100 text-purple-600', 
-    accessType: 'paid',
-    cost: 100,
-    dateCreated: 'Mar 2024',
-    messagesPerDay: 45,
-    activeMembers: 8,
-    adminName: 'David Kim'
-  },
-  { 
-    id: 'g5', 
-    name: 'Startup Founders', 
-    description: 'Networking for early stage founders.', 
-    memberCount: 410, 
-    avatarColor: 'bg-green-100 text-green-600', 
-    accessType: 'request',
-    dateCreated: 'Nov 2023',
-    messagesPerDay: 90,
-    activeMembers: 23,
-    adminName: 'Alex T.'
-  },
-];
 
 export default function DiscoverGroupsModal({ 
   isOpen, 
@@ -125,10 +60,7 @@ export default function DiscoverGroupsModal({
 
   // --- RENDERERS ---
 
-  const filteredGroups = MOCK_GROUPS.filter(g => 
-    g.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    g.description.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredGroups: Group[] = []; // No mock data - groups should come from API
 
   return (
     <>

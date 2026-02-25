@@ -6,7 +6,8 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
-import { getPostById, FeedPost, JobPost, ProjectPost, TechNewsPost, RegularPost } from '@/utils/mockData';
+import { getPostById } from '@/services/posts';
+import type { FeedPost, JobPost, ProjectPost, TechNewsPost, RegularPost } from '@/types';
 import LeftPanel from '@/components/LeftPanel';
 import Toast from '@/components/Toast';
 import PostHeader from '@/components/PostHeader';
@@ -36,12 +37,20 @@ export default function PostDetailPage() {
 
   useEffect(() => {
     if (params?.id) {
-      // Simulate fetch
-      setTimeout(() => {
-        const foundPost = getPostById(params.id as string);
-        setPost(foundPost);
-        setLoading(false);
-      }, 500);
+  useEffect(() => {
+    if (params?.id) {
+      const fetchPost = async () => {
+        try {
+          const foundPost = await getPostById(params.id as string);
+          setPost(foundPost);
+        } catch (error) {
+          console.error('Error fetching post:', error);
+          setPost(null);
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchPost();
     }
   }, [params?.id]);
 

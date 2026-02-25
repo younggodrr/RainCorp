@@ -1,6 +1,6 @@
 import React from 'react';
 import { Briefcase, MapPin, DollarSign } from 'lucide-react';
-import { JobPost } from '@/utils/mockData';
+import type { JobPost } from '@/types';
 
 interface JobPostDetailProps {
   post: JobPost;

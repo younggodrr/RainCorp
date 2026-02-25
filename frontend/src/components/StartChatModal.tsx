@@ -24,23 +24,11 @@ interface StartChatModalProps {
   isDarkMode?: boolean;
 }
 
-// --- MOCK FRIENDS DATA (If not provided) ---
-const MOCK_FRIENDS: Friend[] = [
-  { id: 'f1', name: 'Sarah Chen', avatarColor: 'bg-pink-100 text-pink-600', initials: 'SC', isOnline: true, status: 'Coding a new feature' },
-  { id: 'f2', name: 'Mike Johnson', avatarColor: 'bg-blue-100 text-blue-600', initials: 'MJ', status: 'In a meeting' },
-  { id: 'f3', name: 'Jessica Lee', avatarColor: 'bg-purple-100 text-purple-600', initials: 'JL', isOnline: true, status: 'Available' },
-  { id: 'f4', name: 'David Kim', avatarColor: 'bg-green-100 text-green-600', initials: 'DK', status: 'Debugging...' },
-  { id: 'f5', name: 'Alex Thompson', avatarColor: 'bg-orange-100 text-orange-600', initials: 'AT', isOnline: true, status: 'Coffee time ☕' },
-  { id: 'f6', name: 'Emily Wilson', avatarColor: 'bg-yellow-100 text-yellow-600', initials: 'EW', status: 'Designing UI' },
-  { id: 'f7', name: 'Ryan Garcia', avatarColor: 'bg-red-100 text-red-600', initials: 'RG', status: 'On vacation' },
-  { id: 'f8', name: 'Olivia Martinez', avatarColor: 'bg-indigo-100 text-indigo-600', initials: 'OM', status: 'Working remotely' },
-];
-
 export default function StartChatModal({ 
   isOpen, 
   onClose, 
   onStartChat,
-  existingFriends = MOCK_FRIENDS,
+  existingFriends = [],
   isDarkMode = false
 }: StartChatModalProps) {
   const [searchQuery, setSearchQuery] = useState('');

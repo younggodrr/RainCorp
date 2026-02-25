@@ -23,7 +23,6 @@ import {
   Mic
 } from 'lucide-react';
 import { NavItem } from './NavItem';
-import { MOCK_CONVERSATIONS } from '@/utils/mockData';
 
 interface LeftPanelProps {
   activeTab: string;
@@ -84,7 +83,8 @@ export default function LeftPanel({
     }
   };
 
-  const groups = MOCK_CONVERSATIONS.filter(c => c.isGroup).slice(0, 3);
+  // For now, use empty array - will be populated from backend later
+  const groups: any[] = [];
 
   // Mobile Drawer Content
   if (isMobile) {

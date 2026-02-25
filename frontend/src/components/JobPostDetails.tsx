@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Briefcase, MapPin, DollarSign, Users, FileText, X } from 'lucide-react';
-import { JobPost } from '@/utils/mockData';
+import type { JobPost } from '@/types';
 
 interface JobPostDetailsProps {
   post: JobPost;

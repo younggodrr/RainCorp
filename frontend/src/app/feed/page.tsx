@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { generateMockPosts, FeedPost } from '@/utils/mockData';
+import { getUserFeed, getPosts } from '@/services/posts';
+import type { Post as FeedPost } from '@/services/posts';
 import LeftPanel from '@/components/LeftPanel';
 import TopNavigation from '@/components/TopNavigation';
 import Toast from '@/components/Toast';
@@ -76,70 +77,50 @@ export default function FeedPage() {
     const fetchPosts = async () => {
       setLoading(true);
       try {
-        const token = localStorage.getItem('accessToken');
-        const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
-        if (!apiUrl) throw new Error('API URL is not defined');
-        
         // Try fetching social feed first (posts from followed users)
         // If that fails or returns empty, fallback to general posts
-        let response = await fetch(`${apiUrl}/social/feed`, {
-          headers: {
-            'accept': '*/*',
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        // If social feed endpoint is not available or fails, fallback to general posts
-        if (!response.ok) {
-           console.warn('Social feed fetch failed, falling back to general posts');
-           response = await fetch(`${apiUrl}/posts?page=1&limit=5`, {
-            headers: {
-              'accept': 'application/json',
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            }
-          });
+        let postsData: FeedPost[] = [];
+        
+        try {
+          postsData = await getUserFeed({ limit: 10, offset: 0 });
+        } catch (error) {
+          console.warn('Social feed fetch failed, falling back to general posts:', error);
+          postsData = await getPosts({ limit: 10, offset: 0 });
         }
         
-        if (!response.ok) {
-          throw new Error('Failed to fetch posts');
-        }
-        const data = await response.json();
-        const postsData = Array.isArray(data) ? data : (data.posts || data.data || []);
-        const mappedPosts = Array.isArray(postsData) ? postsData.map((post: any) => ({
+        // Map backend data to component format
+        const mappedPosts = postsData.map((post) => ({
           id: post.id,
-          type: post.post_type || post.type || 'post',
+          type: post.type?.toLowerCase() || 'regular',
           author: {
-            name: post.author?.username || post.author?.name || 'Unknown',
-            avatar: post.author?.avatar_url || post.author?.avatar || post.author?.image,
-            role: post.author?.role || 'Member'
+            name: post.user?.username || post.user?.fullName || 'Unknown',
+            avatar: post.user?.profilePicture,
+            role: post.user?.verified ? 'Verified' : 'Member'
           },
-          createdAt: post.created_at || post.createdAt,
-          likes: post.likesCount || post.likes || 0,
-          comments: post.commentsCount || post.comments || 0,
+          createdAt: post.createdAt,
+          likes: post.likes || 0,
+          comments: post.comments || 0,
           title: post.title,
           content: post.content,
-          image: post.image,
+          image: post.mediaUrls?.[0],
           company: post.company,
-          description: post.description,
+          description: post.projectDescription,
           location: post.location,
           salary: post.salary,
           tags: post.tags,
           jobType: post.jobType,
-          deadlineProgress: post.deadlineProgress,
-          timeLeft: post.timeLeft,
-          summary: post.summary,
-          source: post.source,
-          url: post.url,
-          imageUrl: post.imageUrl,
-          membersNeeded: post.membersNeeded,
-          requestsSent: post.requestsSent,
-          membersJoined: post.membersJoined
-        })) : [];
-        setPosts(mappedPosts);
+          summary: post.newsTitle,
+          source: post.newsSource,
+          url: post.newsUrl,
+          imageUrl: post.mediaUrls?.[0],
+        }));
+        
+        setPosts(mappedPosts as any);
+        setHasMore(postsData.length >= 10);
       } catch (error) {
         console.error('Error fetching posts:', error);
         setPosts([]);
+        setHasMore(false);
       } finally {
         setLoading(false);
       }
@@ -153,56 +134,41 @@ export default function FeedPage() {
     setLoading(true);
     
     try {
-      const token = localStorage.getItem('accessToken');
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
-      if (!apiUrl) throw new Error('API URL is not defined');
-
-      const nextPage = page + 1;
-      const response = await fetch(`${apiUrl}/posts?page=${nextPage}&limit=5`, {
-        headers: { 
-          'accept': 'application/json',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      if (!response.ok) throw new Error('Failed to fetch more posts');
-      const data = await response.json();
-      const postsData = Array.isArray(data) ? data : (data.posts || data.data || []);
-      if (!Array.isArray(postsData) || postsData.length === 0) {
+      const offset = posts.length;
+      const postsData = await getPosts({ limit: 10, offset });
+      
+      if (postsData.length === 0) {
         setHasMore(false);
       } else {
-        const mappedPosts = postsData.map((post: any) => ({
+        const mappedPosts = postsData.map((post) => ({
           id: post.id,
-          type: post.post_type || post.type || 'post',
+          type: post.type?.toLowerCase() || 'regular',
           author: {
-            name: post.author?.username || post.author?.name || 'Unknown',
-            avatar: post.author?.avatar_url || post.author?.avatar || post.author?.image,
-            role: post.author?.role || 'Member'
+            name: post.user?.username || post.user?.fullName || 'Unknown',
+            avatar: post.user?.profilePicture,
+            role: post.user?.verified ? 'Verified' : 'Member'
           },
-          createdAt: post.created_at || post.createdAt,
-          likes: post.likesCount || post.likes || 0,
-          comments: post.commentsCount || post.comments || 0,
+          createdAt: post.createdAt,
+          likes: post.likes || 0,
+          comments: post.comments || 0,
           title: post.title,
           content: post.content,
-          image: post.image,
+          image: post.mediaUrls?.[0],
           company: post.company,
-          description: post.description,
+          description: post.projectDescription,
           location: post.location,
           salary: post.salary,
           tags: post.tags,
           jobType: post.jobType,
-          deadlineProgress: post.deadlineProgress,
-          timeLeft: post.timeLeft,
-          summary: post.summary,
-          source: post.source,
-          url: post.url,
-          imageUrl: post.imageUrl,
-          membersNeeded: post.membersNeeded,
-          requestsSent: post.requestsSent,
-          membersJoined: post.membersJoined
+          summary: post.newsTitle,
+          source: post.newsSource,
+          url: post.newsUrl,
+          imageUrl: post.mediaUrls?.[0],
         }));
-        setPosts(prev => [...prev, ...mappedPosts]);
+        
+        setPosts(prev => [...prev, ...mappedPosts] as any);
         setPage(prev => prev + 1);
+        setHasMore(postsData.length >= 10);
       }
     } catch (error) {
       console.error('Error loading more posts:', error);
@@ -210,7 +176,7 @@ export default function FeedPage() {
     } finally {
       setLoading(false);
     }
-  }, [loading, hasMore, page]);
+  }, [loading, hasMore, posts.length, page]);
 
   // Observer
   const observer = useRef<IntersectionObserver | null>(null);

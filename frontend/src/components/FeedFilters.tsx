@@ -10,8 +10,6 @@ export interface Tag {
   count?: number;
 }
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
-
 interface FeedFiltersProps {
   activeFilter: string;
   setActiveFilter: (filter: string) => void;
@@ -25,7 +23,8 @@ export default function FeedFilters({ activeFilter, setActiveFilter, isDarkMode 
   useEffect(() => {
     const fetchTags = async () => {
       try {
-        const res = await fetch(`${API_BASE}/tags`);
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        const res = await fetch(`${apiUrl}/api/tags`);
         if (!res.ok) throw new Error('Failed to fetch tags');
         const data = await res.json();
         setTags(data);

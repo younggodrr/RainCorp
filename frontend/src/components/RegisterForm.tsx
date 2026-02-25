@@ -50,69 +50,9 @@ export default function RegisterForm({ isDarkMode, onRegisterSuccess }: Register
     if (!validateForm()) return;
     setIsLoading(true);
     try {
-      // MOCK REGISTER IMPLEMENTATION (Bypassing backend as requested)
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      const data = {
-        jwt: "mock-jwt-token-" + Date.now(),
-        user: {
-          id: Date.now(),
-          username: formData.username,
-          email: formData.email,
-          provider: "local",
-          confirmed: true,
-          blocked: false,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-      };
-
-      console.log('Mock Register success:', data);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       
-      // Store tokens and user data
-      localStorage.setItem('accessToken', data.jwt);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      localStorage.setItem('userid', String(data.user.id));
-      
-      onRegisterSuccess();
-      return;
-
-      /* REAL BACKEND CODE COMMENTED OUT
-      // MOCK REGISTRATION IMPLEMENTATION (Bypassing backend as requested)
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Mock successful response
-      const data = {
-        jwt: "mock-jwt-token-" + Date.now(),
-        user: {
-          id: Date.now(),
-          username: formData.username,
-          email: formData.email,
-          provider: "local",
-          confirmed: true,
-          blocked: false,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-      };
-
-      console.log('Mock Register success:', data);
-      
-      // Store tokens and user data if needed immediately, though usually login handles this
-      // But for better UX, we can auto-login
-      localStorage.setItem('accessToken', data.jwt);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      localStorage.setItem('userid', String(data.user.id));
-
-      onRegisterSuccess();
-      return;
-
-      /* REAL BACKEND CODE COMMENTED OUT
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
-      if (!apiUrl) throw new Error('API URL is not defined');
-      
-      const response = await fetch(`${apiUrl}/auth/register`, {
+      const response = await fetch(`${apiUrl}/api/auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -139,8 +79,25 @@ export default function RegisterForm({ isDarkMode, onRegisterSuccess }: Register
       }
 
       console.log('Register success:', data);
+      
+      // Store tokens and user data for auto-login
+      const responseData = data.data || data;
+      
+      if (responseData.accessToken) localStorage.setItem('accessToken', responseData.accessToken);
+      if (responseData.refreshToken) localStorage.setItem('refreshToken', responseData.refreshToken);
+      
+      const user = responseData.user || {};
+      const userId = user.id || responseData.userId || responseData.id;
+
+      if (userId) {
+        localStorage.setItem('userid', userId);
+      }
+      
+      if (user && Object.keys(user).length > 0) {
+        localStorage.setItem('user', JSON.stringify(user));
+      }
+
       onRegisterSuccess();
-      */
     } catch (error: any) {
       console.error('Register error:', error);
       setErrors({ general: error.message || 'Registration failed. Please try again.' });
@@ -150,41 +107,13 @@ export default function RegisterForm({ isDarkMode, onRegisterSuccess }: Register
   };
 
   const handleGoogleLogin = () => {
-    // MOCK GOOGLE LOGIN
-    const data = {
-      jwt: "mock-google-jwt-" + Date.now(),
-      user: {
-        id: "google-user-" + Date.now(),
-        username: "GoogleUser",
-        email: "google@example.com",
-        provider: "google",
-        confirmed: true,
-        blocked: false
-      }
-    };
-    localStorage.setItem('accessToken', data.jwt);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    localStorage.setItem('userid', String(data.user.id));
-    onRegisterSuccess();
+    // Google OAuth via NextAuth - redirect to sign in
+    window.location.href = '/login?oauth=google';
   };
 
   const handleGithubLogin = () => {
-    // MOCK GITHUB LOGIN
-    const data = {
-      jwt: "mock-github-jwt-" + Date.now(),
-      user: {
-        id: "github-user-" + Date.now(),
-        username: "GithubUser",
-        email: "github@example.com",
-        provider: "github",
-        confirmed: true,
-        blocked: false
-      }
-    };
-    localStorage.setItem('accessToken', data.jwt);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    localStorage.setItem('userid', String(data.user.id));
-    onRegisterSuccess();
+    // GitHub OAuth not yet implemented
+    setErrors({ general: 'GitHub authentication is not yet available. Please use Google or email/password.' });
   };
 
   // Theme constants

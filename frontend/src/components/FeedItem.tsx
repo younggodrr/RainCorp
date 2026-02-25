@@ -15,14 +15,13 @@ import {
   ChevronRight 
 } from 'lucide-react';
 import PostInteractionBar from '@/components/PostInteractionBar';
-import { 
+import type { 
   FeedPost, 
   JobPost, 
   ProjectPost, 
   TechNewsPost, 
-  RegularPost, 
-  generateMockComments 
-} from '@/utils/mockData';
+  RegularPost
+} from '@/types';
 
 interface FeedItemProps {
   post: FeedPost;

@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Eye, EyeOff, Mail, Lock, Sun, Moon, Github, Chrome, ArrowLeft } from 'lucide-react';
+import { signIn } from 'next-auth/react';
 import TopNavigation from '@/components/TopNavigation';
+import { clearMockSessionData } from '@/utils/clearMockData';
 
 export default function LoginPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -16,11 +18,16 @@ export default function LoginPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
 
   // Handle theme persistence
   useEffect(() => {
     setMounted(true);
+    
+    // Clear any old mock session data on mount
+    clearMockSessionData();
+    
     const savedTheme = localStorage.getItem('theme');
     // Default to dark mode if no preference, or check system preference
     if (savedTheme === 'dark') {
@@ -61,42 +68,9 @@ export default function LoginPage() {
     if (!validateForm()) return;
     setIsLoading(true);
     try {
-      // MOCK LOGIN IMPLEMENTATION (Bypassing backend as requested)
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      // Mock successful response
-      // You can add logic here to validate specific mock credentials if needed
-      const data = {
-        jwt: "mock-jwt-token-" + Date.now(),
-        user: {
-          id: 1,
-          username: formData.email.split('@')[0],
-          email: formData.email,
-          provider: "local",
-          confirmed: true,
-          blocked: false,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        }
-      };
-
-      console.log('Mock Login successful:', data);
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
       
-      // Store tokens and user data
-      localStorage.setItem('accessToken', data.jwt);
-      localStorage.setItem('user', JSON.stringify(data.user));
-      localStorage.setItem('userid', String(data.user.id));
-
-      // Redirect to feed
-      window.location.href = '/feed';
-      return;
-
-      /* REAL BACKEND CODE COMMENTED OUT
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
-      if (!apiUrl) throw new Error('API URL is not defined');
-      
-      const response = await fetch(`${apiUrl}/auth/login`, {
+      const response = await fetch(`${apiUrl}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -121,16 +95,12 @@ export default function LoginPage() {
         throw new Error(data.message || 'Login failed');
       }
 
-      // Store token if needed, or handle session
       console.log('Login successful:', data);
       
       // Store tokens and user data
-      // Handle the nested data structure from your response
-      const responseData = data.data || data; // Check if wrapped in "data"
+      const responseData = data.data || data;
       
       if (responseData.accessToken) localStorage.setItem('accessToken', responseData.accessToken);
-      else if (responseData.token) localStorage.setItem('accessToken', responseData.token);
-      
       if (responseData.refreshToken) localStorage.setItem('refreshToken', responseData.refreshToken);
       
       const user = responseData.user || {};
@@ -143,14 +113,12 @@ export default function LoginPage() {
       if (user && Object.keys(user).length > 0) {
         localStorage.setItem('user', JSON.stringify(user));
       } else {
-        // Fallback: create minimal user object from what we have
         const fallbackUser = { id: userId, email: formData.email };
         localStorage.setItem('user', JSON.stringify(fallbackUser));
       }
 
-      // Redirect based on user role or default to feed
+      // Redirect to feed
       window.location.href = '/feed';
-      */
     } catch (err: any) {
       console.error('Login error:', err);
       setErrors({ form: err.message || 'Something went wrong. Please try again.' });
@@ -159,52 +127,45 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleLogin = () => {
-    // MOCK GOOGLE LOGIN
-    const data = {
-      jwt: "mock-google-jwt-" + Date.now(),
-      user: {
-        id: "google-user-" + Date.now(),
-        username: "GoogleUser",
-        email: "google@example.com",
-        provider: "google",
-        confirmed: true,
-        blocked: false
+  const handleGoogleLogin = async () => {
+    try {
+      setIsGoogleLoading(true);
+      setErrors({});
+      
+      // Check if backend is reachable before attempting OAuth
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      try {
+        const healthCheck = await fetch(`${apiUrl}/health`, { method: 'GET' });
+        if (!healthCheck.ok) {
+          throw new Error('Backend server is not responding');
+        }
+      } catch (healthError) {
+        setErrors({ 
+          form: 'Cannot connect to backend server. Please ensure the backend is running on port 5000.' 
+        });
+        setIsGoogleLoading(false);
+        return;
       }
-    };
-    localStorage.setItem('accessToken', data.jwt);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    localStorage.setItem('userid', String(data.user.id));
-    window.location.href = '/feed';
-    
-    /* REAL BACKEND
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
-    window.location.href = `${apiUrl}/auth/social/google`;
-    */
+      
+      // Trigger NextAuth Google sign-in with redirect
+      // This will open Google's OAuth popup
+      await signIn('google', {
+        callbackUrl: '/auth/callback',
+      });
+      
+      // Note: If we reach here, sign-in was cancelled or failed
+      // The page will redirect on success, so we only handle errors
+      setIsGoogleLoading(false);
+    } catch (err: any) {
+      console.error('Google sign-in error:', err);
+      setErrors({ form: err.message || 'Connection error. Please try again.' });
+      setIsGoogleLoading(false);
+    }
   };
 
   const handleGithubLogin = () => {
-    // MOCK GITHUB LOGIN
-    const data = {
-      jwt: "mock-github-jwt-" + Date.now(),
-      user: {
-        id: "github-user-" + Date.now(),
-        username: "GithubUser",
-        email: "github@example.com",
-        provider: "github",
-        confirmed: true,
-        blocked: false
-      }
-    };
-    localStorage.setItem('accessToken', data.jwt);
-    localStorage.setItem('user', JSON.stringify(data.user));
-    localStorage.setItem('userid', String(data.user.id));
-    window.location.href = '/feed';
-
-    /* REAL BACKEND
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
-    window.location.href = `${apiUrl}/auth/social/github`;
-    */
+    // GitHub OAuth not yet implemented
+    setErrors({ form: 'GitHub authentication is not yet available. Please use Google or email/password.' });
   };
 
 
@@ -295,6 +256,12 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {errors.form && (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-500 text-sm text-center">
+              {errors.form}
+            </motion.div>
+          )}
+
           {errors.general && (
             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="bg-red-500/10 border border-red-500/20 rounded-lg p-3 text-red-500 text-sm text-center">
               {errors.general}
@@ -392,10 +359,17 @@ export default function LoginPage() {
             <button 
               type="button" 
               onClick={handleGoogleLogin}
-              className={`flex items-center justify-center gap-2 py-2.5 rounded-full border border-transparent transition-all ${theme.socialBtn}`}
+              disabled={isGoogleLoading}
+              className={`flex items-center justify-center gap-2 py-2.5 rounded-full border border-transparent transition-all ${theme.socialBtn} disabled:opacity-70 disabled:cursor-not-allowed`}
             >
-              <Chrome className="w-5 h-5" />
-              <span className="font-medium text-sm">Google</span>
+              {isGoogleLoading ? (
+                <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
+              ) : (
+                <>
+                  <Chrome className="w-5 h-5" />
+                  <span className="font-medium text-sm">Google</span>
+                </>
+              )}
             </button>
             <button
             onClick={handleGithubLogin}

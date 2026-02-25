@@ -3,8 +3,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Briefcase, Users, Bug } from 'lucide-react';
-import MagnaNewIcon from '@/components/MagnaNewIcon';
+import MagnaAiGreeting from '@/components/MagnaAiGreeting';
 import MagnaChatInput from './MagnaChatInput';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface MagnaWelcomeScreenProps {
   userName?: string;
@@ -25,18 +26,12 @@ export default function MagnaWelcomeScreen({
   handleServiceClick,
   inputRef
 }: MagnaWelcomeScreenProps) {
+  const { token } = useAuth();
+
   return (
     <div className="flex-1 overflow-y-auto px-6 md:px-8 pt-20 md:pt-24 pb-40 md:pb-8 flex flex-col items-start justify-start w-full max-w-4xl mx-auto gap-8">
-      {/* Greeting */}
-      <div className="w-full text-left">
-        <h1 className="text-2xl md:text-3xl font-medium tracking-tight mb-4 text-[#F4A261] flex items-center gap-2">
-          <MagnaNewIcon className="w-8 h-8 text-[#E50914]" />
-          <span className="font-bold">Hi <span className="text-[#E50914]">{userName}</span></span>
-        </h1>
-        <p className={`text-2xl md:text-4xl font-medium leading-snug break-words max-w-full ${isDarkMode ? 'text-[#F4A261]' : 'text-[#E50914]'}`}>
-          I help you solve technical problems, design systems, write code, and turn ideas into working software — fast.
-        </p>
-      </div>
+      {/* Greeting with real user context */}
+      <MagnaAiGreeting isDarkMode={isDarkMode} authToken={token || undefined} />
 
       {/* Desktop Input Area */}
       <div className="hidden md:block w-full">

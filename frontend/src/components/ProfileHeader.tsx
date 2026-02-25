@@ -64,7 +64,7 @@ export default function ProfileHeader({ user, isDarkMode, isFromNav }: ProfileHe
           
           {/* Social Links */}
           <div className="flex items-center justify-center md:justify-start gap-3 mt-4">
-             {user.socials?.map((social, index) => {
+             {user.socials && user.socials.length > 0 && user.socials.map((social, index) => {
                const Icon = social.name === 'GitHub' ? Github : 
                             social.name === 'LinkedIn' ? Linkedin : Globe;
                return (

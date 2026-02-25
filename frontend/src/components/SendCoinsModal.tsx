@@ -1,8 +1,14 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Wallet, Send, User, Users, Search, Check } from 'lucide-react';
-import { MOCK_FRIENDS } from '../utils/friendsData';
+
+interface Friend {
+  id: string;
+  name: string;
+  username?: string;
+  avatar?: string;
+}
 
 interface SendCoinsModalProps {
   isOpen: boolean;
@@ -31,8 +37,50 @@ export default function SendCoinsModal({
   const [note, setNote] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [friendSearch, setFriendSearch] = useState('');
+  const [friends, setFriends] = useState<Friend[]>([]);
+  const [loadingFriends, setLoadingFriends] = useState(false);
   
-  const currentBalance = balance; 
+  const currentBalance = balance;
+
+  // Fetch friends from API when in friend mode
+  useEffect(() => {
+    if (mode === 'friend' && friends.length === 0) {
+      fetchFriends();
+    }
+  }, [mode]);
+
+  const fetchFriends = async () => {
+    setLoadingFriends(true);
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+      const userId = localStorage.getItem('userid');
+      
+      if (!userId) {
+        console.warn('No user ID found');
+        return;
+      }
+
+      const response = await fetch(`${apiUrl}/api/social/following/${userId}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+        }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setFriends(data.map((user: any) => ({
+          id: user.id,
+          name: user.username || 'Unknown',
+          username: user.username,
+          avatar: user.avatar_url
+        })));
+      }
+    } catch (error) {
+      console.error('Failed to fetch friends:', error);
+    } finally {
+      setLoadingFriends(false);
+    }
+  }; 
 
   const handleSend = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,12 +103,12 @@ export default function SendCoinsModal({
     }
   };
 
-  const filteredFriends = MOCK_FRIENDS.filter(friend => 
+  const filteredFriends = friends.filter(friend => 
     friend.name.toLowerCase().includes(friendSearch.toLowerCase()) || 
     friend.username?.toLowerCase().includes(friendSearch.toLowerCase())
   );
 
-  const selectFriend = (friend: typeof MOCK_FRIENDS[0]) => {
+  const selectFriend = (friend: Friend) => {
     setRecipientId(friend.username || friend.id.toString());
     setMode('manual'); // Switch back to manual view to show selected recipient
   };
@@ -245,7 +293,11 @@ export default function SendCoinsModal({
 
               {/* Friends List */}
               <div className="flex-1 overflow-y-auto space-y-2 pr-2">
-                {filteredFriends.length > 0 ? (
+                {loadingFriends ? (
+                  <div className="text-center py-8 text-gray-500 text-sm">
+                    Loading friends...
+                  </div>
+                ) : filteredFriends.length > 0 ? (
                   filteredFriends.map(friend => (
                     <button
                       key={friend.id}
@@ -276,7 +328,7 @@ export default function SendCoinsModal({
                   ))
                 ) : (
                   <div className="text-center py-8 text-gray-500 text-sm">
-                    No friends found matching "{friendSearch}"
+                    {friendSearch ? `No friends found matching "${friendSearch}"` : 'No friends yet. Start following people!'}
                   </div>
                 )}
               </div>

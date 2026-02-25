@@ -1,6 +1,6 @@
 import React from 'react';
 import { Globe } from 'lucide-react';
-import { FeedPost } from '@/utils/mockData';
+import type { FeedPost } from '@/types';
 
 interface PostHeaderProps {
   post: FeedPost;

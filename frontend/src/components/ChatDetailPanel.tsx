@@ -1,6 +1,6 @@
 import React from 'react';
 import { Phone, Video } from 'lucide-react';
-import { Conversation } from '@/utils/mockData';
+import type { Conversation } from '@/types';
 
 interface ChatDetailPanelProps {
   selectedChat: Conversation;

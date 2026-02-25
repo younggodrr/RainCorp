@@ -2,9 +2,8 @@
 
 import React, { useState, useMemo, useRef, useCallback } from 'react';
 import { Heart, MessageSquare, Share2, Send, Edit2, Trash2, Reply } from 'lucide-react';
-import { Comment } from '@/utils/mockData';
+import type { Comment } from '@/types';
 import Image from 'next/image';
-// import { commentService } from '@/services/commentService'; // REMOVED
 
 const USE_REAL_API = true;
 const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
