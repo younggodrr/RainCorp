@@ -12,9 +12,11 @@ import {
   DollarSign, 
   Users, 
   Send, 
-  ChevronRight 
+  ChevronRight,
+  Trash2
 } from 'lucide-react';
 import PostInteractionBar from '@/components/PostInteractionBar';
+import { deletePost } from '@/services/posts';
 import type { 
   FeedPost, 
   JobPost, 
@@ -26,13 +28,26 @@ import type {
 interface FeedItemProps {
   post: FeedPost;
   onRequestJoin?: (authorName: string) => void;
+  onDelete?: (postId: string) => void;
   isDarkMode?: boolean;
 }
 
-export default function FeedItem({ post, onRequestJoin, isDarkMode }: FeedItemProps) {
+export default function FeedItem({ post, onRequestJoin, onDelete, isDarkMode }: FeedItemProps) {
   const router = useRouter();
   const [isRequestSent, setIsRequestSent] = useState(false);
   const [isApplied, setIsApplied] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isOwner, setIsOwner] = useState(false);
+
+  // Check if current user owns this post
+  useEffect(() => {
+    // Check both userId and userid for compatibility
+    const userId = localStorage.getItem('userId') || localStorage.getItem('userid');
+    if (userId && post.author?.id === userId) {
+      setIsOwner(true);
+    }
+  }, [post.author?.id]);
 
   // Move hooks to top level to avoid conditional hook calls
   const jobPost = post.type === 'job' ? post as JobPost : null;
@@ -119,6 +134,27 @@ export default function FeedItem({ post, onRequestJoin, isDarkMode }: FeedItemPr
     }
   };
 
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!confirm('Are you sure you want to delete this post?')) {
+      return;
+    }
+
+    setIsDeleting(true);
+    try {
+      await deletePost(post.id);
+      onDelete?.(post.id);
+    } catch (error) {
+      console.error('Error deleting post:', error);
+      alert('Failed to delete post. Please try again.');
+    } finally {
+      setIsDeleting(false);
+      setShowMenu(false);
+    }
+  };
+
   const cardClassName = `block rounded-2xl p-4 md:p-6 shadow-sm mt-6 cursor-pointer hover:shadow-md transition-all text-left w-full ${isDarkMode ? 'bg-[#111] border border-[#E70008]/20 shadow-[0_0_15px_rgba(231,0,8,0.1)] text-[#F4A261]' : 'bg-white'}`;
 
   // Job Post
@@ -129,8 +165,12 @@ export default function FeedItem({ post, onRequestJoin, isDarkMode }: FeedItemPr
         <Link href={`/post/${post.id}`} className={cardClassName}>
           <div className="flex items-start justify-between mb-4">
             <div className="flex gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm">
-                {post.author.name.charAt(0)}
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm overflow-hidden relative">
+                {post.author.avatar ? (
+                  <Image src={post.author.avatar} alt={post.author.name} fill sizes="40px" className="object-cover" />
+                ) : (
+                  post.author.name.charAt(0)
+                )}
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -144,8 +184,30 @@ export default function FeedItem({ post, onRequestJoin, isDarkMode }: FeedItemPr
                 </div>
               </div>
             </div>
-            <div role="button" className="text-gray-400 hover:text-black" onClick={e => e.preventDefault()}>
-              <MoreHorizontal size={20} />
+            <div className="relative">
+              <div 
+                role="button" 
+                className="text-gray-400 hover:text-black cursor-pointer" 
+                onClick={(e) => { 
+                  e.preventDefault(); 
+                  e.stopPropagation();
+                  if (isOwner) setShowMenu(!showMenu);
+                }}
+              >
+                <MoreHorizontal size={20} />
+              </div>
+              {isOwner && showMenu && (
+                <div className="absolute right-0 top-8 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-10 min-w-[150px]">
+                  <button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 disabled:opacity-50"
+                  >
+                    <Trash2 size={16} />
+                    {isDeleting ? 'Deleting...' : 'Delete Post'}
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
@@ -232,8 +294,12 @@ export default function FeedItem({ post, onRequestJoin, isDarkMode }: FeedItemPr
         <Link href={`/post/${post.id}`} className={cardClassName}>
           <div className="flex items-start justify-between mb-4">
             <div className="flex gap-3">
-              <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center overflow-hidden relative">
-                 <Image src="/api/placeholder/40/40" alt="User" fill sizes="40px" className="object-cover" />
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm overflow-hidden relative">
+                {post.author.avatar ? (
+                  <Image src={post.author.avatar} alt={post.author.name} fill sizes="40px" className="object-cover" />
+                ) : (
+                  post.author.name.charAt(0)
+                )}
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -324,14 +390,29 @@ export default function FeedItem({ post, onRequestJoin, isDarkMode }: FeedItemPr
           
           {news.imageUrl && (
             <div className={`w-full h-48 md:h-64 rounded-xl overflow-hidden mb-4 relative group cursor-pointer ${isDarkMode ? 'bg-[#222]' : 'bg-gray-100'}`}>
-              <Image 
-                src={news.imageUrl} 
-                alt={news.title} 
-                fill
-                sizes="(max-width: 768px) 100vw, 768px"
-                className="object-cover transition-transform duration-700 group-hover:scale-105" 
-              />
-              <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+              {news.imageUrl.startsWith('data:') ? (
+                // Use regular img tag for base64 data URLs
+                <>
+                  <img 
+                    src={news.imageUrl} 
+                    alt={news.title} 
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" 
+                  />
+                  <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+                </>
+              ) : (
+                // Use Next.js Image for external URLs
+                <>
+                  <Image 
+                    src={news.imageUrl} 
+                    alt={news.title} 
+                    fill
+                    sizes="(max-width: 768px) 100vw, 768px"
+                    className="object-cover transition-transform duration-700 group-hover:scale-105" 
+                  />
+                  <div className="absolute inset-0 bg-black/10 group-hover:bg-black/0 transition-colors" />
+                </>
+              )}
             </div>
           )}
         </div>
@@ -339,7 +420,6 @@ export default function FeedItem({ post, onRequestJoin, isDarkMode }: FeedItemPr
         <PostInteractionBar 
            initialLikes={post.likes} 
            initialComments={post.comments} 
-           initialCommentsData={generateMockComments(post.id, post.comments)}
            postId={post.id}
         >
              <button 
@@ -360,8 +440,12 @@ export default function FeedItem({ post, onRequestJoin, isDarkMode }: FeedItemPr
         <Link href={`/post/${post.id}`} className={cardClassName}>
           <div className="flex items-start justify-between mb-4">
             <div className="flex gap-3">
-              <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center overflow-hidden relative">
-                 <Image src="/api/placeholder/40/40" alt="User" fill sizes="40px" className="object-cover" />
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm overflow-hidden relative">
+                {post.author.avatar ? (
+                  <Image src={post.author.avatar} alt={post.author.name} fill sizes="40px" className="object-cover" />
+                ) : (
+                  post.author.name.charAt(0)
+                )}
               </div>
               <div>
                 <div className="flex items-center gap-2">
@@ -378,14 +462,46 @@ export default function FeedItem({ post, onRequestJoin, isDarkMode }: FeedItemPr
           </div>
 
           <div className="mb-4">
-            <h3 className={`font-bold text-lg mb-2 ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>{regular.title}</h3>
-            <p className={`leading-relaxed mb-4 ${isDarkMode ? 'text-[#F4A261]' : 'text-gray-600'}`}>
-              {regular.content}
-            </p>
+            {regular.title && <h3 className={`font-bold text-lg mb-2 ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>{regular.title}</h3>}
+            {regular.content && (
+              <p className={`leading-relaxed mb-4 ${isDarkMode ? 'text-[#F4A261]' : 'text-gray-600'}`}>
+                {regular.content}
+              </p>
+            )}
             
             {regular.image && (
-                <div className={`w-full h-64 md:h-80 rounded-xl overflow-hidden mb-2 border border-gray-100 relative ${isDarkMode ? 'bg-[#222] border-gray-700' : 'bg-gray-100 border-gray-100'}`}>
-                   <Image src={regular.image} alt="Post Content" fill sizes="(max-width: 768px) 100vw, 768px" className="object-cover hover:scale-105 transition-transform duration-500" />
+                <div className={`w-full h-64 md:h-80 rounded-xl overflow-hidden mb-2 border ${isDarkMode ? 'bg-[#222] border-gray-700' : 'bg-gray-100 border-gray-100'}`}>
+                   {regular.image.startsWith('data:video/') ? (
+                     // Video display
+                     <video 
+                       src={regular.image} 
+                       controls 
+                       className="w-full h-full object-cover"
+                       onError={(e) => console.error('Video load error:', e)}
+                     />
+                   ) : regular.image.startsWith('data:') ? (
+                     // Use regular img tag for base64 image data URLs
+                     <img 
+                       src={regular.image} 
+                       alt="Post Content" 
+                       className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
+                       onError={(e) => {
+                         console.error('Image load error:', e);
+                         console.log('Image data length:', regular.image.length);
+                         console.log('Image data prefix:', regular.image.substring(0, 50));
+                       }}
+                     />
+                   ) : (
+                     // Use Next.js Image for external URLs
+                     <Image 
+                       src={regular.image} 
+                       alt="Post Content" 
+                       fill 
+                       sizes="(max-width: 768px) 100vw, 768px" 
+                       className="object-cover hover:scale-105 transition-transform duration-500"
+                       onError={(e) => console.error('Next.js Image load error:', e)}
+                     />
+                   )}
                 </div>
             )}
           </div>
@@ -393,7 +509,6 @@ export default function FeedItem({ post, onRequestJoin, isDarkMode }: FeedItemPr
           <PostInteractionBar 
              initialLikes={post.likes} 
              initialComments={post.comments} 
-             initialCommentsData={generateMockComments(post.id, post.comments)}
              postId={post.id} 
           />
         </Link>

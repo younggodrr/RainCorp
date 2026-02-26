@@ -6,11 +6,9 @@
 export function clearMockSessionData() {
   if (typeof window === 'undefined') return;
   
+  // Only clear theme, not authentication tokens
+  // Authentication tokens should only be cleared on explicit logout
   const keysToRemove = [
-    'accessToken',
-    'refreshToken',
-    'userid',
-    'user',
     'theme'
   ];
   

@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { ToggleLeft, ToggleRight } from 'lucide-react';
 
-export function InputField({ label, type = "text", defaultValue, placeholder, isDarkMode, onChange, name }: { label: string; type?: string; defaultValue?: string; placeholder?: string; isDarkMode?: boolean; onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void; name?: string }) {
+export function InputField({ label, type = "text", value, defaultValue, placeholder, isDarkMode, onChange, name, disabled }: { label: string; type?: string; value?: string; defaultValue?: string; placeholder?: string; isDarkMode?: boolean; onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void; name?: string; disabled?: boolean }) {
   return (
     <div className="space-y-2">
       <label className={`text-sm font-semibold ${isDarkMode ? 'text-[#F4A261]' : 'text-gray-700'}`}>{label}</label>
       <input 
         name={name}
         type={type}  
+        value={value}
         defaultValue={defaultValue}
         placeholder={placeholder}
         onChange={onChange}
-        className={`w-full px-4 py-3 rounded-xl border focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm ${
+        disabled={disabled}
+        className={`w-full px-4 py-3 rounded-xl border focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm disabled:opacity-50 disabled:cursor-not-allowed ${
           isDarkMode ? 'bg-[#222] border-gray-700 text-[#F4A261] placeholder-gray-600' : 'bg-gray-50 border-gray-100 text-black'
         }`}
       />

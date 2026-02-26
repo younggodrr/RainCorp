@@ -82,16 +82,29 @@ export default function PostEditor({
         </div>
       )}
 
-      {/* Image Preview */}
+      {/* Image/Video Preview */}
       {selectedImage && (
         <div className="relative mt-4 rounded-xl overflow-hidden group">
-          <Image 
-            src={selectedImage} 
-            alt="Preview" 
-            width={600} 
-            height={400} 
-            className="w-full h-auto max-h-[500px] object-cover rounded-xl border border-gray-100" 
-          />
+          {selectedImage.startsWith('data:video/') ? (
+            // Video preview
+            <video 
+              src={selectedImage} 
+              controls 
+              className="w-full h-auto max-h-[500px] rounded-xl border border-gray-100"
+              onError={(e) => console.error('Video preview error:', e)}
+            />
+          ) : (
+            // Image preview - use regular img tag for base64
+            <img
+              src={selectedImage}
+              alt="Preview"
+              className="w-full h-auto max-h-[500px] object-cover rounded-xl border border-gray-100"
+              onError={(e) => {
+                console.error('Image preview error:', e);
+                console.log('Preview image length:', selectedImage.length);
+              }}
+            />
+          )}
           <button 
             onClick={() => setSelectedImage(null)}
             className="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded-full hover:bg-black/80 transition-all backdrop-blur-sm"

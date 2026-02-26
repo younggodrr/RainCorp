@@ -34,7 +34,6 @@ export default function TechNewsPostDetail({ post }: TechNewsPostDetailProps) {
       <PostInteractionBar 
         initialLikes={post.likes} 
         initialComments={post.comments} 
-        initialCommentsData={generateMockComments(post.id, post.comments)} 
         postId={post.id} 
       />
 

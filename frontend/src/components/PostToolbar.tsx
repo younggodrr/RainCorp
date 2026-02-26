@@ -53,7 +53,7 @@ export default function PostToolbar({
           <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'text-[#E50914] hover:bg-[#E50914]/20' : 'text-[#E50914] hover:bg-[#E50914]/10'}`} title="Add Image" onClick={() => fileInputRef.current?.click()}>
             <ImageIcon size={22} />
           </button>
-          <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'text-gray-400 hover:bg-[#222] hover:text-[#E50914]' : 'text-gray-500 hover:bg-gray-100 hover:text-[#E50914]'}`} title="Add Video">
+          <button className={`p-2 rounded-full transition-colors ${isDarkMode ? 'text-[#E50914] hover:bg-[#E50914]/20' : 'text-[#E50914] hover:bg-[#E50914]/10'}`} title="Add Video" onClick={() => fileInputRef.current?.click()}>
             <Video size={22} />
           </button>
           <button 
@@ -105,7 +105,7 @@ export default function PostToolbar({
         <div className="flex items-center gap-2">
           <input 
             type="file" 
-            accept="image/*" 
+            accept="image/*,video/*" 
             className="hidden" 
             ref={fileInputRef}
             onChange={onImageSelect}

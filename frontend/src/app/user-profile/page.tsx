@@ -42,10 +42,11 @@ function UserProfileContent() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const userId = searchParams?.get('id') || localStorage.getItem('userid');
+        // Check both userId and userid for compatibility
+        const userId = searchParams?.get('id') || localStorage.getItem('userId') || localStorage.getItem('userid');
         if (userId) {
           const token = localStorage.getItem('accessToken');
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/auth/profile/${userId}`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/auth/profile/${userId}`, {
             method: 'GET',
             headers: {
               'Accept': 'application/json',
@@ -54,19 +55,24 @@ function UserProfileContent() {
           });
           
           if (response.ok) {
-            const profileData = await response.json();
-            console.log('Fetched profile:', profileData);
+            const result = await response.json();
+            console.log('Fetched profile:', result);
+            
+            // Extract user data from response
+            const profileData = result.data || result;
             
             // Map backend data to frontend structure
             setUserData(prevData => ({
               ...prevData,
-              name: profileData.name || prevData.name,
-              username: profileData.username || profileData.email || prevData.username,
+              name: profileData.username || profileData.email?.split('@')[0] || prevData.name,
+              username: profileData.username ? `@${profileData.username}` : (profileData.email ? `@${profileData.email.split('@')[0]}` : prevData.username),
               role: profileData.role || prevData.role,
               location: profileData.location || prevData.location,
               bio: profileData.bio || prevData.bio,
               // Update other fields if backend provides them
             }));
+          } else {
+            console.error('Profile fetch failed:', response.status, response.statusText);
           }
         }
       } catch (err) {

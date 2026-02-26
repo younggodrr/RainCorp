@@ -7,6 +7,7 @@ import type { Post as FeedPost } from '@/services/posts';
 import LeftPanel from '@/components/LeftPanel';
 import TopNavigation from '@/components/TopNavigation';
 import Toast from '@/components/Toast';
+import { formatTimeAgo } from '@/utils/timeFormat';
 import FeedItem from '@/components/FeedItem';
 import MobileDrawer from '@/components/MobileDrawer';
 import InactiveAccountAlert from '@/components/InactiveAccountAlert';
@@ -77,48 +78,68 @@ export default function FeedPage() {
     const fetchPosts = async () => {
       setLoading(true);
       try {
-        // Try fetching social feed first (posts from followed users)
-        // If that fails or returns empty, fallback to general posts
-        let postsData: FeedPost[] = [];
-        
-        try {
-          postsData = await getUserFeed({ limit: 10, offset: 0 });
-        } catch (error) {
-          console.warn('Social feed fetch failed, falling back to general posts:', error);
-          postsData = await getPosts({ limit: 10, offset: 0 });
-        }
+        console.log('Fetching posts from backend...');
+        const postsData = await getPosts({ limit: 10, offset: 0 });
+        console.log('Successfully fetched posts:', postsData.length);
+        console.log('Raw posts data:', JSON.stringify(postsData, null, 2));
         
         // Map backend data to component format
-        const mappedPosts = postsData.map((post) => ({
-          id: post.id,
-          type: post.type?.toLowerCase() || 'regular',
-          author: {
-            name: post.user?.username || post.user?.fullName || 'Unknown',
-            avatar: post.user?.profilePicture,
-            role: post.user?.verified ? 'Verified' : 'Member'
-          },
-          createdAt: post.createdAt,
-          likes: post.likes || 0,
-          comments: post.comments || 0,
-          title: post.title,
-          content: post.content,
-          image: post.mediaUrls?.[0],
-          company: post.company,
-          description: post.projectDescription,
-          location: post.location,
-          salary: post.salary,
-          tags: post.tags,
-          jobType: post.jobType,
-          summary: post.newsTitle,
-          source: post.newsSource,
-          url: post.newsUrl,
-          imageUrl: post.mediaUrls?.[0],
-        }));
+        const mappedPosts = postsData.map((post) => {
+          const mapped = {
+            id: post.id,
+            type: (post.type?.toLowerCase() === 'regular' ? 'regular' : post.type?.toLowerCase()) || 'regular',
+            author: {
+              id: post.userId || post.user?.id,
+              name: post.user?.username || post.author?.username || 'Unknown User',
+              avatar: post.user?.profilePicture || post.author?.avatar_url,
+              role: post.user?.verified ? 'Verified' : 'Member'
+            },
+            createdAt: formatTimeAgo(post.createdAt || post.created_at),
+            likes: post.likesCount || post.likes || 0,
+            comments: post.commentsCount || post.comments || 0,
+            title: post.title,
+            content: post.content,
+            image: post.mediaUrls?.[0],
+            company: post.company,
+            description: post.projectDescription,
+            location: post.location,
+            salary: post.salary,
+            tags: post.tags,
+            jobType: post.jobType,
+            summary: post.newsTitle,
+            source: post.newsSource,
+            url: post.newsUrl,
+            imageUrl: post.mediaUrls?.[0],
+          };
+          
+          console.log(`Post ${post.id}:`, {
+            hasMediaUrls: !!post.mediaUrls,
+            mediaUrlsLength: post.mediaUrls?.length,
+            firstMediaUrl: post.mediaUrls?.[0] ? `${post.mediaUrls[0].substring(0, 100)}...` : 'none',
+            mappedImage: mapped.image ? `${mapped.image.substring(0, 100)}...` : 'none'
+          });
+          
+          return mapped;
+        });
         
+        // Debug: Log image data
+        mappedPosts.forEach((post, index) => {
+          if (post.image) {
+            console.log(`Post ${index} has image:`, {
+              hasImage: !!post.image,
+              imageType: post.image.startsWith('data:video/') ? 'video' : post.image.startsWith('data:image/') ? 'image' : 'unknown',
+              imageLength: post.image.length,
+              imagePrefix: post.image.substring(0, 50)
+            });
+          }
+        });
+        
+        console.log('Mapped posts:', mappedPosts.length);
         setPosts(mappedPosts as any);
         setHasMore(postsData.length >= 10);
-      } catch (error) {
-        console.error('Error fetching posts:', error);
+      } catch (error: any) {
+        console.error('Error fetching posts:', error.message);
+        showToast('Unable to load feed. Please check if the backend server is running.');
         setPosts([]);
         setHasMore(false);
       } finally {
@@ -142,15 +163,16 @@ export default function FeedPage() {
       } else {
         const mappedPosts = postsData.map((post) => ({
           id: post.id,
-          type: post.type?.toLowerCase() || 'regular',
+          type: (post.type?.toLowerCase() === 'regular' ? 'regular' : post.type?.toLowerCase()) || 'regular',
           author: {
-            name: post.user?.username || post.user?.fullName || 'Unknown',
-            avatar: post.user?.profilePicture,
+            id: post.userId || post.user?.id,
+            name: post.user?.username || post.author?.username || 'Unknown User',
+            avatar: post.user?.profilePicture || post.author?.avatar_url,
             role: post.user?.verified ? 'Verified' : 'Member'
           },
           createdAt: post.createdAt,
-          likes: post.likes || 0,
-          comments: post.comments || 0,
+          likes: post.likesCount || post.likes || 0,
+          comments: post.commentsCount || post.comments || 0,
           title: post.title,
           content: post.content,
           image: post.mediaUrls?.[0],
@@ -176,7 +198,7 @@ export default function FeedPage() {
     } finally {
       setLoading(false);
     }
-  }, [loading, hasMore, posts.length, page]);
+  }, [loading, hasMore, posts.length]);
 
   // Observer
   const observer = useRef<IntersectionObserver | null>(null);
@@ -199,6 +221,11 @@ export default function FeedPage() {
     if (activeFilter === 'Tech News') return post.type === 'tech-news';
     return true;
   });
+
+  const handleDeletePost = (postId: string) => {
+    setPosts(prev => prev.filter(p => p.id !== postId));
+    showToast('Post deleted successfully');
+  };
 
   return (
     <div className={`min-h-screen font-sans flex transition-colors duration-300 ${isDarkMode ? 'bg-black text-[#F9E4AD]' : 'bg-[#FDF8F5] text-[#444444]'}`}>
@@ -256,6 +283,18 @@ export default function FeedPage() {
           />
         </div>
 
+        {filteredPosts.length === 0 && !loading && (
+          <div className={`text-center py-16 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+            <div className="mb-4">
+              <svg className="w-16 h-16 mx-auto opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-semibold mb-2">No posts yet</h3>
+            <p className="text-sm">Be the first to share something with the community!</p>
+          </div>
+        )}
+
         {filteredPosts.map((post, index) => {
           if (filteredPosts.length === index + 1) {
              return (
@@ -263,6 +302,7 @@ export default function FeedPage() {
                  <FeedItem 
                    post={post} 
                    onRequestJoin={(authorName) => showToast(post.type === 'job' ? `Application sent to ${authorName}!` : `Request sent. ${authorName} will review your request.`)} 
+                   onDelete={handleDeletePost}
                    isDarkMode={isDarkMode} 
                  />
                </div>
@@ -273,6 +313,7 @@ export default function FeedPage() {
                  <FeedItem 
                    post={post} 
                    onRequestJoin={(authorName) => showToast(post.type === 'job' ? `Application sent to ${authorName}!` : `Request sent. ${authorName} will review your request.`)} 
+                   onDelete={handleDeletePost}
                    isDarkMode={isDarkMode} 
                  />
                </div>

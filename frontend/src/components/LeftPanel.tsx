@@ -46,6 +46,42 @@ export default function LeftPanel({
   toggleTheme
 }: LeftPanelProps) {
   const router = useRouter();
+  const [userName, setUserName] = React.useState('Loading...');
+  const [userRole, setUserRole] = React.useState('Developer');
+  const [userAvatar, setUserAvatar] = React.useState<string | null>(null);
+
+  // Fetch user profile data
+  React.useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        // Check both userId and userid for compatibility
+        const userId = localStorage.getItem('userId') || localStorage.getItem('userid');
+        const token = localStorage.getItem('accessToken');
+        
+        if (userId && token) {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/auth/profile/${userId}`, {
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Accept': 'application/json'
+            }
+          });
+          
+          if (response.ok) {
+            const result = await response.json();
+            const profileData = result.data || result;
+            
+            setUserName(profileData.username || profileData.email?.split('@')[0] || 'User');
+            setUserRole(profileData.role || 'Developer');
+            setUserAvatar(profileData.avatar_url || null);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to fetch user profile:', error);
+      }
+    };
+
+    fetchUserProfile();
+  }, []);
   
   const handleNavClick = (tab: string) => {
     setActiveTab(tab);
@@ -293,14 +329,22 @@ export default function LeftPanel({
               : 'lg:justify-center'
           }`}>
             <div className="relative flex-shrink-0">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm">
-                JD
-              </div>
+              {userAvatar ? (
+                <img 
+                  src={userAvatar} 
+                  alt={userName}
+                  className="w-10 h-10 rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-sm">
+                  {userName.charAt(0).toUpperCase()}
+                </div>
+              )}
               <div className="absolute bottom-0 right-0 w-3 h-3 bg-[#2ECC71] border-2 border-white rounded-full"></div>
             </div>
             <div className={`flex-1 min-w-0 hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>
-              <h3 className={`text-sm font-bold truncate ${isDarkMode ? 'text-white' : 'text-black'}`}>John Doe</h3>
-              <p className="text-xs text-gray-500 truncate">Full Stack Dev</p>
+              <h3 className={`text-sm font-bold truncate ${isDarkMode ? 'text-white' : 'text-black'}`}>{userName}</h3>
+              <p className="text-xs text-gray-500 truncate">{userRole}</p>
             </div>
           </div>
 

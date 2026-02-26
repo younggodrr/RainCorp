@@ -89,6 +89,14 @@ class MagnaAIService {
    * @throws Error if authentication fails or network error occurs
    */
   private async request(endpoint: string, options: RequestInit = {}): Promise<Response> {
+    // Get auth token from localStorage if not already set
+    if (!this.authToken && typeof window !== 'undefined') {
+      const token = localStorage.getItem('accessToken') || localStorage.getItem('token') || localStorage.getItem('authToken');
+      if (token) {
+        this.authToken = token;
+      }
+    }
+
     // Ensure auth token is set
     if (!this.authToken) {
       throw new Error('Authentication token not set');
@@ -107,13 +115,10 @@ class MagnaAIService {
         headers,
       });
 
-      // Handle 401 Unauthorized - redirect to login
+      // Handle 401 Unauthorized - clear token and throw error
       if (response.status === 401) {
         this.clearAuthToken();
-        if (typeof window !== 'undefined') {
-          window.location.href = '/login';
-        }
-        throw new Error('Unauthorized - redirecting to login');
+        throw new Error('Unauthorized - please log in again');
       }
 
       // Handle 429 Rate Limit
@@ -156,12 +161,21 @@ class MagnaAIService {
       const response = await this.request('/api/user/context');
 
       if (!response.ok) {
-        throw new Error('Failed to fetch user context');
+        const errorText = await response.text().catch(() => 'Unknown error');
+        console.error('Failed to fetch user context:', response.status, errorText);
+        throw new Error(`Failed to fetch user context: ${response.status}`);
       }
 
-      const context = await response.json();
+      const data = await response.json();
+      
+      // The AI backend returns the context directly or wrapped in a data field
+      // Handle both formats for compatibility
+      const context = data.data || data;
+      
+      console.log('User context fetched successfully:', context);
       return context;
     } catch (error) {
+      console.error('Error in getUserContext:', error);
       if (error instanceof Error) {
         throw error;
       }
@@ -270,8 +284,8 @@ class MagnaAIService {
             if (line.startsWith('data: ')) {
               const content = line.slice(6); // Remove "data: " prefix
 
-              // Check for completion marker
-              if (content === '[DONE]') {
+              // Check for completion marker - don't display it
+              if (content === '[DONE]' || content.trim() === '[DONE]') {
                 if (onComplete) {
                   onComplete();
                 }
@@ -284,8 +298,8 @@ class MagnaAIService {
                 throw new Error(errorMsg);
               }
 
-              // Call the chunk callback with the content
-              if (content.trim()) {
+              // Call the chunk callback with the content (skip [DONE] marker)
+              if (content.trim() && content.trim() !== '[DONE]') {
                 onChunk(content);
               }
             }

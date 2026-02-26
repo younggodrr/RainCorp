@@ -53,7 +53,8 @@ export default function SendCoinsModal({
     setLoadingFriends(true);
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-      const userId = localStorage.getItem('userid');
+      // Check both userId and userid for compatibility
+      const userId = localStorage.getItem('userId') || localStorage.getItem('userid');
       
       if (!userId) {
         console.warn('No user ID found');

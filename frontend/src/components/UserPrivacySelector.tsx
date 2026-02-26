@@ -1,9 +1,11 @@
 import React from 'react';
+import Image from 'next/image';
 import { Globe, Users, ChevronDown } from 'lucide-react';
 
 interface UserPrivacySelectorProps {
   userName: string;
   userInitials: string;
+  userAvatar?: string;
   privacy: string;
   onPrivacyChange: (privacy: string) => void;
   isDarkMode: boolean;
@@ -12,14 +14,25 @@ interface UserPrivacySelectorProps {
 export default function UserPrivacySelector({ 
   userName, 
   userInitials, 
+  userAvatar,
   privacy, 
   onPrivacyChange, 
   isDarkMode 
 }: UserPrivacySelectorProps) {
   return (
     <div className="p-4 md:p-6 flex items-center gap-3">
-      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-lg shadow-sm">
-        {userInitials}
+      <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-lg shadow-sm relative overflow-hidden">
+        {userAvatar ? (
+          <Image 
+            src={userAvatar} 
+            alt={userName} 
+            fill 
+            sizes="48px" 
+            className="object-cover" 
+          />
+        ) : (
+          userInitials
+        )}
       </div>
       <div>
         <h3 className={`font-bold text-sm ${isDarkMode ? 'text-[#F9E4AD]' : 'text-black'}`}>{userName}</h3>

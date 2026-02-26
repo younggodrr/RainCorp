@@ -102,7 +102,7 @@ export const getPosts = async (params: GetPostsParams = {}): Promise<Post[]> => 
   if (params.search) searchParams.set('search', params.search);
 
   const query = searchParams.toString();
-  const data = await apiFetch<any>(`/posts${query ? `?${query}` : ''}`, { method: 'GET' });
+  const data = await apiFetch<any>(`/api/posts${query ? `?${query}` : ''}`, { method: 'GET' });
 
   // Handle different response formats
   if (Array.isArray(data)) {
@@ -122,8 +122,55 @@ export const getPosts = async (params: GetPostsParams = {}): Promise<Post[]> => 
  */
 export const getPostById = async (id: string): Promise<Post | null> => {
   try {
-    const data = await apiFetch<any>(`/posts/${id}`, { method: 'GET' });
-    return data?.post || data || null;
+    const data = await apiFetch<any>(`/api/posts/${id}`, { method: 'GET' });
+    
+    // Handle different response formats
+    const rawPost = data?.post || data?.data || data;
+    
+    if (!rawPost || !rawPost.id) {
+      return null;
+    }
+    
+    // Map backend data to frontend format (same as feed page)
+    const post = {
+      id: rawPost.id,
+      userId: rawPost.author_id || rawPost.userId,
+      content: rawPost.content,
+      type: (rawPost.post_type?.toUpperCase() || 'REGULAR') as 'REGULAR' | 'JOB' | 'PROJECT' | 'TECH_NEWS',
+      category: rawPost.category,
+      tags: rawPost.tags || [],
+      mediaUrls: rawPost.mediaUrls || [],
+      likes: rawPost.likesCount || rawPost._count?.likes || 0,
+      comments: rawPost.commentsCount || rawPost._count?.comments || 0,
+      shares: 0,
+      createdAt: rawPost.created_at || rawPost.createdAt,
+      updatedAt: rawPost.updated_at || rawPost.updatedAt,
+      user: rawPost.author || rawPost.users || rawPost.user ? {
+        id: rawPost.author?.id || rawPost.users?.id || rawPost.user?.id,
+        username: rawPost.author?.username || rawPost.users?.username || rawPost.user?.username || 'Unknown',
+        fullName: rawPost.author?.username || rawPost.users?.username || rawPost.user?.username || 'Unknown',
+        profilePicture: rawPost.author?.avatar_url || rawPost.users?.avatar_url || rawPost.user?.avatar_url,
+        verified: rawPost.author?.verified || rawPost.users?.verified || rawPost.user?.verified || false
+      } : undefined,
+      // Job-specific fields
+      title: rawPost.title,
+      company: rawPost.company,
+      location: rawPost.location,
+      salary: rawPost.salary,
+      jobType: rawPost.jobType,
+      // Project-specific fields
+      projectName: rawPost.projectName,
+      projectDescription: rawPost.projectDescription,
+      techStack: rawPost.techStack,
+      githubUrl: rawPost.githubUrl,
+      liveUrl: rawPost.liveUrl,
+      // Tech news-specific fields
+      newsTitle: rawPost.newsTitle,
+      newsUrl: rawPost.newsUrl,
+      newsSource: rawPost.newsSource
+    };
+    
+    return post;
   } catch (error) {
     console.error('Error fetching post:', error);
     return null;
@@ -134,7 +181,7 @@ export const getPostById = async (id: string): Promise<Post | null> => {
  * Create a new post
  */
 export const createPost = async (postData: CreatePostData): Promise<Post> => {
-  const data = await apiFetch<any>('/posts', {
+  const data = await apiFetch<any>('/api/posts', {
     method: 'POST',
     data: postData,
   });
@@ -142,24 +189,31 @@ export const createPost = async (postData: CreatePostData): Promise<Post> => {
 };
 
 /**
+ * Delete a post
+ */
+export const deletePost = async (postId: string): Promise<void> => {
+  await apiFetch(`/api/posts/${postId}`, { method: 'DELETE' });
+};
+
+/**
  * Like a post
  */
 export const likePost = async (postId: string): Promise<void> => {
-  await apiFetch(`/posts/${postId}/like`, { method: 'POST' });
+  await apiFetch(`/api/posts/${postId}/like`, { method: 'POST' });
 };
 
 /**
  * Unlike a post
  */
 export const unlikePost = async (postId: string): Promise<void> => {
-  await apiFetch(`/posts/${postId}/unlike`, { method: 'POST' });
+  await apiFetch(`/api/posts/${postId}/unlike`, { method: 'POST' });
 };
 
 /**
  * Get comments for a post
  */
 export const getComments = async (postId: string): Promise<Comment[]> => {
-  const data = await apiFetch<any>(`/posts/${postId}/comments`, { method: 'GET' });
+  const data = await apiFetch<any>(`/api/posts/${postId}/comments`, { method: 'GET' });
   
   if (Array.isArray(data)) {
     return data;
@@ -174,7 +228,7 @@ export const getComments = async (postId: string): Promise<Comment[]> => {
  * Create a comment on a post
  */
 export const createComment = async (postId: string, commentData: CreateCommentData): Promise<Comment> => {
-  const data = await apiFetch<any>(`/posts/${postId}/comments`, {
+  const data = await apiFetch<any>(`/api/posts/${postId}/comments`, {
     method: 'POST',
     data: commentData,
   });

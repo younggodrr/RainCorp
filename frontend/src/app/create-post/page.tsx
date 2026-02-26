@@ -7,6 +7,15 @@ import LeftPanel from '@/components/LeftPanel';
 import UserPrivacySelector from '@/components/UserPrivacySelector';
 import PostEditor from '@/components/PostEditor';
 import PostToolbar from '@/components/PostToolbar';
+import Toast from '@/components/Toast';
+
+interface UserProfile {
+  id: string;
+  username: string;
+  fullName?: string;
+  email: string;
+  profilePicture?: string;
+}
 
 export default function CreatePostPage() {
   const router = useRouter();
@@ -17,6 +26,10 @@ export default function CreatePostPage() {
   const [privacy, setPrivacy] = useState('Public');
   const [isDragOver, setIsDragOver] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true);
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -24,14 +37,43 @@ export default function CreatePostPage() {
       setIsDarkMode(true);
     }
 
-    // Check for authentication on mount
-    const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
-    if (!token) {
-      // If no token, redirect to login immediately
-      // router.push('/login');
-      // For now, we'll just log it, but in a real app you'd redirect
-      console.warn('No access token found on mount. User may need to login.');
-    }
+    // Fetch user profile
+    const fetchUserProfile = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        // Check both userId and userid for compatibility
+        const userId = localStorage.getItem('userId') || localStorage.getItem('userid');
+        
+        if (!token || !userId) {
+          console.warn('No access token or userId found. User may need to login.');
+          setIsLoadingProfile(false);
+          return;
+        }
+
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/auth/profile/${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          const profileData = result.data || result;
+          // Map avatar_url from Google OAuth to profilePicture
+          setUserProfile({
+            ...profileData,
+            profilePicture: profileData.avatar_url || profileData.profilePicture
+          });
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      } finally {
+        setIsLoadingProfile(false);
+      }
+    };
+
+    fetchUserProfile();
   }, []);
 
   const handleDragOver = (e: React.DragEvent) => {
@@ -49,10 +91,31 @@ export default function CreatePostPage() {
     setIsDragOver(false);
     
     const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith('image/')) {
+    if (file) {
+      // Check file size (50MB = 52428800 bytes)
+      const maxSize = 50 * 1024 * 1024; // 50MB in bytes
+      if (file.size > maxSize) {
+        setToastMessage('File size must be less than 50MB');
+        setShowToast(true);
+        return;
+      }
+      
+      // Check file type (images and videos)
+      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+        setToastMessage('Only images and videos are allowed');
+        setShowToast(true);
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onloadend = () => {
         setSelectedImage(reader.result as string);
+        setToastMessage('Media added successfully');
+        setShowToast(true);
+      };
+      reader.onerror = () => {
+        setToastMessage('Failed to read file. Please try again.');
+        setShowToast(true);
       };
       reader.readAsDataURL(file);
     }
@@ -61,9 +124,32 @@ export default function CreatePostPage() {
   const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Check file size (50MB = 52428800 bytes)
+      const maxSize = 50 * 1024 * 1024; // 50MB in bytes
+      if (file.size > maxSize) {
+        setToastMessage('File size must be less than 50MB');
+        setShowToast(true);
+        e.target.value = ''; // Reset input
+        return;
+      }
+      
+      // Check file type (images and videos)
+      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+        setToastMessage('Only images and videos are allowed');
+        setShowToast(true);
+        e.target.value = ''; // Reset input
+        return;
+      }
+      
       const reader = new FileReader();
       reader.onloadend = () => {
         setSelectedImage(reader.result as string);
+        setToastMessage('Media added successfully');
+        setShowToast(true);
+      };
+      reader.onerror = () => {
+        setToastMessage('Failed to read file. Please try again.');
+        setShowToast(true);
       };
       reader.readAsDataURL(file);
     }
@@ -75,83 +161,33 @@ export default function CreatePostPage() {
     setIsSubmitting(true);
     
     try {
-      // Get the API URL from env
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
-      if (!apiUrl) throw new Error('API URL is not defined');
-      
-      // Try to get token from localStorage first
-      const token = localStorage.getItem('accessToken') || localStorage.getItem('token');
+      // Get token
+      const token = localStorage.getItem('accessToken');
       
       if (!token) {
-        console.error("Authentication failed: No access token found in localStorage.");
         throw new Error('You must be logged in to post. Please try logging in again.');
       }
 
-      // Handle file upload if image is selected
-      let imageUrl = null;
-      if (selectedImage && selectedImage.startsWith('data:')) {
-         try {
-             // Convert base64 to blob
-             const res = await fetch(selectedImage);
-             const blob = await res.blob();
-             
-             // This endpoint expects JSON with file metadata, but typically file uploads 
-             // require either multipart/form-data OR a pre-signed URL flow.
-             // Given the user provided a JSON structure: { url, filename, mime_type, size, purpose }
-             // It seems this endpoint registers a file, but doesn't upload the content directly?
-             // OR it might be a placeholder. 
-             
-             // However, for a real file upload to work with the provided curl example which sends JSON,
-             // it usually implies we are sending a link (url) to an already hosted file, 
-             // OR base64 content if the API supports it in the JSON body.
-             
-             // BUT, standard file upload is usually multipart.
-             // If the user insists on the JSON structure for `/api/files`:
-             
-             const uploadBody = {
-                 url: selectedImage, // Sending base64 as URL (if supported) or this is a metadata registration
-                 filename: "image.jpg",
-                 mime_type: blob.type,
-                 size: blob.size,
-                 purpose: "post_image"
-             };
-
-             const uploadRes = await fetch(`${apiUrl}/files`, {
-                method: 'POST',
-                headers: {
-                    'accept': '*/*',
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
-                },
-                body: JSON.stringify(uploadBody)
-             });
-             
-             if (uploadRes.ok) {
-                const data = await uploadRes.json();
-                imageUrl = data.url || data.fileUrl; // Adjust based on actual response
-             } else {
-                 console.warn('Image upload/registration failed, proceeding without image');
-             }
-         } catch (e) {
-             console.error('Failed to upload image', e);
-         }
-      }
-
-      const postBody = {
-        title: content.length > 50 ? content.slice(0, 50) + "..." : "New Post",
+      // Create post using the service
+      const postData: any = {
+        title: content.length > 50 ? content.slice(0, 50) + "..." : content.slice(0, 30) || "New Post",
         content: content,
-        image: imageUrl, // Use the uploaded image URL
-        gistId: selectedGistId // Include Gist ID
+        post_type: 'regular'
       };
 
-      const response = await fetch(`${apiUrl}/posts`, {
+      // If image is selected, add it to mediaUrls
+      if (selectedImage) {
+        postData.mediaUrls = [selectedImage];
+      }
+
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/posts`, {
         method: 'POST',
         headers: {
           'accept': 'application/json',
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify(postBody)
+        body: JSON.stringify(postData)
       });
 
       if (!response.ok) {
@@ -160,17 +196,38 @@ export default function CreatePostPage() {
       }
 
       console.log('Post created successfully');
-      router.push('/feed');
+      setToastMessage('Post created successfully!');
+      setShowToast(true);
+      
+      // Redirect after a short delay to show the toast
+      setTimeout(() => {
+        router.push('/feed');
+      }, 1000);
       
     } catch (error) {
       console.error('Error creating post:', error);
-      alert(error instanceof Error ? error.message : 'Failed to create post');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to create post';
+      setToastMessage(errorMessage);
+      setShowToast(true);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const canPost = Boolean(content.trim() || selectedImage);
+
+  // Get user display info
+  const getUserName = () => {
+    if (isLoadingProfile) return 'Loading...';
+    if (!userProfile) return 'User';
+    return userProfile.fullName || userProfile.username || userProfile.email.split('@')[0];
+  };
+
+  const getUserInitials = () => {
+    if (isLoadingProfile || !userProfile) return '?';
+    const name = userProfile.fullName || userProfile.username || userProfile.email;
+    return name.charAt(0).toUpperCase();
+  };
 
   return (
     <div className={`min-h-screen font-sans flex transition-colors duration-300 ${isDarkMode ? 'bg-black text-[#F9E4AD]' : 'bg-[#FDF8F5] text-[#444444]'}`}>
@@ -209,8 +266,9 @@ export default function CreatePostPage() {
           
           {/* User Info & Privacy */}
           <UserPrivacySelector 
-            userName="John Doe"
-            userInitials="JD"
+            userName={getUserName()}
+            userInitials={getUserInitials()}
+            userAvatar={userProfile?.profilePicture}
             privacy={privacy}
             onPrivacyChange={setPrivacy}
             isDarkMode={isDarkMode}
@@ -245,6 +303,12 @@ export default function CreatePostPage() {
         </div>
 
       </main>
+
+      <Toast 
+        message={toastMessage}
+        isVisible={showToast}
+        onClose={() => setShowToast(false)}
+      />
     </div>
   );
 }

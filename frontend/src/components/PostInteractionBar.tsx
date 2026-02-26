@@ -215,8 +215,8 @@ export default function PostInteractionBar({
     if (USE_REAL_API && showComments) {
       const fetchComments = async () => {
         try {
-          const res = await authenticatedFetch(`/comments/post/${postId}?page=1&limit=20`);
-          setComments(res.comments || []);
+          const res = await authenticatedFetch(`/api/posts/${postId}/comments?page=1&limit=20`);
+          setComments(res.comments || res || []);
         } catch (error) {
           console.error('Failed to fetch comments:', error);
         }
@@ -225,10 +225,23 @@ export default function PostInteractionBar({
     }
   }, [showComments, postId]);
 
-  const handleLike = (e: React.MouseEvent) => {
+  const handleLike = async (e: React.MouseEvent) => {
     e.preventDefault();
-    setLiked(!liked);
-    setLikes(prev => liked ? prev - 1 : prev + 1);
+    try {
+      if (liked) {
+        await authenticatedFetch(`/api/posts/${postId}/unlike`, { method: 'POST' });
+        setLiked(false);
+        setLikes(prev => prev - 1);
+      } else {
+        await authenticatedFetch(`/api/posts/${postId}/like`, { method: 'POST' });
+        setLiked(true);
+        setLikes(prev => prev + 1);
+      }
+    } catch (err) {
+      console.error('Failed to like/unlike post:', err);
+      // Revert on error
+      setLiked(!liked);
+    }
   };
 
   const handleCommentClick = (e: React.MouseEvent) => {
@@ -250,7 +263,7 @@ export default function PostInteractionBar({
     e.preventDefault();
     if (!commentText.trim()) return;
     try {
-      const newComment: Comment = await authenticatedFetch(`/comments/post/${postId}`, {
+      const newComment: Comment = await authenticatedFetch(`/api/posts/${postId}/comments`, {
         method: 'POST',
         body: JSON.stringify({ content: commentText })
       });
@@ -264,7 +277,7 @@ export default function PostInteractionBar({
 
   const handleLikeComment = async (commentId: string) => {
     try {
-      const res = await authenticatedFetch(`/comments/${commentId}/like`, {
+      const res = await authenticatedFetch(`/api/comments/${commentId}/like`, {
         method: 'POST'
       });
       const updateLikes = (list: Comment[]): Comment[] =>
@@ -285,7 +298,7 @@ export default function PostInteractionBar({
 
   const handleDeleteComment = async (commentId: string) => {
     try {
-      await authenticatedFetch(`/comments/${commentId}`, {
+      await authenticatedFetch(`/api/comments/${commentId}`, {
         method: 'DELETE',
         headers: {
           'Accept': '*/*'
@@ -308,7 +321,7 @@ export default function PostInteractionBar({
 
   const handleEditComment = async (commentId: string, newContent: string) => {
     try {
-      const updated = await authenticatedFetch(`/comments/${commentId}`, {
+      const updated = await authenticatedFetch(`/api/comments/${commentId}`, {
         method: 'PUT',
         body: JSON.stringify({ content: newContent })
       });
@@ -330,7 +343,7 @@ export default function PostInteractionBar({
 
   const handleReplyComment = async (parentId: string, replyContent: string) => {
     try {
-      const reply: Comment = await authenticatedFetch(`/comments/post/${postId}`, {
+      const reply: Comment = await authenticatedFetch(`/api/posts/${postId}/comments`, {
         method: 'POST',
         body: JSON.stringify({ content: replyContent, parentId })
       });

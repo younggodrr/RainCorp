@@ -1,4 +1,35 @@
-export const USER_DATA = {
+export interface UserProfile {
+  name: string;
+  username: string;
+  role: string;
+  secondaryRole: string;
+  location: string;
+  bio: string;
+  verified: boolean;
+  followers: number;
+  following: number;
+  projects: number;
+  stats: {
+    connections: number;
+    mutualConnections: number;
+    projects: number;
+    followers: number;
+    following: number;
+    skills: number;
+  };
+  socials: Array<{
+    name: string;
+    url: string;
+    icon?: any;
+    color?: string;
+  }>;
+  skillsList: any[];
+  projectsList: any[];
+  activitiesList: any[];
+  connectionsList: any[];
+}
+
+export const USER_DATA: UserProfile = {
   name: 'Loading...',
   username: '@user',
   role: 'Developer',

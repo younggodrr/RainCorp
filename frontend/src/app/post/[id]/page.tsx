@@ -14,7 +14,7 @@ import PostHeader from '@/components/PostHeader';
 import JobPostDetails from '@/components/JobPostDetails';
 import ProjectPostDetails from '@/components/ProjectPostDetails';
 import TechNewsPostDetails from '@/components/TechNewsPostDetails';
-import RegularPostDetails from '@/components/RegularPostDetails';
+import { formatTimeAgo } from '@/utils/timeFormat';
 
 export default function PostDetailPage() {
   const params = useParams();
@@ -37,12 +37,41 @@ export default function PostDetailPage() {
 
   useEffect(() => {
     if (params?.id) {
-  useEffect(() => {
-    if (params?.id) {
       const fetchPost = async () => {
         try {
           const foundPost = await getPostById(params.id as string);
-          setPost(foundPost);
+          if (foundPost) {
+            // Map to component format (same as feed page)
+            const mappedPost = {
+              id: foundPost.id,
+              type: (foundPost.type?.toLowerCase() === 'regular' ? 'regular' : foundPost.type?.toLowerCase()) || 'regular',
+              author: {
+                id: foundPost.userId || foundPost.user?.id,
+                name: foundPost.user?.username || 'Unknown User',
+                avatar: foundPost.user?.profilePicture,
+                role: foundPost.user?.verified ? 'Verified' : 'Member'
+              },
+              createdAt: formatTimeAgo(foundPost.createdAt),
+              likes: foundPost.likes || 0,
+              comments: foundPost.comments || 0,
+              title: foundPost.title,
+              content: foundPost.content,
+              image: foundPost.mediaUrls?.[0],
+              company: foundPost.company,
+              description: foundPost.projectDescription,
+              location: foundPost.location,
+              salary: foundPost.salary,
+              tags: foundPost.tags,
+              jobType: foundPost.jobType,
+              summary: foundPost.newsTitle,
+              source: foundPost.newsSource,
+              url: foundPost.newsUrl,
+              imageUrl: foundPost.mediaUrls?.[0],
+            };
+            setPost(mappedPost as any);
+          } else {
+            setPost(null);
+          }
         } catch (error) {
           console.error('Error fetching post:', error);
           setPost(null);
@@ -130,7 +159,7 @@ export default function PostDetailPage() {
                     <TechNewsPostDetails post={post as TechNewsPost} />
                 )}
 
-                {post.type === 'post' && (
+                {(post.type === 'post' || post.type === 'regular') && (
                     <RegularPostDetails post={post as RegularPost} />
                 )}
             </div>

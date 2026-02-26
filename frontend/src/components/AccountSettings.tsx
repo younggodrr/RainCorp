@@ -17,6 +17,8 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
   
   // Profile Update State
   const [isSaving, setIsSaving] = useState(false);
+  const [profilePicture, setProfilePicture] = useState<string | null>(null);
+  const [userName, setUserName] = useState('');
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -34,11 +36,12 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
   React.useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const userId = localStorage.getItem('userid');
+        // Check both userId and userid for compatibility
+        const userId = localStorage.getItem('userId') || localStorage.getItem('userid');
         const token = localStorage.getItem('accessToken');
         if (!userId || !token || !API_BASE) return;
 
-        const response = await fetch(`${API_BASE}/auth/profile/${userId}`, {
+        const response = await fetch(`${API_BASE}/api/auth/profile/${userId}`, {
           headers: {
             'Accept': 'application/json',
             'Authorization': `Bearer ${token}`
@@ -46,9 +49,18 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
         });
 
         if (response.ok) {
-          const data = await response.json();
+          const result = await response.json();
+          const data = result.data || result;
+          
+          // Set profile picture
+          setProfilePicture(data.avatar_url || null);
+          
+          // Set username for display
+          setUserName(data.username || data.email?.split('@')[0] || 'User');
+          
           // Split full name if needed
-          const [firstName, ...lastNameParts] = (data.name || '').split(' ');
+          const fullName = data.name || data.username || '';
+          const [firstName, ...lastNameParts] = fullName.split(' ');
           
           setFormData({
             firstName: firstName || '',
@@ -78,7 +90,8 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
   const handleSaveProfile = async () => {
     setIsSaving(true);
     try {
-      const userId = localStorage.getItem('userid');
+      // Check both userId and userid for compatibility
+      const userId = localStorage.getItem('userId') || localStorage.getItem('userid');
       const token = localStorage.getItem('accessToken');
       
       if (!userId || !token || !API_BASE) {
@@ -87,14 +100,15 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
       }
 
       const payload = {
-        name: `${formData.firstName} ${formData.lastName}`.trim(),
         bio: formData.bio,
         location: formData.location,
-        website: formData.website,
-        // Add other fields as per API spec
+        website_url: formData.website,
+        github_url: formData.github,
+        linkedin_url: formData.linkedin,
+        twitter_url: formData.twitter
       };
 
-      const response = await fetch(`${API_BASE}/auth/profile/${userId}`, {
+      const response = await fetch(`${API_BASE}/api/auth/profile/${userId}`, {
         method: 'PUT',
         headers: {
           'Accept': 'application/json',
@@ -106,12 +120,15 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
 
       if (response.ok) {
         alert('Profile updated successfully!');
+        // Refresh the profile data
+        window.location.reload();
       } else {
-        throw new Error('Failed to update profile');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to update profile');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating profile:', error);
-      alert('Failed to update profile. Please try again.');
+      alert(error.message || 'Failed to update profile. Please try again.');
     } finally {
       setIsSaving(false);
     }
@@ -145,162 +162,28 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
     }
   }, []);
 
-  React.useEffect(() => {
-    // Fetch connected social platforms on mount
-    const fetchPlatforms = async () => {
-      try {
-        if (!API_BASE) return;
-        const token = localStorage.getItem('accessToken');
-        if (!token) return;
-
-        const response = await fetch(`${API_BASE}/integrations/social/platforms`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          // Assuming response structure: { data: [{ provider: 'github', ... }, ...] } 
-          // or similar array of connected providers
-          const platforms = Array.isArray(data) ? data : (data.data || []);
-          
-          platforms.forEach((p: any) => {
-            const provider = (p.provider || p.name || '').toLowerCase();
-            if (provider === 'github') setGithubConnected(true);
-            if (provider === 'linkedin') setLinkedinConnected(true);
-            if (provider === 'twitter') setTwitterConnected(true);
-            if (provider === 'discord') setDiscordConnected(true);
-          });
-        }
-      } catch (error) {
-        console.error('Failed to fetch connected platforms', error);
-      }
-    };
-
-    fetchPlatforms();
-  }, []);
-
   const handleSync = async () => {
-    // Get list of connected platforms
-    const platformsToSync: string[] = [];
-    if (githubConnected) platformsToSync.push('github');
-    if (linkedinConnected) platformsToSync.push('linkedin');
-    if (twitterConnected) platformsToSync.push('twitter');
-    if (discordConnected) platformsToSync.push('discord');
-
-    if (platformsToSync.length === 0) {
-      alert('No connected platforms to sync.');
-      return;
-    }
-
-    setIsSyncing(true);
-    try {
-      if (!API_BASE) throw new Error('API URL is not defined');
-      
-      const token = localStorage.getItem('accessToken');
-      if (!token) throw new Error('Not authenticated');
-
-      const response = await fetch(`${API_BASE}/integrations/social/sync`, {
-        method: 'POST',
-        headers: {
-          'accept': '*/*',
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({ platforms: platformsToSync })
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to sync data');
-      }
-
-      alert('Sync started successfully! Your profile data will be updated shortly.');
-    } catch (error: any) {
-      console.error('Sync error:', error);
-      alert(error.message || 'Failed to sync data');
-    } finally {
-      setIsSyncing(false);
-    }
+    alert('Social platform sync feature is coming soon!');
   };
 
   const handleDisconnect = async (platform: string) => {
-    if (!confirm(`Are you sure you want to disconnect ${platform}?`)) return;
-
-    // Map platform name to state setters
-    const setStateMap: Record<string, (val: boolean) => void> = {
-      'github': setGithubConnected,
-      'linkedin': setLinkedinConnected,
-      'twitter': setTwitterConnected,
-      'discord': setDiscordConnected
-    };
-
-    try {
-      if (!API_BASE) throw new Error('API URL is not defined');
-      
-      const token = localStorage.getItem('accessToken');
-      if (!token) throw new Error('Not authenticated');
-
-      const response = await fetch(`${API_BASE}/integrations/social/platforms/${platform.toLowerCase()}`, {
-        method: 'DELETE',
-        headers: {
-          'accept': '*/*',
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (response.ok) {
-        // Success - update state
-        if (setStateMap[platform.toLowerCase()]) {
-          setStateMap[platform.toLowerCase()](false);
-        }
-        alert(`${platform} disconnected successfully`);
-      } else {
-        // Handle errors based on status code
-        if (response.status === 401) throw new Error('Unauthorized');
-        if (response.status === 404) throw new Error('Platform not found');
-        if (response.status === 500) throw new Error('Server error');
-        throw new Error('Failed to disconnect');
-      }
-    } catch (error: any) {
-      console.error(`Error disconnecting ${platform}:`, error);
-      alert(error.message || `Failed to disconnect ${platform}`);
-    }
+    alert(`${platform} disconnect feature is coming soon!`);
   };
 
   const handleGitHubConnect = () => {
-    if (!API_BASE) {
-      alert('API URL is not defined');
-      return;
-    }
-    // Redirect to backend to initiate OAuth flow
-    // Assuming the backend endpoint is /integrations/social/{platform}/auth or similar
-    // Based on the callback URL provided, we'll target the initiation route
-    window.location.href = `${API_BASE}/integrations/social/github/auth`;
+    alert('GitHub integration is coming soon!');
   };
 
   const handleLinkedInConnect = () => {
-    if (!API_BASE) {
-      alert('API URL is not defined');
-      return;
-    }
-    window.location.href = `${API_BASE}/integrations/social/linkedin/auth`;
+    alert('LinkedIn integration is coming soon!');
   };
 
   const handleTwitterConnect = () => {
-    if (!API_BASE) {
-      alert('API URL is not defined');
-      return;
-    }
-    window.location.href = `${API_BASE}/integrations/social/twitter/auth`;
+    alert('Twitter integration is coming soon!');
   };
 
   const handleDiscordConnect = () => {
-    if (!API_BASE) {
-      alert('API URL is not defined');
-      return;
-    }
-    window.location.href = `${API_BASE}/integrations/social/discord/auth`;
+    alert('Discord integration is coming soon!');
   };
 
   return (
@@ -309,8 +192,16 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
         <h2 className={`text-xl font-bold mb-6 ${isDarkMode ? 'text-[#F4A261]' : 'text-black'}`}>Profile Information</h2>
         <div className="flex flex-col md:flex-row gap-8 items-start">
           <div className="flex flex-col items-center gap-4 mx-auto md:mx-0">
-            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-3xl shadow-md relative">
-              JD
+            <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-3xl shadow-md relative overflow-hidden">
+              {profilePicture ? (
+                <img 
+                  src={profilePicture} 
+                  alt={userName}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span>{userName.charAt(0).toUpperCase()}</span>
+              )}
               <div className={`absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center shadow-sm cursor-pointer transition-colors border ${isDarkMode ? 'bg-[#222] border-gray-700 hover:bg-[#333]' : 'bg-white border-gray-100 hover:bg-gray-50'}`}>
                 <Camera size={14} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
               </div>
@@ -321,57 +212,39 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
           </div>
           <div className="flex-1 w-full space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <InputField label="First Name" name="firstName" defaultValue={formData.firstName} onChange={handleInputChange} isDarkMode={isDarkMode} />
-              <InputField label="Last Name" name="lastName" defaultValue={formData.lastName} onChange={handleInputChange} isDarkMode={isDarkMode} />
+              <InputField label="First Name" name="firstName" value={formData.firstName} onChange={handleInputChange} isDarkMode={isDarkMode} />
+              <InputField label="Last Name" name="lastName" value={formData.lastName} onChange={handleInputChange} isDarkMode={isDarkMode} />
             </div>
-            <InputField label="Email Address" name="email" defaultValue={formData.email} type="email" isDarkMode={isDarkMode} />
+            <InputField label="Email Address" name="email" value={formData.email} type="email" disabled isDarkMode={isDarkMode} />
             <div className="space-y-2">
               <label className={`text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Bio</label>
               <textarea 
                 name="bio"
                 rows={4}
-                defaultValue={formData.bio}
+                value={formData.bio}
                 onChange={handleInputChange}
                 className={`w-full px-4 py-3 rounded-xl border focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm resize-none ${
                   isDarkMode ? 'bg-[#222] border-gray-700 text-white' : 'bg-gray-50 border-gray-100 text-black'
                 }`}
               ></textarea>
             </div>
-            <InputField label="Location" name="location" defaultValue={formData.location} onChange={handleInputChange} isDarkMode={isDarkMode} />
+            <InputField label="Location" name="location" value={formData.location} onChange={handleInputChange} isDarkMode={isDarkMode} />
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InputField label="Website (optional)" name="website" placeholder="https://yourwebsite.com" defaultValue={formData.website} onChange={handleInputChange} isDarkMode={isDarkMode} />
-                <InputField label="GitHub (optional)" name="github" placeholder="https://github.com/username" defaultValue={formData.github} onChange={handleInputChange} isDarkMode={isDarkMode} />
+                <InputField label="Website (optional)" name="website" placeholder="https://yourwebsite.com" value={formData.website} onChange={handleInputChange} isDarkMode={isDarkMode} />
+                <InputField label="GitHub (optional)" name="github" placeholder="https://github.com/username" value={formData.github} onChange={handleInputChange} isDarkMode={isDarkMode} />
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <InputField label="LinkedIn (optional)" name="linkedin" placeholder="https://linkedin.com/in/username" defaultValue={formData.linkedin} onChange={handleInputChange} isDarkMode={isDarkMode} />
-                <InputField label="Twitter (optional)" name="twitter" placeholder="https://twitter.com/username" defaultValue={formData.twitter} onChange={handleInputChange} isDarkMode={isDarkMode} />
+                <InputField label="LinkedIn (optional)" name="linkedin" placeholder="https://linkedin.com/in/username" value={formData.linkedin} onChange={handleInputChange} isDarkMode={isDarkMode} />
+                <InputField label="Twitter (optional)" name="twitter" placeholder="https://twitter.com/username" value={formData.twitter} onChange={handleInputChange} isDarkMode={isDarkMode} />
             </div>
-            <InputField label="WhatsApp (optional)" name="whatsapp" placeholder="+254..." defaultValue={formData.whatsapp} onChange={handleInputChange} isDarkMode={isDarkMode} />
+            <InputField label="WhatsApp (optional)" name="whatsapp" placeholder="+254..." value={formData.whatsapp} onChange={handleInputChange} isDarkMode={isDarkMode} />
 
-            <div className="pt-4 flex justify-end">
+            <div className="pt-4 flex gap-4">
               <Button primary onClick={handleSaveProfile} disabled={isSaving} isDarkMode={isDarkMode}>
                 {isSaving ? 'Saving...' : 'Save Changes'}
               </Button>
-            </div>
-
-            <div className="space-y-2">
-              <label className={`text-sm font-semibold ${isDarkMode ? 'text-gray-300' : 'text-gray-700'}`}>Your Availability</label>
-              <div className="relative">
-                <select className={`w-full px-4 py-3 rounded-xl border focus:border-[#E50914] focus:ring-1 focus:ring-[#E50914] focus:outline-none transition-all text-sm appearance-none cursor-pointer ${
-                  isDarkMode ? 'bg-[#222] border-gray-700 text-[#F4A261]' : 'bg-gray-50 border-gray-100 text-black'
-                }`}>
-                  <option value="available">Available</option>
-                  <option value="unavailable">Unavailable</option>
-                  <option value="break">On Break</option>
-                </select>
-                <ChevronRight className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 rotate-90" size={16} />
-              </div>
-            </div>
-
-            <div className="pt-4 flex gap-4">
-              <Button primary isDarkMode={isDarkMode}>Save Changes</Button>
-              <Button isDarkMode={isDarkMode}>Cancel</Button>
+              <Button onClick={() => window.location.reload()} isDarkMode={isDarkMode}>Cancel</Button>
             </div>
           </div>
         </div>
@@ -405,15 +278,15 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
               </div>
               <div>
                 <h3 className={`font-semibold text-sm ${isDarkMode ? 'text-white' : 'text-black'}`}>Google</h3>
-                <p className="text-xs text-gray-500">john.doe@gmail.com</p>
+                <p className="text-xs text-gray-500">{formData.email || 'Connected'}</p>
               </div>
             </div>
             <button className={`px-4 py-2 rounded-full border text-xs font-semibold transition-all ${
               isDarkMode 
-                ? 'border-gray-700 text-gray-400 hover:bg-[#222] hover:text-[#E50914] hover:border-[#E50914]/30' 
-                : 'border-gray-200 text-gray-600 hover:bg-gray-50 hover:text-[#E50914] hover:border-[#E50914]/30'
+                ? 'border-green-500 text-green-500 bg-green-500/10' 
+                : 'border-green-600 text-green-600 bg-green-50'
             }`}>
-              Disconnect
+              Connected
             </button>
           </div>
 

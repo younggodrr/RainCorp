@@ -41,7 +41,6 @@ export default function ProjectPostDetail({ post, isRequestSent, onRequest }: Pr
         <PostInteractionBar 
           initialLikes={post.likes} 
           initialComments={post.comments} 
-          initialCommentsData={generateMockComments(post.id, post.comments)} 
           postId={post.id} 
         />
       </div>

@@ -52,7 +52,8 @@ export default function JobsPage() {
       try {
         const res = await listOpportunities({ limit: 20 });
         const items = res.items || [];
-        const localUserId = typeof window !== 'undefined' ? localStorage.getItem('userid') : null;
+        // Check both userId and userid for compatibility
+        const localUserId = typeof window !== 'undefined' ? (localStorage.getItem('userId') || localStorage.getItem('userid')) : null;
         const mapped: Job[] = items.map((opportunity: any, idx: number) => {
           const companyName = opportunity.company?.name || opportunity.company || 'Company';
           const salary = opportunity.salary_min && opportunity.salary_max

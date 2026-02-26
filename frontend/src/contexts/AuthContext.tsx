@@ -21,7 +21,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   // Load token from localStorage on mount
   useEffect(() => {
-    const storedToken = localStorage.getItem('authToken');
+    // Check for accessToken first (used by login), then fall back to authToken
+    const storedToken = localStorage.getItem('accessToken') || localStorage.getItem('authToken');
     if (storedToken) {
       setTokenState(storedToken);
       magnaAIService.setAuthToken(storedToken);
@@ -31,9 +32,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   const setToken = (newToken: string | null) => {
     setTokenState(newToken);
     if (newToken) {
+      // Store in both locations for compatibility
+      localStorage.setItem('accessToken', newToken);
       localStorage.setItem('authToken', newToken);
       magnaAIService.setAuthToken(newToken);
     } else {
+      localStorage.removeItem('accessToken');
       localStorage.removeItem('authToken');
       magnaAIService.clearAuthToken();
     }
@@ -41,6 +45,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
   const clearToken = () => {
     setTokenState(null);
+    localStorage.removeItem('accessToken');
     localStorage.removeItem('authToken');
     magnaAIService.clearAuthToken();
   };

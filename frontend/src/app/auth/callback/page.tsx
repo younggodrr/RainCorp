@@ -31,6 +31,8 @@ export default function AuthCallbackPage() {
         localStorage.setItem('refreshToken', backendRefreshToken);
       }
       if (userId) {
+        // Store in both formats for compatibility
+        localStorage.setItem('userId', userId);
         localStorage.setItem('userid', userId);
       }
       if (user) {

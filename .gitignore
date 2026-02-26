@@ -93,6 +93,16 @@ jspm_packages/
 *.swo
 *~
 
+# Kiro and Trae directories
+.kiro/
+.trae/
+
+# AI Backend (separate repository)
+magna-ai-backend/
+
+# Main Backend (separate repository)
+magna-coders-backend/
+
 # OS generated files
 .DS_Store
 .DS_Store?

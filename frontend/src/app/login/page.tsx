@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { Eye, EyeOff, Mail, Lock, Sun, Moon, Github, Chrome, ArrowLeft } from 'lucide-react';
 import { signIn } from 'next-auth/react';
 import TopNavigation from '@/components/TopNavigation';
-import { clearMockSessionData } from '@/utils/clearMockData';
 
 export default function LoginPage() {
   const [isDarkMode, setIsDarkMode] = useState(false);
@@ -24,9 +23,6 @@ export default function LoginPage() {
   // Handle theme persistence
   useEffect(() => {
     setMounted(true);
-    
-    // Clear any old mock session data on mount
-    clearMockSessionData();
     
     const savedTheme = localStorage.getItem('theme');
     // Default to dark mode if no preference, or check system preference
@@ -107,6 +103,8 @@ export default function LoginPage() {
       const userId = user.id || responseData.userId || responseData.id;
 
       if (userId) {
+        // Store in both formats for compatibility
+        localStorage.setItem('userId', userId);
         localStorage.setItem('userid', userId);
       }
       

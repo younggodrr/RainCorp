@@ -19,7 +19,29 @@ export default function RegularPostDetails({ post }: RegularPostDetailsProps) {
       </p>
       {post.image && (
           <div className="w-full h-96 rounded-2xl overflow-hidden relative border border-gray-100 shadow-sm">
-             <Image src={post.image} alt="Post Content" fill className="object-cover" />
+             {post.image.startsWith('data:video/') ? (
+               // Video display
+               <video 
+                 src={post.image} 
+                 controls 
+                 className="w-full h-full object-cover" 
+               />
+             ) : post.image.startsWith('data:') ? (
+               // Use regular img tag for base64 image data URLs
+               <img 
+                 src={post.image} 
+                 alt="Post Content" 
+                 className="w-full h-full object-cover" 
+               />
+             ) : (
+               // Use Next.js Image for external URLs
+               <Image 
+                 src={post.image} 
+                 alt="Post Content" 
+                 fill 
+                 className="object-cover" 
+               />
+             )}
           </div>
       )}
       

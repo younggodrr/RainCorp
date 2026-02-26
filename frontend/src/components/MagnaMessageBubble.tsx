@@ -101,8 +101,17 @@ export default function MagnaMessageBubble({
         <div className="flex items-baseline gap-2 ml-1">
           <span className={`text-xs font-bold ${color ? color.split(' ')[1] : (isDarkMode ? 'text-gray-400' : 'text-gray-700')}`}>{sender}</span>
         </div>
-        <div className={`p-4 rounded-2xl rounded-tl-none border shadow-sm ${isDarkMode ? 'bg-[#111] border-[#333] text-gray-200' : 'bg-white border-gray-100 text-gray-700'}`}>
-          {!isLoading && <p className="text-sm leading-relaxed">{text}</p>}
+        <div className={`p-4 rounded-2xl rounded-tl-none ${isDarkMode ? 'bg-transparent text-gray-200' : 'bg-transparent text-gray-700'}`}>
+          {!isLoading && (
+            <div className="text-sm leading-relaxed whitespace-pre-wrap">
+              {text.split('\n').map((line, index) => (
+                <React.Fragment key={index}>
+                  {line}
+                  {index < text.split('\n').length - 1 && <br />}
+                </React.Fragment>
+              ))}
+            </div>
+          )}
           
           {isLoading && (
             <div className="flex items-center gap-2 text-[#E50914]">

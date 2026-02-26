@@ -182,10 +182,20 @@ export function useMagnaChat() {
           message: `Rate limit exceeded. Please wait ${error.retryAfter} seconds.` 
         });
       } else if (error instanceof Error) {
-        setToastConfig({ 
-          isVisible: true, 
-          message: error.message || 'Failed to send message. Please try again.' 
-        });
+        // Check if it's an authentication error
+        if (error.message.includes('Unauthorized') || error.message.includes('Authentication token not set')) {
+          setToastConfig({ 
+            isVisible: true, 
+            message: 'Session expired. Please log in again.' 
+          });
+          // Use Next.js router for navigation instead of window.location
+          setTimeout(() => router.push('/login'), 2000);
+        } else {
+          setToastConfig({ 
+            isVisible: true, 
+            message: error.message || 'Failed to send message. Please try again.' 
+          });
+        }
       }
     }
   };

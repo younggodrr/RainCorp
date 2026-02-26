@@ -13,7 +13,22 @@ export default function TechNewsPostDetails({ post }: TechNewsPostDetailsProps) 
     <div className="space-y-8">
       {post.imageUrl && (
         <div className="w-full h-80 md:h-96 rounded-2xl overflow-hidden relative shadow-md">
-          <Image src={post.imageUrl} alt="News" fill className="object-cover" />
+          {post.imageUrl.startsWith('data:') ? (
+            // Use regular img tag for base64 data URLs
+            <img 
+              src={post.imageUrl} 
+              alt="News" 
+              className="w-full h-full object-cover" 
+            />
+          ) : (
+            // Use Next.js Image for external URLs
+            <Image 
+              src={post.imageUrl} 
+              alt="News" 
+              fill 
+              className="object-cover" 
+            />
+          )}
         </div>
       )}
       <div className="flex items-center gap-3">
@@ -31,7 +46,7 @@ export default function TechNewsPostDetails({ post }: TechNewsPostDetailsProps) 
         &quot;This is a placeholder for the full article content. In a real application, this would either fetch the full content or redirect to the source.&quot;
       </div>
       
-      <PostInteractionBar initialLikes={post.likes} initialComments={post.comments} initialCommentsData={generateMockComments(post.id, post.comments)} postId={post.id} />
+      <PostInteractionBar initialLikes={post.likes} initialComments={post.comments} postId={post.id} />
 
       <a href={post.url} target="_blank" rel="noopener noreferrer" className="block w-full py-4 rounded-xl bg-black text-white font-bold text-lg shadow-lg hover:bg-gray-800 transition-all text-center transform hover:-translate-y-1">
         Read Full Article
