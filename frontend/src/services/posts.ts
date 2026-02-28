@@ -97,12 +97,12 @@ export const getPosts = async (params: GetPostsParams = {}): Promise<Post[]> => 
   const searchParams = new URLSearchParams();
   if (params.limit) searchParams.set('limit', String(params.limit));
   if (params.offset) searchParams.set('offset', String(params.offset));
-  if (params.type) searchParams.set('type', params.type);
+  if (params.type) searchParams.set('postType', params.type); // Backend expects 'postType'
   if (params.category) searchParams.set('category', params.category);
   if (params.search) searchParams.set('search', params.search);
 
   const query = searchParams.toString();
-  const data = await apiFetch<any>(`/api/posts${query ? `?${query}` : ''}`, { method: 'GET' });
+  const data = await apiFetch<any>(`/posts${query ? `?${query}` : ''}`, { method: 'GET' });
 
   // Handle different response formats
   if (Array.isArray(data)) {
@@ -122,7 +122,7 @@ export const getPosts = async (params: GetPostsParams = {}): Promise<Post[]> => 
  */
 export const getPostById = async (id: string): Promise<Post | null> => {
   try {
-    const data = await apiFetch<any>(`/api/posts/${id}`, { method: 'GET' });
+    const data = await apiFetch<any>(`/posts/${id}`, { method: 'GET' });
     
     // Handle different response formats
     const rawPost = data?.post || data?.data || data;
@@ -143,6 +143,7 @@ export const getPostById = async (id: string): Promise<Post | null> => {
       likes: rawPost.likesCount || rawPost._count?.likes || 0,
       comments: rawPost.commentsCount || rawPost._count?.comments || 0,
       shares: 0,
+      isLiked: rawPost.isLiked || false, // Add isLiked status from backend
       createdAt: rawPost.created_at || rawPost.createdAt,
       updatedAt: rawPost.updated_at || rawPost.updatedAt,
       user: rawPost.author || rawPost.users || rawPost.user ? {
@@ -181,7 +182,7 @@ export const getPostById = async (id: string): Promise<Post | null> => {
  * Create a new post
  */
 export const createPost = async (postData: CreatePostData): Promise<Post> => {
-  const data = await apiFetch<any>('/api/posts', {
+  const data = await apiFetch<any>('/posts', {
     method: 'POST',
     data: postData,
   });
@@ -192,28 +193,28 @@ export const createPost = async (postData: CreatePostData): Promise<Post> => {
  * Delete a post
  */
 export const deletePost = async (postId: string): Promise<void> => {
-  await apiFetch(`/api/posts/${postId}`, { method: 'DELETE' });
+  await apiFetch(`/posts/${postId}`, { method: 'DELETE' });
 };
 
 /**
  * Like a post
  */
 export const likePost = async (postId: string): Promise<void> => {
-  await apiFetch(`/api/posts/${postId}/like`, { method: 'POST' });
+  await apiFetch(`/posts/${postId}/like`, { method: 'POST' });
 };
 
 /**
  * Unlike a post
  */
 export const unlikePost = async (postId: string): Promise<void> => {
-  await apiFetch(`/api/posts/${postId}/unlike`, { method: 'POST' });
+  await apiFetch(`/posts/${postId}/unlike`, { method: 'POST' });
 };
 
 /**
  * Get comments for a post
  */
 export const getComments = async (postId: string): Promise<Comment[]> => {
-  const data = await apiFetch<any>(`/api/posts/${postId}/comments`, { method: 'GET' });
+  const data = await apiFetch<any>(`/posts/${postId}/comments`, { method: 'GET' });
   
   if (Array.isArray(data)) {
     return data;
@@ -228,7 +229,7 @@ export const getComments = async (postId: string): Promise<Comment[]> => {
  * Create a comment on a post
  */
 export const createComment = async (postId: string, commentData: CreateCommentData): Promise<Comment> => {
-  const data = await apiFetch<any>(`/api/posts/${postId}/comments`, {
+  const data = await apiFetch<any>(`/posts/${postId}/comments`, {
     method: 'POST',
     data: commentData,
   });
@@ -251,6 +252,63 @@ export const getUserFeed = async (params: GetPostsParams = {}): Promise<Post[]> 
   }
   if (data?.posts && Array.isArray(data.posts)) {
     return data.posts;
+  }
+  return [];
+};
+
+/**
+ * Get posts by user ID
+ */
+export const getUserPosts = async (userId: string, params: GetPostsParams = {}): Promise<Post[]> => {
+  const searchParams = new URLSearchParams();
+  searchParams.set('authorId', userId);
+  if (params.limit) searchParams.set('limit', String(params.limit));
+  if (params.offset) searchParams.set('offset', String(params.offset));
+  if (params.type) searchParams.set('postType', params.type);
+
+  const query = searchParams.toString();
+  const data = await apiFetch<any>(`/posts${query ? `?${query}` : ''}`, { method: 'GET' });
+
+  // Handle different response formats
+  if (Array.isArray(data)) {
+    return data;
+  }
+  if (data?.posts && Array.isArray(data.posts)) {
+    return data.posts.map((rawPost: any) => ({
+      id: rawPost.id,
+      userId: rawPost.author_id || rawPost.userId,
+      content: rawPost.content,
+      type: (rawPost.post_type?.toUpperCase() || 'REGULAR') as 'REGULAR' | 'JOB' | 'PROJECT' | 'TECH_NEWS',
+      category: rawPost.category,
+      tags: rawPost.tags || [],
+      mediaUrls: rawPost.mediaUrls || [],
+      likes: rawPost.likesCount || rawPost._count?.likes || 0,
+      comments: rawPost.commentsCount || rawPost._count?.comments || 0,
+      shares: 0,
+      isLiked: rawPost.isLiked || false,
+      createdAt: rawPost.created_at || rawPost.createdAt,
+      updatedAt: rawPost.updated_at || rawPost.updatedAt,
+      user: rawPost.author || rawPost.users || rawPost.user ? {
+        id: rawPost.author?.id || rawPost.users?.id || rawPost.user?.id,
+        username: rawPost.author?.username || rawPost.users?.username || rawPost.user?.username || 'Unknown',
+        fullName: rawPost.author?.username || rawPost.users?.username || rawPost.user?.username || 'Unknown',
+        profilePicture: rawPost.author?.avatar_url || rawPost.users?.avatar_url || rawPost.user?.avatar_url,
+        verified: rawPost.author?.verified || rawPost.users?.verified || rawPost.user?.verified || false
+      } : undefined,
+      title: rawPost.title,
+      company: rawPost.company,
+      location: rawPost.location,
+      salary: rawPost.salary,
+      jobType: rawPost.jobType,
+      projectName: rawPost.projectName,
+      projectDescription: rawPost.projectDescription,
+      techStack: rawPost.techStack,
+      githubUrl: rawPost.githubUrl,
+      liveUrl: rawPost.liveUrl,
+      newsTitle: rawPost.newsTitle,
+      newsUrl: rawPost.newsUrl,
+      newsSource: rawPost.newsSource
+    }));
   }
   return [];
 };

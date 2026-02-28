@@ -159,6 +159,8 @@ export const getUserProfile = async (req: Request, res: Response): Promise<void>
         github_url: true,
         linkedin_url: true,
         twitter_url: true,
+        instagram_url: true,
+        whatsapp_url: true,
         created_at: true,
         profile_complete_percentage: true
       }
@@ -185,6 +187,46 @@ export const getUserProfile = async (req: Request, res: Response): Promise<void>
   }
 };
 
+/**
+ * Upload profile picture
+ */
+export const uploadProfilePicture = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const userId = req.user;
+    
+    if (!userId) {
+      res.status(401).json({ success: false, message: 'Authentication required' });
+      return;
+    }
+
+    if (!req.file) {
+      res.status(400).json({ success: false, message: 'No file uploaded' });
+      return;
+    }
+
+    const file = req.file;
+    const fileUrl = `/uploads/${file.filename}`;
+    
+    // Update user's avatar_url
+    await prisma.users.update({
+      where: { id: userId },
+      data: {
+        avatar_url: fileUrl,
+        updated_at: new Date()
+      }
+    });
+    
+    res.status(200).json({
+      success: true,
+      avatar_url: fileUrl,
+      message: 'Profile picture uploaded successfully'
+    });
+  } catch (error: any) {
+    console.error('Upload profile picture error:', error);
+    res.status(500).json({ success: false, message: 'Failed to upload profile picture' });
+  }
+};
+
 // Update user profile
 export const updateUserProfile = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -204,6 +246,24 @@ export const updateUserProfile = async (req: Request, res: Response): Promise<vo
     delete updateData.email;
     delete updateData.id;
 
+    // Check if username is being updated and if it's already taken
+    if (updateData.username) {
+      const existingUser = await prisma.users.findFirst({
+        where: {
+          username: updateData.username,
+          NOT: { id: userId }
+        }
+      });
+
+      if (existingUser) {
+        res.status(400).json({
+          success: false,
+          message: 'Username is already taken'
+        });
+        return;
+      }
+    }
+
     const updatedUser = await prisma.users.update({
       where: { id: userId },
       data: {
@@ -221,6 +281,8 @@ export const updateUserProfile = async (req: Request, res: Response): Promise<vo
         github_url: true,
         linkedin_url: true,
         twitter_url: true,
+        instagram_url: true,
+        whatsapp_url: true,
         profile_complete_percentage: true
       }
     });

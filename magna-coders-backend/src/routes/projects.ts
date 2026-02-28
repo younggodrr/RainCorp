@@ -11,7 +11,13 @@ import {
   getProjectMembers,
   getProjectTasks,
   getProjectFiles,
-  getProjectActivity
+  getProjectActivity,
+  createProjectTask,
+  updateProjectTask,
+  deleteProjectTask,
+  uploadProjectFile,
+  deleteProjectFile,
+  getUserProjects,
 } from '../controllers/projects';
 import { asyncHandler } from '../middleware/errorHandler';
 import { authenticateToken } from '../middleware/auth';
@@ -20,8 +26,14 @@ const router: Router = express.Router();
 
 // Project Tasks/Issues
 router.get('/:projectId/tasks', authenticateToken, asyncHandler(getProjectTasks));
+router.post('/:projectId/tasks', authenticateToken, asyncHandler(createProjectTask));
+router.put('/:projectId/tasks/:taskId', authenticateToken, asyncHandler(updateProjectTask));
+router.delete('/:projectId/tasks/:taskId', authenticateToken, asyncHandler(deleteProjectTask));
+
 // Project Files/Assets
 router.get('/:projectId/files', authenticateToken, asyncHandler(getProjectFiles));
+router.post('/:projectId/files', authenticateToken, asyncHandler(uploadProjectFile));
+router.delete('/:projectId/files/:fileId', authenticateToken, asyncHandler(deleteProjectFile));
 
 /**
  * @swagger
@@ -137,6 +149,27 @@ router.get('/:projectId/files', authenticateToken, asyncHandler(getProjectFiles)
  *         description: Server error
  */
 router.get('/', asyncHandler(getProjects));
+
+/**
+ * @swagger
+ * /api/projects/user/{userId}:
+ *   get:
+ *     summary: Get user's projects
+ *     tags: [Projects]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         schema:
+ *           type: string
+ *         required: false
+ *         description: User ID (optional, defaults to current user)
+ *     responses:
+ *       200:
+ *         description: User projects retrieved successfully
+ */
+router.get('/user/:userId?', authenticateToken, asyncHandler(getUserProjects));
 
 /**
  * @swagger

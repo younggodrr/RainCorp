@@ -54,6 +54,7 @@ export default function PostDetailPage() {
               createdAt: formatTimeAgo(foundPost.createdAt),
               likes: foundPost.likes || 0,
               comments: foundPost.comments || 0,
+              isLiked: (foundPost as any).isLiked || false, // Add isLiked status
               title: foundPost.title,
               content: foundPost.content,
               image: foundPost.mediaUrls?.[0],
@@ -63,7 +64,7 @@ export default function PostDetailPage() {
               salary: foundPost.salary,
               tags: foundPost.tags,
               jobType: foundPost.jobType,
-              summary: foundPost.newsTitle,
+              summary: foundPost.content || foundPost.newsTitle, // Use content as summary for tech news
               source: foundPost.newsSource,
               url: foundPost.newsUrl,
               imageUrl: foundPost.mediaUrls?.[0],

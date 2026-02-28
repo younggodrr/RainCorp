@@ -45,7 +45,12 @@ export default function RegularPostDetails({ post }: RegularPostDetailsProps) {
           </div>
       )}
       
-      <PostInteractionBar initialLikes={post.likes} initialComments={post.comments} postId={post.id} />
+      <PostInteractionBar 
+        initialLikes={post.likes} 
+        initialComments={post.comments} 
+        postId={post.id}
+        initialLiked={(post as any).isLiked || false}
+      />
     </div>
   );
 }

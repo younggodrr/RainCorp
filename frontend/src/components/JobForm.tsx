@@ -4,7 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import FileUpload from './FileUpload';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL + '/api' || 'http://localhost:5000/api';
 
 // Helper for authenticated requests
 const getAuthToken = () => {
@@ -68,7 +68,7 @@ export default function JobForm({ isDarkMode, onCancel, onSuccess, jobId }: JobF
       if (!jobId) return;
       setLoadingJob(true);
       try {
-        const data = await authenticatedFetch(`/jobs/${encodeURIComponent(String(jobId))}`);
+        const data = await authenticatedFetch(`/opportunities/${encodeURIComponent(String(jobId))}`);
         if (!mounted) return;
         setForm(prev => ({
           ...prev,
@@ -76,7 +76,7 @@ export default function JobForm({ isDarkMode, onCancel, onSuccess, jobId }: JobF
           company: data.company || '',
           description: data.description || '',
           location: data.location || '',
-          jobType: data.jobType || data.employment_type || '',
+          jobType: data.job_type || data.employment_type || '',
           salary: data.salary || data.salary_text || '',
           tags: (data.skills || data.tags || []).join(', ')
         }));
@@ -107,14 +107,14 @@ export default function JobForm({ isDarkMode, onCancel, onSuccess, jobId }: JobF
         company: form.company,
         description: form.description,
         location: form.location,
-        jobType: form.jobType,
+        job_type: form.jobType,
         salary: form.salary,
         tags: form.tags.split(',').map(t => t.trim()).filter(Boolean),
       };
       if (jobId) {
-        await authenticatedFetch(`/jobs/${encodeURIComponent(String(jobId))}`, { method: 'PATCH', body: JSON.stringify(body) });
+        await authenticatedFetch(`/opportunities/${encodeURIComponent(String(jobId))}`, { method: 'PUT', body: JSON.stringify(body) });
       } else {
-        await authenticatedFetch('/jobs', { method: 'POST', body: JSON.stringify(body) });
+        await authenticatedFetch('/opportunities', { method: 'POST', body: JSON.stringify(body) });
       }
       if (onSuccess) onSuccess();
       // Redirect back to jobs list after successful create/update

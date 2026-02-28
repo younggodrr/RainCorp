@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { 
   LayoutGrid, Users, MessageCircleQuestion, Settings, 
@@ -26,6 +26,9 @@ export default function ProjectsPage() {
   const [error, setError] = useState<string | null>(null);
   const tabs = ['All projects', 'Search trending projects', 'Completed projects'];
   const [activeFilterTab, setActiveFilterTab] = useState('All projects');
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -48,9 +51,15 @@ export default function ProjectsPage() {
       setLoading(true);
       setError(null);
       try {
-        const params = searchQuery ? `?search=${encodeURIComponent(searchQuery)}` : '';
-        const data = await apiFetch<{ projects: any[] }>(`/projects${params}`);
+        const params = new URLSearchParams();
+        if (searchQuery) params.set('search', searchQuery);
+        params.set('limit', '50');
+        params.set('page', '1');
+        
+        const data = await apiFetch<{ projects: any[] }>(`/projects?${params.toString()}`);
         setProjects(data.projects || []);
+        setHasMore((data.projects || []).length >= 50);
+        setPage(1);
       } catch (err: any) {
         setError(err?.message || 'Failed to load projects');
       } finally {
@@ -65,6 +74,50 @@ export default function ProjectsPage() {
     setIsDarkMode(newMode);
     localStorage.setItem('theme', newMode ? 'dark' : 'light');
   };
+
+  const loadMoreProjects = async () => {
+    if (loadingMore || !hasMore) return;
+    
+    setLoadingMore(true);
+    try {
+      const params = new URLSearchParams();
+      if (searchQuery) params.set('search', searchQuery);
+      params.set('limit', '50');
+      params.set('page', String(page + 1));
+      
+      const data = await apiFetch<{ projects: any[] }>(`/projects?${params.toString()}`);
+      const newProjects = data.projects || [];
+      
+      if (newProjects.length === 0) {
+        setHasMore(false);
+      } else {
+        setProjects(prev => [...prev, ...newProjects]);
+        setPage(prev => prev + 1);
+        setHasMore(newProjects.length >= 50);
+      }
+    } catch (err) {
+      console.error('Error loading more projects:', err);
+      setHasMore(false);
+    } finally {
+      setLoadingMore(false);
+    }
+  };
+
+  const lastProjectRef = React.useCallback((node: HTMLDivElement) => {
+    if (loading || loadingMore) return;
+    
+    const observer = new IntersectionObserver(entries => {
+      if (entries[0].isIntersecting && hasMore) {
+        loadMoreProjects();
+      }
+    });
+    
+    if (node) observer.observe(node);
+    
+    return () => {
+      if (node) observer.disconnect();
+    };
+  }, [loading, loadingMore, hasMore, projects.length]);
 
   return (
     <div className={`h-screen font-sans flex overflow-hidden transition-colors duration-300 ${isDarkMode ? 'bg-black text-[#F9E4AD]' : 'bg-[#FDF8F5] text-[#444444]'}`}>
@@ -189,8 +242,16 @@ export default function ProjectsPage() {
               ) : projects.length === 0 ? (
                 <div className="col-span-2 text-center py-12 text-gray-400">No projects found.</div>
               ) : (
-                projects.map(project => (
-                  <Link href={`/projects/${project.id}`} key={project.id} className="block">
+                <>
+                  {projects.map((project, index) => {
+                    const isLastProject = index === projects.length - 1;
+                    return (
+                      <Link 
+                        href={`/projects/${project.id}`} 
+                        key={project.id} 
+                        className="block"
+                        ref={isLastProject ? lastProjectRef : null}
+                      >
                     <div className={`rounded-2xl p-6 border shadow-sm hover:shadow-md transition-all group ${
                       isDarkMode 
                         ? 'bg-[#111] border-[#E70008]/30 shadow-[0_0_15px_rgba(231,0,8,0.1)]' 
@@ -301,7 +362,22 @@ export default function ProjectsPage() {
                       </div>
                     </div>
                   </Link>
-                ))
+                    );
+                  })}
+                  
+                  {loadingMore && (
+                    <div className="col-span-2 py-8 text-center flex flex-col items-center justify-center text-gray-400">
+                      <div className="w-8 h-8 border-4 border-gray-200 border-t-[#E50914] rounded-full animate-spin mb-2"></div>
+                      <span className="text-sm font-medium">Loading more projects...</span>
+                    </div>
+                  )}
+                  
+                  {!hasMore && projects.length > 0 && (
+                    <div className="col-span-2 py-8 text-center text-gray-400 text-sm font-medium">
+                      You've seen all projects!
+                    </div>
+                  )}
+                </>
               )}
             </div>
 

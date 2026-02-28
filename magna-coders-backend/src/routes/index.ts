@@ -19,11 +19,20 @@ import contractRoutes from './contracts';
 import coinRoutes from './coins';
 import adminRoutes from './admin';
 import aiRoutes from './ai';
+import newsRoutes from './news';
+import usersRoutes from './users';
+import friendsRoutes from './friends';
+import notificationsRoutes from './notifications';
+import skillsRoutes from './skills';
 
 const router: Router = express.Router();
 
 // API Routes
 router.use('/auth', authRoutes);
+router.use('/users', usersRoutes);
+router.use('/friends', friendsRoutes);
+router.use('/notifications', notificationsRoutes);
+router.use('/skills', skillsRoutes);
 router.use('/posts', postRoutes);
 router.use('/jobs', jobRoutes);
 router.use('/tags', tagRoutes);
@@ -55,6 +64,9 @@ router.use('/admin', adminRoutes);
 
 // AI Routes (Backend Integration for Magna AI)
 router.use('/ai', aiRoutes);
+
+// News Routes (Tech News Aggregator)
+router.use('/news', newsRoutes);
 
 // Health check
 router.get('/health', (req, res) => {

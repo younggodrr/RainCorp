@@ -117,11 +117,22 @@ const nextConfig = {
   },
   
   images: {
-    domains: ['localhost', 'vercel.app', 'your-domain.com'],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+      },
+      {
+        protocol: 'https',
+        hostname: 'vercel.app',
+      },
+      {
+        protocol: 'https',
+        hostname: 'your-domain.com',
       },
     ],
   },

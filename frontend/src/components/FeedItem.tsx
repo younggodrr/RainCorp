@@ -507,8 +507,8 @@ export default function FeedItem({ post, onRequestJoin, onDelete, isDarkMode }: 
           </div>
 
           <PostInteractionBar 
-             initialLikes={post.likes} 
-             initialComments={post.comments} 
+             initialLikes={typeof post.likes === 'number' ? post.likes : (Array.isArray(post.likes) ? post.likes.length : 0)} 
+             initialComments={typeof post.comments === 'number' ? post.comments : (Array.isArray(post.comments) ? post.comments.length : 0)} 
              postId={post.id} 
           />
         </Link>

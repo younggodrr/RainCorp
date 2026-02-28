@@ -79,6 +79,9 @@ class AgentResponse:
     conversation_id: str
     metadata: Dict[str, Any]  # Tool calls, results, etc.
     timestamp: datetime
+    tool_calls: Optional[List[Any]] = None  # Tool calls made during processing
+    results: Optional[List[Any]] = None  # Results from tool executions
+    requires_consent: Optional[Any] = None  # Consent request if needed
 
 
 class MagnaAgent:
@@ -883,6 +886,9 @@ Guidelines:
         # Format user context for prompt
         user_context_str = self._format_user_context(user_context)
         
+        # Extract user name for personalization
+        user_name = user_context.get('name', 'there') if user_context else 'there'
+        
         response_prompt = f"""Generate a helpful response to the user based on the following information.
 
 User's message: "{context.message}"
@@ -906,7 +912,7 @@ Errors (if any):
 Recent conversation context:
 {memory_context}
 
-IMPORTANT: Always address the user by their name from the profile above. Start your response with "Hello [Name]" or "Hi [Name]".
+IMPORTANT: Always address the user by their name "{user_name}" from the profile above. Start your response with "Hello {user_name}" or "Hi {user_name}".
 
 Generate a response that:
 1. Directly addresses the user's request
@@ -915,7 +921,7 @@ Generate a response that:
 4. Acknowledges any limitations or errors honestly
 5. Maintains a professional but friendly tone
 6. References previous conversation context when relevant
-7. Uses the user's name and profile information for personalization
+7. Uses the user's actual name "{user_name}" and profile information for personalization
 
 If tools failed or no results were found, explain why and suggest alternatives."""
 
@@ -1178,7 +1184,10 @@ If tools failed or no results were found, explain why and suggest alternatives."
         user_context = context.metadata.get("user_context", {})
         user_context_str = self._format_user_context(user_context)
         
-        simple_prompt = f"""You are Magna AI, a career assistant for the Magna platform.
+        # Extract user name for personalization
+        user_name = user_context.get('name', 'there') if user_context else 'there'
+        
+        simple_prompt = f"""You are Magna AI, a career assistant for the Magna platform with a fun, casual personality.
 
 {user_context_str}
 
@@ -1187,16 +1196,16 @@ User's message: "{message}"
 Previous context:
 {memory_context if memory_context else "No previous context"}
 
-IMPORTANT: Always greet the user by their name from the profile above. Start your response with "Hello [Name]" or "Hi [Name]".
+IMPORTANT: Always greet the user by their actual name "{user_name}" from the profile above. Start your response with "Hey {user_name}!" or "What's up {user_name}!" Keep it casual and fun!
 
-Provide a helpful, friendly response. Keep it concise and conversational.
+Provide a helpful, friendly response with personality. Keep it concise and conversational. Use emojis when appropriate 🚀.
 If the user is asking about what you can do, mention:
-- Finding job opportunities
-- Searching for builders and collaborators
-- Preparing for interviews
-- Managing career documents
+- Finding job opportunities that match their vibe
+- Connecting them with cool builders and collaborators
+- Helping them crush interviews
+- Managing career docs and making them shine
 
-Use the user's name and profile information to personalize your response.
+Use the user's actual name "{user_name}" and profile information to personalize your response. Keep it real and engaging!
 
 Response:"""
         

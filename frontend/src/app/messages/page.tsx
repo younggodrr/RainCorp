@@ -9,7 +9,7 @@ import ChatInput from '@/components/ChatInput';
 import CreateGroupModal from '@/components/CreateGroupModal';
 import GroupInfoModal from '@/components/GroupInfoModal';
 import StartChatModal from '@/components/StartChatModal';
-import ContactInfoModal from '@/components/ContactInfoModal';
+import ContactInfoModalWrapper from '@/components/ContactInfoModalWrapper';
 import AttachmentModal from '@/components/AttachmentModal';
 import SendCoinsModal from '@/components/SendCoinsModal';
 import DiscoverGroupsModal from '@/components/DiscoverGroupsModal';
@@ -20,7 +20,7 @@ import ChatSidebar from '@/components/ChatSidebar';
 import FloatingActionMenu from '@/components/FloatingActionMenu';
 import MobileDrawer from '@/components/MobileDrawer';
 
-import { getGroupMembers, getContactInfo } from './constants';
+import { getGroupMembers } from './constants';
 import { useMessages } from './useMessages';
 
 export default function MessagesPage() {
@@ -88,7 +88,8 @@ function MessagesContent() {
     handleAttachmentSelect,
     handleStartChat,
     handleJoinGroup,
-    chatDetails
+    chatDetails,
+    friends
   } = useMessages();
 
   return (
@@ -241,6 +242,7 @@ function MessagesContent() {
         isOpen={isStartChatModalOpen}
         onClose={() => setIsStartChatModalOpen(false)}
         onStartChat={handleStartChat}
+        existingFriends={friends}
         isDarkMode={isDarkMode}
       />
 
@@ -264,10 +266,10 @@ function MessagesContent() {
       )}
 
       {selectedChat && !selectedChat.isGroup && (
-        <ContactInfoModal
+        <ContactInfoModalWrapper
           isOpen={isContactInfoModalOpen}
           onClose={() => setIsContactInfoModalOpen(false)}
-          contact={getContactInfo(selectedChat)}
+          chat={selectedChat}
           isDarkMode={isDarkMode}
         />
       )}

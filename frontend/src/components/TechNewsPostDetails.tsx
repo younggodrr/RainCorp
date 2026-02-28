@@ -39,14 +39,26 @@ export default function TechNewsPostDetails({ post }: TechNewsPostDetailsProps) 
         <span className="text-gray-500 font-medium">{post.createdAt}</span>
       </div>
       <h2 className="font-bold text-3xl md:text-4xl text-black leading-tight">{post.title}</h2>
-      <p className="text-gray-600 leading-relaxed text-xl">
-        {post.summary}
-      </p>
-      <div className="p-6 bg-gray-50 rounded-2xl border border-gray-100 text-gray-600 italic text-lg border-l-4 border-l-[#E50914]">
-        &quot;This is a placeholder for the full article content. In a real application, this would either fetch the full content or redirect to the source.&quot;
-      </div>
       
-      <PostInteractionBar initialLikes={post.likes} initialComments={post.comments} postId={post.id} />
+      {/* Display actual content if available */}
+      {post.content && (
+        <div className="text-gray-700 leading-relaxed text-lg whitespace-pre-wrap">
+          {post.content}
+        </div>
+      )}
+      
+      {post.summary && post.summary !== post.title && (
+        <p className="text-gray-600 leading-relaxed text-xl">
+          {post.summary}
+        </p>
+      )}
+      
+      <PostInteractionBar 
+        initialLikes={post.likes} 
+        initialComments={post.comments} 
+        postId={post.id}
+        initialLiked={(post as any).isLiked || false}
+      />
 
       <a href={post.url} target="_blank" rel="noopener noreferrer" className="block w-full py-4 rounded-xl bg-black text-white font-bold text-lg shadow-lg hover:bg-gray-800 transition-all text-center transform hover:-translate-y-1">
         Read Full Article

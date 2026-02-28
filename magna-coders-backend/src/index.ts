@@ -2,12 +2,14 @@ import express, { Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import path from 'path';
 import swaggerUi from 'swagger-ui-express';
 import apiRoutes from './routes';
 import { errorHandler, notFound } from './middleware/errorHandler';
 import { swaggerSpec } from './utils/swagger';
 import { OTPService } from './services';
 import { validateEnv } from './utils/validateEnv';
+import newsScheduler from './services/news/newsScheduler';
 
 // Load environment variables
 dotenv.config();
@@ -27,6 +29,9 @@ app.use(helmet({
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+
+// Serve uploaded files statically
+app.use('/uploads', express.static(path.join(__dirname, '../uploads')));
 
 // Swagger documentation
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, {
@@ -62,6 +67,18 @@ setInterval(() => {
 }, OTP_CLEANUP_INTERVAL);
 
 console.log(`⏰ OTP cleanup scheduled every ${OTP_CLEANUP_INTERVAL / 1000 / 60} minutes`);
+
+// Initialize and start news scheduler
+(async () => {
+  try {
+    await newsScheduler.initialize();
+    // Start scheduler (runs every hour)
+    newsScheduler.start('0 * * * *');
+    console.log('📰 Tech news scheduler initialized');
+  } catch (error) {
+    console.error('❌ Failed to initialize news scheduler:', error);
+  }
+})();
 
 // Legacy health check (for backward compatibility)
 app.get('/health', (req, res) => {

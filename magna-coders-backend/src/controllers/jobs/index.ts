@@ -34,7 +34,7 @@ const getJobs = async (req: Request, res: Response): Promise<void> => {
 			take: limit,
 			orderBy,
 			include: {
-				author: {
+				users: {
 					select: { id: true, username: true, avatar_url: true }
 				},
 				categories: {
@@ -71,7 +71,7 @@ const getJobById = async (req: Request, res: Response): Promise<void> => {
 	const job = await prisma.opportunities.findUnique({
 		where: { id },
 		include: {
-			author: {
+			users: {
 				select: { id: true, username: true, avatar_url: true }
 			},
 			categories: {
@@ -181,7 +181,7 @@ const updateJob = async (req: Request, res: Response): Promise<void> => {
 			category_id: categoryId !== undefined ? categoryId : job.category_id
 		},
 		include: {
-			author: {
+			users: {
 				select: { id: true, username: true, avatar_url: true }
 			},
 			categories: {

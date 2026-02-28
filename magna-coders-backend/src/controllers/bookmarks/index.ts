@@ -7,8 +7,11 @@ const prisma = new PrismaClient();
 const toggleBookmark = async (req: Request, res: Response): Promise<void> => {
   const userId = req.user as string;
   const { id } = req.params; // opportunity id
+  
+  console.log('Toggle bookmark - userId:', userId, 'opportunityId:', id, 'params:', req.params);
+  
   if (!id) {
-    res.status(400).json({ message: 'opportunity id required' });
+    res.status(400).json({ message: 'opportunity id required', params: req.params });
     return;
   }
 
@@ -41,4 +44,28 @@ const getBookmarkState = async (req: Request, res: Response): Promise<void> => {
   res.status(200).json({ bookmarked: !!existing, id: existing?.id || null });
 };
 
-export { toggleBookmark, getBookmarkState };
+const getUserBookmarks = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.user as string;
+
+  if (!userId) {
+    res.status(401).json({ message: 'Authentication required' });
+    return;
+  }
+
+  const bookmarks = await prisma.bookmarks.findMany({
+    where: { user_id: userId },
+    include: {
+      opportunities: {
+        include: {
+          users: { select: { id: true, username: true, avatar_url: true } },
+          categories: { select: { id: true, name: true } }
+        }
+      }
+    },
+    orderBy: { saved_at: 'desc' }
+  });
+
+  res.status(200).json({ bookmarks });
+};
+
+export { toggleBookmark, getBookmarkState, getUserBookmarks };

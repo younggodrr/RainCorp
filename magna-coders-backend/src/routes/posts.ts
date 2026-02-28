@@ -100,6 +100,60 @@ router.get('/', asyncHandler(getPosts));
 
 /**
  * @swagger
+ * /api/posts/tags:
+ *   get:
+ *     summary: Get all tags
+ *     tags: [Tags]
+ *     parameters:
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search tags by name
+ *     responses:
+ *       200:
+ *         description: Tags retrieved successfully
+ *       500:
+ *         description: Server error
+ */
+router.get('/tags', asyncHandler(getAllTags));
+
+/**
+ * @swagger
+ * /api/posts/tags/popular:
+ *   get:
+ *     summary: Get popular tags
+ *     tags: [Tags]
+ *     parameters:
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *         description: Number of tags to return (max 50)
+ *     responses:
+ *       200:
+ *         description: Popular tags retrieved successfully
+ *       500:
+ *         description: Server error
+ */
+router.get('/tags/popular', asyncHandler(getPopularTags));
+
+/**
+ * @swagger
+ * /api/categories:
+ *   get:
+ *     summary: Get all categories
+ *     tags: [Categories]
+ *     responses:
+ *       200:
+ *         description: Categories retrieved successfully
+ *       500:
+ *         description: Server error
+ */
+router.get('/categories', asyncHandler(getAllCategories));
+
+/**
+ * @swagger
  * /api/posts/{id}:
  *   get:
  *     summary: Get a post by ID
@@ -434,59 +488,5 @@ router.put('/:id/comments/:commentId', authenticateToken, asyncHandler(updateCom
  *         description: Server error
  */
 router.delete('/:id/comments/:commentId', authenticateToken, asyncHandler(deleteComment));
-
-/**
- * @swagger
- * /api/tags:
- *   get:
- *     summary: Get all tags
- *     tags: [Tags]
- *     parameters:
- *       - in: query
- *         name: search
- *         schema:
- *           type: string
- *         description: Search tags by name
- *     responses:
- *       200:
- *         description: Tags retrieved successfully
- *       500:
- *         description: Server error
- */
-router.get('/tags', asyncHandler(getAllTags));
-
-/**
- * @swagger
- * /api/tags/popular:
- *   get:
- *     summary: Get popular tags
- *     tags: [Tags]
- *     parameters:
- *       - in: query
- *         name: limit
- *         schema:
- *           type: integer
- *         description: Number of tags to return
- *     responses:
- *       200:
- *         description: Popular tags retrieved successfully
- *       500:
- *         description: Server error
- */
-router.get('/tags/popular', asyncHandler(getPopularTags));
-
-/**
- * @swagger
- * /api/categories:
- *   get:
- *     summary: Get all categories
- *     tags: [Categories]
- *     responses:
- *       200:
- *         description: Categories retrieved successfully
- *       500:
- *         description: Server error
- */
-router.get('/categories', asyncHandler(getAllCategories));
 
 export default router;

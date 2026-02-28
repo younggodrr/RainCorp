@@ -1,13 +1,18 @@
 import express, { Router } from 'express';
-// Chat controllers temporarily disabled
-const getUserChats = (req: any, res: any) => res.status(501).json({ message: 'Chat endpoints temporarily disabled' });
-const getChatMessages = (req: any, res: any) => res.status(501).json({ message: 'Chat endpoints temporarily disabled' });
-const createDirectChat = (req: any, res: any) => res.status(501).json({ message: 'Chat endpoints temporarily disabled' });
-const createGroupChat = (req: any, res: any) => res.status(501).json({ message: 'Chat endpoints temporarily disabled' });
-const sendMessage = (req: any, res: any) => res.status(501).json({ message: 'Chat endpoints temporarily disabled' });
-const leaveChat = (req: any, res: any) => res.status(501).json({ message: 'Chat endpoints temporarily disabled' });
+import { 
+  getUserChats, 
+  getChatById,
+  getChatMessages, 
+  createDirectChat, 
+  createGroupChat, 
+  sendMessage, 
+  leaveChat,
+  uploadFile,
+  markMessagesAsRead
+} from '../controllers/chat';
 import { asyncHandler } from '../middleware/errorHandler';
 import { authenticateToken } from '../middleware/auth';
+import { upload } from '../services/fileUpload';
 
 /**
  * @swagger
@@ -98,6 +103,35 @@ router.use(authenticateToken);
  *         description: Server error
  */
 router.get('/', asyncHandler(getUserChats));
+
+/**
+ * @swagger
+ * /api/chat/{chatId}:
+ *   get:
+ *     summary: Get a specific chat by ID
+ *     tags: [Chat]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: chatId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Chat ID
+ *     responses:
+ *       200:
+ *         description: Chat retrieved successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Not a member of this chat
+ *       404:
+ *         description: Chat not found
+ *       500:
+ *         description: Server error
+ */
+router.get('/:chatId', asyncHandler(getChatById));
 
 /**
  * @swagger
@@ -278,6 +312,33 @@ router.post('/:chatId/messages', asyncHandler(sendMessage));
 
 /**
  * @swagger
+ * /api/chat/{chatId}/read:
+ *   post:
+ *     summary: Mark messages as read in a chat
+ *     tags: [Chat]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: chatId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Chat ID
+ *     responses:
+ *       200:
+ *         description: Messages marked as read successfully
+ *       401:
+ *         description: Unauthorized
+ *       403:
+ *         description: Not a member of this chat
+ *       500:
+ *         description: Server error
+ */
+router.post('/:chatId/read', asyncHandler(markMessagesAsRead));
+
+/**
+ * @swagger
  * /api/chat/{chatId}/leave:
  *   delete:
  *     summary: Leave a chat
@@ -304,5 +365,35 @@ router.post('/:chatId/messages', asyncHandler(sendMessage));
  *         description: Server error
  */
 router.delete('/:chatId/leave', asyncHandler(leaveChat));
+
+/**
+ * @swagger
+ * /api/chat/upload:
+ *   post:
+ *     summary: Upload a file for messaging
+ *     tags: [Chat]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: File uploaded successfully
+ *       401:
+ *         description: Unauthorized
+ *       400:
+ *         description: No file uploaded or invalid file type
+ *       500:
+ *         description: Server error
+ */
+router.post('/upload', upload.single('file'), asyncHandler(uploadFile));
 
 export default router;

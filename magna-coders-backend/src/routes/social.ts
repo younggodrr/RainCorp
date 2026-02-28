@@ -7,6 +7,9 @@ import {
   getUserFeed,
   getNotifications,
   getUnreadNotificationCount,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteNotification,
   searchUsers,
 } from '../controllers/social';
 import { asyncHandler } from '../middleware/errorHandler';
@@ -185,5 +188,61 @@ router.get('/notifications', asyncHandler(getNotifications));
  *         description: Unread notification count
  */
 router.get('/notifications/unread', asyncHandler(getUnreadNotificationCount));
+
+/**
+ * @swagger
+ * /api/social/notifications/{notificationId}/read:
+ *   patch:
+ *     summary: Mark a notification as read
+ *     tags: [Social, Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: notificationId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Notification ID
+ *     responses:
+ *       200:
+ *         description: Notification marked as read
+ */
+router.patch('/notifications/:notificationId/read', asyncHandler(markNotificationAsRead));
+
+/**
+ * @swagger
+ * /api/social/notifications/read-all:
+ *   patch:
+ *     summary: Mark all notifications as read
+ *     tags: [Social, Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: All notifications marked as read
+ */
+router.patch('/notifications/read-all', asyncHandler(markAllNotificationsAsRead));
+
+/**
+ * @swagger
+ * /api/social/notifications/{notificationId}:
+ *   delete:
+ *     summary: Delete a notification
+ *     tags: [Social, Notifications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: notificationId
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Notification ID
+ *     responses:
+ *       200:
+ *         description: Notification deleted
+ */
+router.delete('/notifications/:notificationId', asyncHandler(deleteNotification));
 
 export default router;

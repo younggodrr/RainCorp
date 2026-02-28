@@ -197,7 +197,9 @@ export default function LoginPage() {
         {isDarkMode ? (
           <>
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#5C2400] opacity-20 rounded-full blur-[100px]"></div>
-            <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.03]"></div>
+            <div className="absolute inset-0 opacity-[0.03]" style={{
+              backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.03) 2px, rgba(255,255,255,0.03) 4px)',
+            }}></div>
           </>
         ) : (
           <>

@@ -121,6 +121,37 @@ export const sendMessage = async (chatId: string, messageData: SendMessageData):
 };
 
 /**
+ * Upload a file for messaging
+ */
+export const uploadMessageFile = async (file: File): Promise<{
+  fileUrl: string;
+  fileName: string;
+  fileSize: number;
+  fileType: string;
+}> => {
+  const formData = new FormData();
+  formData.append('file', file);
+
+  const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
+  const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+
+  const response = await fetch(`${API_BASE}/chat/upload`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to upload file');
+  }
+
+  const data = await response.json();
+  return data;
+};
+
+/**
  * Mark messages as read
  */
 export const markMessagesAsRead = async (chatId: string): Promise<void> => {

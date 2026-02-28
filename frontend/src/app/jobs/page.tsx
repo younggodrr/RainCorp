@@ -50,34 +50,50 @@ export default function JobsPage() {
     async function fetchJobs() {
       setLoadingJobs(true);
       try {
-        const res = await listOpportunities({ limit: 20 });
-        const items = res.items || [];
+        // Fetch all opportunities and bookmarked jobs in parallel
+        const [opportunitiesRes, bookmarksRes] = await Promise.all([
+          listOpportunities({ limit: 20 }),
+          fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/bookmarks/me`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('accessToken')}`
+            }
+          }).then(r => r.ok ? r.json() : { bookmarks: [] }).catch(() => ({ bookmarks: [] }))
+        ]);
+
+        const items = opportunitiesRes.items || [];
+        const bookmarkedIds = new Set((bookmarksRes.bookmarks || []).map((b: any) => b.opportunity_id));
+        
         // Check both userId and userid for compatibility
         const localUserId = typeof window !== 'undefined' ? (localStorage.getItem('userId') || localStorage.getItem('userid')) : null;
+        
         const mapped: Job[] = items.map((opportunity: any, idx: number) => {
           const companyName = opportunity.company?.name || opportunity.company || 'Company';
           const salary = opportunity.salary_min && opportunity.salary_max
             ? `${opportunity.currency || ''} ${opportunity.salary_min} - ${opportunity.salary_max}`.trim()
             : (opportunity.salary_text || 'Competitive');
+          const isBookmarked = bookmarkedIds.has(opportunity.id);
+          
           return {
             id: Number(opportunity.id) || idx + 1,
             title: opportunity.title || 'Untitled',
             company: companyName,
             location: opportunity.location ? `${opportunity.location.city || ''}${opportunity.location.region ? ', ' + opportunity.location.region : ''}`.trim() : 'Remote',
-            type: opportunity.employment_type || 'Full-time',
+            type: opportunity.employment_type || opportunity.job_type || 'Full-time',
             salary,
-            postedAt: opportunity.posted_at || '',
+            postedAt: opportunity.posted_at || opportunity.created_at || '',
             description: opportunity.short_description || (opportunity.description ? String(opportunity.description).replace(/<[^>]+>/g, '') : ''),
             tags: opportunity.skills || [],
             logoColor: 'bg-gray-500',
-            category: opportunity.is_bookmarked ? 'saved' : 'recommended',
+            category: isBookmarked ? 'saved' : 'recommended',
             isExpired: opportunity.status === 'closed',
             isOwner: !!(localUserId && (
               String(opportunity.owner_user_id || opportunity.author_id || opportunity.author?.id || '') === String(localUserId)
             )),
-            opportunityId: opportunity.id
+            opportunityId: opportunity.id,
+            isBookmarked
           } as Job;
         });
+        
         if (mounted) setAllJobs(mapped);
       } catch (err: any) {
         if (mounted) setJobsError(err?.message || 'Failed to load jobs');

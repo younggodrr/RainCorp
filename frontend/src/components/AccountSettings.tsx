@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Camera, Chrome, ChevronRight, Github, Loader2, Linkedin, Twitter, MessageCircle, RefreshCw } from 'lucide-react';
 import { InputField, Button } from './SettingsHelpers';
 
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE;
+const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }) {
   const [isConnectingGitHub, setIsConnectingGitHub] = useState(false);
@@ -19,7 +19,10 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
   const [isSaving, setIsSaving] = useState(false);
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
   const [userName, setUserName] = useState('');
+  const [isUploadingPicture, setIsUploadingPicture] = useState(false);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
+    username: '',
     firstName: '',
     lastName: '',
     email: '',
@@ -29,6 +32,7 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
     github: '',
     linkedin: '',
     twitter: '',
+    instagram: '',
     whatsapp: ''
   });
 
@@ -63,16 +67,18 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
           const [firstName, ...lastNameParts] = fullName.split(' ');
           
           setFormData({
+            username: data.username || '',
             firstName: firstName || '',
             lastName: lastNameParts.join(' ') || '',
             email: data.email || '',
             bio: data.bio || '',
             location: data.location || '',
-            website: data.website || '',
-            github: data.github || '',
-            linkedin: data.linkedin || '',
-            twitter: data.twitter || '',
-            whatsapp: data.whatsapp || ''
+            website: data.website_url || '',
+            github: data.github_url || '',
+            linkedin: data.linkedin_url || '',
+            twitter: data.twitter_url || '',
+            instagram: data.instagram_url || '',
+            whatsapp: data.whatsapp_url || ''
           });
         }
       } catch (error) {
@@ -85,6 +91,61 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleProfilePictureClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      alert('File size must be less than 10MB');
+      return;
+    }
+
+    setIsUploadingPicture(true);
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token || !API_BASE) {
+        alert('Authentication error');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch(`${API_BASE}/api/auth/profile/upload-picture`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+        setProfilePicture(result.avatar_url);
+        alert('Profile picture updated successfully!');
+      } else {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Failed to upload profile picture');
+      }
+    } catch (error: any) {
+      console.error('Error uploading profile picture:', error);
+      alert(error.message || 'Failed to upload profile picture. Please try again.');
+    } finally {
+      setIsUploadingPicture(false);
+    }
   };
 
   const handleSaveProfile = async () => {
@@ -100,12 +161,15 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
       }
 
       const payload = {
+        username: formData.username,
         bio: formData.bio,
         location: formData.location,
         website_url: formData.website,
         github_url: formData.github,
         linkedin_url: formData.linkedin,
-        twitter_url: formData.twitter
+        twitter_url: formData.twitter,
+        instagram_url: formData.instagram,
+        whatsapp_url: formData.whatsapp
       };
 
       const response = await fetch(`${API_BASE}/api/auth/profile/${userId}`, {
@@ -195,22 +259,37 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
             <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#F4A261] to-[#E50914] flex items-center justify-center text-white font-bold text-3xl shadow-md relative overflow-hidden">
               {profilePicture ? (
                 <img 
-                  src={profilePicture} 
+                  src={`${API_BASE}${profilePicture}`}
                   alt={userName}
                   className="w-full h-full object-cover"
                 />
               ) : (
                 <span>{userName.charAt(0).toUpperCase()}</span>
               )}
-              <div className={`absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center shadow-sm cursor-pointer transition-colors border ${isDarkMode ? 'bg-[#222] border-gray-700 hover:bg-[#333]' : 'bg-white border-gray-100 hover:bg-gray-50'}`}>
+              <div 
+                onClick={handleProfilePictureClick}
+                className={`absolute bottom-0 right-0 w-8 h-8 rounded-full flex items-center justify-center shadow-sm cursor-pointer transition-colors border ${isDarkMode ? 'bg-[#222] border-gray-700 hover:bg-[#333]' : 'bg-white border-gray-100 hover:bg-gray-50'}`}
+              >
                 <Camera size={14} className={isDarkMode ? 'text-gray-400' : 'text-gray-600'} />
               </div>
             </div>
-            <button className="text-sm font-semibold text-[#E50914] hover:text-[#cc0812] transition-colors">
-              Change Photo
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <button 
+              onClick={handleProfilePictureClick}
+              disabled={isUploadingPicture}
+              className="text-sm font-semibold text-[#E50914] hover:text-[#cc0812] transition-colors disabled:opacity-50"
+            >
+              {isUploadingPicture ? 'Uploading...' : 'Change Photo'}
             </button>
           </div>
           <div className="flex-1 w-full space-y-6">
+            <InputField label="Username" name="username" value={formData.username} onChange={handleInputChange} isDarkMode={isDarkMode} placeholder="Choose a unique username" />
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <InputField label="First Name" name="firstName" value={formData.firstName} onChange={handleInputChange} isDarkMode={isDarkMode} />
               <InputField label="Last Name" name="lastName" value={formData.lastName} onChange={handleInputChange} isDarkMode={isDarkMode} />
@@ -238,7 +317,10 @@ export default function AccountSettings({ isDarkMode }: { isDarkMode?: boolean }
                 <InputField label="LinkedIn (optional)" name="linkedin" placeholder="https://linkedin.com/in/username" value={formData.linkedin} onChange={handleInputChange} isDarkMode={isDarkMode} />
                 <InputField label="Twitter (optional)" name="twitter" placeholder="https://twitter.com/username" value={formData.twitter} onChange={handleInputChange} isDarkMode={isDarkMode} />
             </div>
-            <InputField label="WhatsApp (optional)" name="whatsapp" placeholder="+254..." value={formData.whatsapp} onChange={handleInputChange} isDarkMode={isDarkMode} />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <InputField label="Instagram (optional)" name="instagram" placeholder="https://instagram.com/username" value={formData.instagram} onChange={handleInputChange} isDarkMode={isDarkMode} />
+                <InputField label="WhatsApp (optional)" name="whatsapp" placeholder="+254..." value={formData.whatsapp} onChange={handleInputChange} isDarkMode={isDarkMode} />
+            </div>
 
             <div className="pt-4 flex gap-4">
               <Button primary onClick={handleSaveProfile} disabled={isSaving} isDarkMode={isDarkMode}>

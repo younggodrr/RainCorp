@@ -1,7 +1,8 @@
 import express, { Router } from 'express';
-import { createApplication, getApplicationsForOpportunity, getUserApplications } from '../controllers/applications';
+import { createApplication, getApplicationsForOpportunity, getUserApplications, updateApplicationStatus, uploadResume } from '../controllers/applications';
 import { asyncHandler } from '../middleware/errorHandler';
 import { authenticateToken } from '../middleware/auth';
+import { upload } from '../services/fileUpload';
 
 const router: Router = express.Router();
 
@@ -76,5 +77,69 @@ router.get('/me', authenticateToken, asyncHandler(getUserApplications));
  *         description: Applications list
  */
 router.get('/:id/applications', authenticateToken, asyncHandler(getApplicationsForOpportunity));
+
+/**
+ * @swagger
+ * /api/applications/{id}/status:
+ *   put:
+ *     summary: Update application status (job poster only)
+ *     tags: [Applications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Application ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - status
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [submitted, reviewed, accepted, rejected]
+ *     responses:
+ *       200:
+ *         description: Status updated successfully
+ */
+router.put('/:id/status', authenticateToken, asyncHandler(updateApplicationStatus));
+
+/**
+ * @swagger
+ * /api/applications/{id}/upload-resume:
+ *   post:
+ *     summary: Upload resume/portfolio for an application
+ *     tags: [Applications]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         schema:
+ *           type: string
+ *         required: true
+ *         description: Application ID
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Resume uploaded successfully
+ */
+router.post('/:id/upload-resume', authenticateToken, upload.single('file'), asyncHandler(uploadResume));
 
 export default router;

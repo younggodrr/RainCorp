@@ -22,7 +22,7 @@ const getComments = async (req: Request, res: Response): Promise<void> => {
 			users: {
 				select: { id: true, username: true, avatar_url: true }
 			},
-			replies: {
+			other_comments: {
 				orderBy: { created_at: 'asc' },
 				include: {
 					users: {
@@ -43,7 +43,7 @@ const getComments = async (req: Request, res: Response): Promise<void> => {
 		comments: comments.map(c => ({
 			...c,
 			author: c.users, // Map users to author for frontend compatibility
-			replies: c.replies?.map(r => ({
+			replies: c.other_comments?.map(r => ({
 				...r,
 				author: r.users
 			}))
@@ -66,7 +66,7 @@ const getCommentById = async (req: Request, res: Response): Promise<void> => {
 			users: {
 				select: { id: true, username: true, avatar_url: true }
 			},
-			replies: {
+			other_comments: {
 				orderBy: { created_at: 'asc' },
 				include: {
 					users: {
@@ -85,7 +85,7 @@ const getCommentById = async (req: Request, res: Response): Promise<void> => {
 	res.status(200).json({
 		...comment,
 		author: comment.users,
-		replies: comment.replies?.map(r => ({
+		replies: comment.other_comments?.map(r => ({
 			...r,
 			author: r.users
 		}))

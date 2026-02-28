@@ -38,7 +38,12 @@ export default function ProjectPostDetails({ post, isRequestSent, onRequest }: P
               ))}
           </div>
           
-          <PostInteractionBar initialLikes={post.likes} initialComments={post.comments} postId={post.id} />
+          <PostInteractionBar 
+            initialLikes={post.likes} 
+            initialComments={post.comments} 
+            postId={post.id}
+            initialLiked={(post as any).isLiked || false}
+          />
       </div>
       
       <button 

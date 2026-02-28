@@ -1,9 +1,23 @@
 import express, { Router } from 'express';
-import { toggleBookmark, getBookmarkState } from '../controllers/bookmarks';
+import { toggleBookmark, getBookmarkState, getUserBookmarks } from '../controllers/bookmarks';
 import { asyncHandler } from '../middleware/errorHandler';
 import { authenticateToken } from '../middleware/auth';
 
 const router: Router = express.Router();
+
+/**
+ * @swagger
+ * /api/bookmarks/me:
+ *   get:
+ *     summary: Get current user's bookmarked jobs
+ *     tags: [Bookmarks]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: List of bookmarked jobs
+ */
+router.get('/me', authenticateToken, asyncHandler(getUserBookmarks));
 
 /**
  * @swagger

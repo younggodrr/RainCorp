@@ -292,6 +292,67 @@ const searchUsers = async (req: Request, res: Response):Promise<void> => {
   res.status(200).json(usersWithCounts);
 };
 
+const markNotificationAsRead = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.user as string;
+  const { notificationId } = req.params;
+
+  const notification = await prisma.notifications.findFirst({
+    where: {
+      id: notificationId,
+      user_id: userId,
+    },
+  });
+
+  if (!notification) {
+    res.status(404).json({ message: 'Notification not found' });
+    return;
+  }
+
+  await prisma.notifications.update({
+    where: { id: notificationId },
+    data: { is_read: true },
+  });
+
+  res.status(200).json({ message: 'Notification marked as read' });
+};
+
+const markAllNotificationsAsRead = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.user as string;
+
+  await prisma.notifications.updateMany({
+    where: {
+      user_id: userId,
+      is_read: false,
+    },
+    data: { is_read: true },
+  });
+
+  res.status(200).json({ message: 'All notifications marked as read' });
+};
+
+const deleteNotification = async (req: Request, res: Response): Promise<void> => {
+  const userId = req.user as string;
+  const { notificationId } = req.params;
+
+  const notification = await prisma.notifications.findFirst({
+    where: {
+      id: notificationId,
+      user_id: userId,
+    },
+  });
+
+  if (!notification) {
+    res.status(404).json({ message: 'Notification not found' });
+    return;
+  }
+
+  await prisma.notifications.delete({
+    where: { id: notificationId },
+  });
+
+  res.status(200).json({ message: 'Notification deleted' });
+};
+
 export {
   followUser,
   unfollowUser,
@@ -300,5 +361,8 @@ export {
   getUserFeed,
   getNotifications,
   getUnreadNotificationCount,
+  markNotificationAsRead,
+  markAllNotificationsAsRead,
+  deleteNotification,
   searchUsers,
 };

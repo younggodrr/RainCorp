@@ -39,10 +39,10 @@ export default function TopNavigation({
     const fetchUnreadCount = async () => {
       try {
         const token = localStorage.getItem('accessToken');
-        const apiUrl = process.env.NEXT_PUBLIC_API_BASE;
-        if (!apiUrl || !token) return;
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+        if (!token) return;
 
-        const response = await fetch(`${apiUrl}/social/notifications/unread`, {
+        const response = await fetch(`${apiUrl}/api/social/notifications/unread`, {
           headers: {
             'accept': '*/*',
             'Authorization': `Bearer ${token}`
@@ -55,7 +55,8 @@ export default function TopNavigation({
           setUnreadCount(data.count || data.unread_count || 0);
         }
       } catch (error) {
-        console.error('Failed to fetch unread notifications count', error);
+        // Silently fail - endpoint may not be implemented yet
+        console.debug('Notifications endpoint not available');
       }
     };
 

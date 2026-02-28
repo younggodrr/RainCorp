@@ -10,3 +10,7 @@ export * from './bookmarks/index';
 export * from './files/index';
 export * from './companies/index';
 export * from './opportunities/index';
+export * from './users/index';
+export * from './friends/index';
+export * from './notifications/index';
+export * from './chat/index';

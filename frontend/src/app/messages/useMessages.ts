@@ -95,6 +95,7 @@ export function useMessages() {
   const [isDiscoverGroupsModalOpen, setIsDiscoverGroupsModalOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [chatDetails, setChatDetails] = useState<{ description?: string; members?: ApiUser[] } | null>(null);
+  const [friends, setFriends] = useState<any[]>([]);
 
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -105,13 +106,81 @@ export function useMessages() {
     const loadConversations = async () => {
       try {
         const chats = await getUserChats();
-        setConversations(chats as any);
+        
+        // Map backend Chat objects to frontend Conversation objects
+        const mappedConversations: Conversation[] = chats.map((chat: any) => {
+          let name = chat.name || 'Unknown Chat';
+          if (chat.type === 'DIRECT' && !chat.name) {
+            // For direct chats, try to get the other participant's name
+            const currentUserId = localStorage.getItem('userid') || localStorage.getItem('userId');
+            const otherParticipant = chat.participants?.find((p: any) => p.id !== currentUserId);
+            name = otherParticipant?.username || otherParticipant?.fullName || 'Direct Chat';
+          }
+
+          return {
+            id: chat.id,
+            name: name,
+            lastMessage: chat.lastMessage?.content || 'No messages yet',
+            time: chat.lastMessage?.createdAt 
+              ? new Date(chat.lastMessage.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) 
+              : '',
+            unread: chat.unreadCount || 0,
+            isTyping: false,
+            pinned: false,
+            isGroup: chat.type === 'GROUP',
+            archived: false,
+            avatarColor: 'bg-indigo-100 text-indigo-600',
+            messages: []
+          };
+        });
+        
+        setConversations(mappedConversations);
       } catch (error) {
         console.error('Error loading conversations:', error);
         // Keep empty array on error
       }
     };
     loadConversations();
+  }, []);
+
+  // Load friends list
+  useEffect(() => {
+    const loadFriends = async () => {
+      try {
+        const userId = localStorage.getItem('userId') || localStorage.getItem('userid');
+        const token = localStorage.getItem('accessToken');
+        
+        if (!userId || !token) return;
+
+        const response = await fetch(`${API_BASE}/friends/${userId}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Accept': 'application/json'
+          }
+        });
+
+        if (response.ok) {
+          const result = await response.json();
+          const friendsList = result.friends || [];
+          
+          // Map to the format expected by StartChatModal
+          const mappedFriends = friendsList.map((friend: any) => ({
+            id: friend.id,
+            name: friend.username || friend.email?.split('@')[0] || 'User',
+            avatarColor: 'bg-indigo-100 text-indigo-600',
+            initials: (friend.username || friend.email?.split('@')[0] || 'U').substring(0, 2).toUpperCase(),
+            isOnline: false,
+            status: friend.bio || ''
+          }));
+          
+          setFriends(mappedFriends);
+        }
+      } catch (error) {
+        console.error('Failed to fetch friends:', error);
+      }
+    };
+
+    loadFriends();
   }, []);
 
   // Derived State
@@ -123,45 +192,77 @@ export function useMessages() {
     
     const action = searchParams.get('action');
     const name = searchParams.get('name');
+    const userId = searchParams.get('userId');
 
-    if (action === 'start_chat' && name) {
-      // Check if chat already exists
-      const existingChat = conversations.find(c => c.name === name && !c.isGroup);
-      
-      if (existingChat) {
-        setSelectedChatId(existingChat.id);
-      } else {
-        // Create new chat
-        const newChat: Conversation = {
-          id: `new-chat-${Date.now()}`,
-          name: name,
-          lastMessage: 'I have accepted your job application.',
-          time: 'Now',
-          unread: 0,
-          isTyping: false,
-          pinned: false,
-          isGroup: false,
-          archived: false,
-          avatarColor: 'bg-indigo-100 text-indigo-600',
-          messages: [
-            {
-              id: `msg-init-${Date.now()}`,
-              sender: 'Me',
-              text: 'I have accepted your job application. Let\'s discuss the details.',
-              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-              avatar: 'ME',
-              isMe: true,
-              type: 'text',
-              read: true
+    if (action === 'start_chat' && (name || userId)) {
+      // If we have a userId, try to create/find a direct chat
+      if (userId && USE_REAL_API) {
+        const createDirectChat = async () => {
+          try {
+            const newChatData: ApiChat = await authenticatedFetch('/chat/direct', {
+              method: 'POST',
+              body: JSON.stringify({ participantId: userId })
+            });
+
+            // Check if we already have this chat in our state
+            const existingChat = conversations.find(c => c.id === newChatData.id);
+            if (existingChat) {
+              setSelectedChatId(existingChat.id);
+            } else {
+              // Add to conversations
+              const newConversation: Conversation = {
+                id: newChatData.id,
+                name: name || 'Direct Chat',
+                lastMessage: 'Start a conversation',
+                time: 'Now',
+                unread: 0,
+                isTyping: false,
+                pinned: false,
+                isGroup: false,
+                archived: false,
+                avatarColor: 'bg-indigo-100 text-indigo-600',
+                messages: []
+              };
+              setConversations(prev => [newConversation, ...prev]);
+              setSelectedChatId(newChatData.id);
             }
-          ]
+          } catch (error) {
+            console.error('Failed to create direct chat:', error);
+          }
         };
+        createDirectChat();
+        return;
+      }
+
+      // Fallback to name-based chat (legacy)
+      if (name) {
+        // Check if chat already exists
+        const existingChat = conversations.find(c => c.name === name && !c.isGroup);
         
-        setConversations(prev => [newChat, ...prev]);
-        setSelectedChatId(newChat.id);
+        if (existingChat) {
+          setSelectedChatId(existingChat.id);
+        } else {
+          // Create new chat
+          const newChat: Conversation = {
+            id: `new-chat-${Date.now()}`,
+            name: name,
+            lastMessage: 'Start a conversation',
+            time: 'Now',
+            unread: 0,
+            isTyping: false,
+            pinned: false,
+            isGroup: false,
+            archived: false,
+            avatarColor: 'bg-indigo-100 text-indigo-600',
+            messages: []
+          };
+          
+          setConversations(prev => [newChat, ...prev]);
+          setSelectedChatId(newChat.id);
+        }
       }
     }
-  }, [searchParams]);
+  }, [searchParams, conversations]);
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -219,26 +320,46 @@ export function useMessages() {
     const fetchMessages = async () => {
       try {
         const currentUserId = localStorage.getItem('userid');
-        const messages: ApiMessage[] = await authenticatedFetch(`/chat/${selectedChatId}/messages`);
+        const messages: any[] = await authenticatedFetch(`/chat/${selectedChatId}/messages`);
         
         setConversations(prev => prev.map(c => {
           if (c.id === selectedChatId) {
             return {
               ...c,
-              messages: messages.map((m: ApiMessage) => ({
-                id: m.id,
-                sender: m.senderId === currentUserId ? 'Me' : 'Other',
-                text: m.content,
-                time: new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                avatar: m.senderId === currentUserId ? 'ME' : 'O',
-                isMe: m.senderId === currentUserId,
-                type: 'text',
-                read: true
-              }))
+              messages: messages.map((m: any) => {
+                // Determine message type from backend message_type or messageType
+                const messageType = m.messageType || m.message_type || 'TEXT';
+                const isImage = messageType === 'IMAGE';
+                const isFile = messageType === 'FILE';
+                
+                return {
+                  id: m.id,
+                  sender: m.senderId === currentUserId ? 'Me' : 'Other',
+                  text: m.content,
+                  time: new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                  avatar: m.senderId === currentUserId ? 'ME' : 'O',
+                  isMe: m.senderId === currentUserId,
+                  type: isImage ? 'image' : isFile ? 'file' : 'text',
+                  imageUrl: isImage ? (m.fileUrl || m.file_url) : undefined,
+                  fileUrl: isFile ? (m.fileUrl || m.file_url) : undefined,
+                  fileName: m.fileName || m.file_name,
+                  fileSize: m.fileSize || m.file_size ? `${((m.fileSize || m.file_size) / 1024).toFixed(1)} KB` : undefined,
+                  read: m.isRead || m.is_read || false
+                };
+              })
             };
           }
           return c;
         }));
+
+        // Mark messages as read
+        try {
+          await authenticatedFetch(`/chat/${selectedChatId}/read`, {
+            method: 'POST'
+          });
+        } catch (error) {
+          console.error('Failed to mark messages as read:', error);
+        }
       } catch (error) {
         console.error('Failed to fetch messages:', error);
       }
@@ -502,30 +623,95 @@ export function useMessages() {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file && selectedChatId) {
-      const newMessage: Message = {
-        id: `file-${Date.now()}`,
-        sender: 'Me',
-        text: `Sent a file: ${file.name}`,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        avatar: 'ME',
-        isMe: true,
-        type: 'file',
-        fileName: file.name,
-        fileSize: `${(file.size / 1024).toFixed(1)} KB`,
-        read: false
-      };
+      // Upload file first
+      const uploadAndSend = async () => {
+        try {
+          // Import the upload function
+          const { uploadMessageFile } = await import('@/services/messages');
+          
+          // Upload file
+          const uploadResult = await uploadMessageFile(file);
+          
+          // Determine message type
+          const messageType = file.type.startsWith('image/') ? 'IMAGE' : 'FILE';
+          
+          // Send message with file info
+          if (USE_REAL_API) {
+            const response = await authenticatedFetch(`/chat/${selectedChatId}/messages`, {
+              method: 'POST',
+              body: JSON.stringify({
+                content: messageType === 'IMAGE' ? 'Sent an image' : `Sent a file: ${file.name}`,
+                messageType,
+                fileUrl: uploadResult.fileUrl,
+                fileName: uploadResult.fileName,
+                fileSize: uploadResult.fileSize,
+                fileType: uploadResult.fileType
+              })
+            });
+            
+            // Add the new message to the conversation (backend returns the created message)
+            const currentUserId = localStorage.getItem('userid');
+            const newMessage = {
+              id: response.id,
+              sender: 'Me',
+              text: response.content,
+              time: new Date(response.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              avatar: 'ME',
+              isMe: true,
+              type: messageType === 'IMAGE' ? 'image' : 'file',
+              imageUrl: messageType === 'IMAGE' ? (response.fileUrl || response.file_url) : undefined,
+              fileUrl: messageType === 'FILE' ? (response.fileUrl || response.file_url) : undefined,
+              fileName: response.fileName || response.file_name,
+              fileSize: response.fileSize || response.file_size ? `${((response.fileSize || response.file_size) / 1024).toFixed(1)} KB` : undefined,
+              read: true
+            };
+            
+            setConversations(prev => prev.map(c => {
+              if (c.id === selectedChatId) {
+                return {
+                  ...c,
+                  messages: [...c.messages, newMessage],
+                  lastMessage: newMessage.text,
+                  time: 'Just now'
+                };
+              }
+              return c;
+            }));
+          } else {
+            // Fallback for non-API mode
+            const newMessage: Message = {
+              id: `file-${Date.now()}`,
+              sender: 'Me',
+              text: messageType === 'IMAGE' ? 'Sent an image' : `Sent a file: ${file.name}`,
+              time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+              avatar: 'ME',
+              isMe: true,
+              type: messageType === 'IMAGE' ? 'image' : 'file',
+              imageUrl: messageType === 'IMAGE' ? URL.createObjectURL(file) : undefined,
+              fileName: messageType === 'FILE' ? file.name : undefined,
+              fileSize: `${(file.size / 1024).toFixed(1)} KB`,
+              read: false
+            };
 
-      setConversations(prev => prev.map(c => {
-        if (c.id === selectedChatId) {
-          return {
-            ...c,
-            messages: [...c.messages, newMessage],
-            lastMessage: `Sent a file: ${file.name}`,
-            time: 'Just now'
-          };
+            setConversations(prev => prev.map(c => {
+              if (c.id === selectedChatId) {
+                return {
+                  ...c,
+                  messages: [...c.messages, newMessage],
+                  lastMessage: newMessage.text,
+                  time: 'Just now'
+                };
+              }
+              return c;
+            }));
+          }
+        } catch (error) {
+          console.error('Failed to upload file:', error);
+          alert('Failed to upload file. Please try again.');
         }
-        return c;
-      }));
+      };
+      
+      uploadAndSend();
     }
   };
 
@@ -697,6 +883,7 @@ export function useMessages() {
     setIsDiscoverGroupsModalOpen,
     isDarkMode,
     toggleTheme,
+    friends,
 
     // Refs
     fileInputRef,

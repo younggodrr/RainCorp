@@ -22,7 +22,7 @@ export const listOpportunities = async (
   if (params.category) searchParams.set('category', params.category);
 
   const query = searchParams.toString();
-  const data = await apiFetch<any>(`/jobs${query ? `?${query}` : ''}`, { method: 'GET' });
+  const data = await apiFetch<any>(`/opportunities${query ? `?${query}` : ''}`, { method: 'GET' });
 
   if (Array.isArray(data)) {
     return { items: data };

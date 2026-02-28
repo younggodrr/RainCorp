@@ -78,8 +78,22 @@ export default function FeedPage() {
     const fetchPosts = async () => {
       setLoading(true);
       try {
-        console.log('Fetching posts from backend...');
-        const postsData = await getPosts({ limit: 10, offset: 0 });
+        console.log('Fetching posts from backend with filter:', activeFilter);
+        
+        // Map filter to backend type
+        let typeFilter: string | undefined;
+        if (activeFilter === 'Projects') typeFilter = 'project';
+        else if (activeFilter === 'Opportunities') typeFilter = 'job';
+        else if (activeFilter === 'Posts') typeFilter = 'post';
+        else if (activeFilter === 'Tech News') typeFilter = 'tech-news';
+        // 'All' means no type filter
+        
+        const postsData = await getPosts({ 
+          limit: 50, 
+          offset: 0,
+          type: typeFilter 
+        });
+        
         console.log('Successfully fetched posts:', postsData.length);
         console.log('Raw posts data:', JSON.stringify(postsData, null, 2));
         
@@ -106,7 +120,7 @@ export default function FeedPage() {
             salary: post.salary,
             tags: post.tags,
             jobType: post.jobType,
-            summary: post.newsTitle,
+            summary: post.content || post.newsTitle, // Use content as summary for tech news
             source: post.newsSource,
             url: post.newsUrl,
             imageUrl: post.mediaUrls?.[0],
@@ -135,8 +149,15 @@ export default function FeedPage() {
         });
         
         console.log('Mapped posts:', mappedPosts.length);
-        setPosts(mappedPosts as any);
-        setHasMore(postsData.length >= 10);
+        
+        // Deduplicate posts by ID
+        const uniquePosts = mappedPosts.filter((post, index, self) =>
+          index === self.findIndex((p) => p.id === post.id)
+        );
+        
+        console.log('Unique posts after deduplication:', uniquePosts.length);
+        setPosts(uniquePosts as any);
+        setHasMore(postsData.length >= 50);
       } catch (error: any) {
         console.error('Error fetching posts:', error.message);
         showToast('Unable to load feed. Please check if the backend server is running.');
@@ -147,7 +168,7 @@ export default function FeedPage() {
       }
     };
     fetchPosts();
-  }, []);
+  }, [activeFilter]); // Re-fetch when filter changes
 
   // Load More
   const loadMorePosts = useCallback(async () => {
@@ -156,7 +177,19 @@ export default function FeedPage() {
     
     try {
       const offset = posts.length;
-      const postsData = await getPosts({ limit: 10, offset });
+      
+      // Map filter to backend type
+      let typeFilter: string | undefined;
+      if (activeFilter === 'Projects') typeFilter = 'project';
+      else if (activeFilter === 'Opportunities') typeFilter = 'job';
+      else if (activeFilter === 'Posts') typeFilter = 'post';
+      else if (activeFilter === 'Tech News') typeFilter = 'tech-news';
+      
+      const postsData = await getPosts({ 
+        limit: 50, 
+        offset,
+        type: typeFilter 
+      });
       
       if (postsData.length === 0) {
         setHasMore(false);
@@ -182,15 +215,21 @@ export default function FeedPage() {
           salary: post.salary,
           tags: post.tags,
           jobType: post.jobType,
-          summary: post.newsTitle,
+          summary: post.content || post.newsTitle, // Use content as summary for tech news
           source: post.newsSource,
           url: post.newsUrl,
           imageUrl: post.mediaUrls?.[0],
         }));
         
-        setPosts(prev => [...prev, ...mappedPosts] as any);
+        setPosts(prev => {
+          // Deduplicate before adding to existing posts
+          const existingIds = new Set(prev.map(p => p.id));
+          const newUniquePosts = mappedPosts.filter(post => !existingIds.has(post.id));
+          
+          return [...prev, ...newUniquePosts] as any;
+        });
         setPage(prev => prev + 1);
-        setHasMore(postsData.length >= 10);
+        setHasMore(postsData.length >= 50);
       }
     } catch (error) {
       console.error('Error loading more posts:', error);
@@ -198,7 +237,7 @@ export default function FeedPage() {
     } finally {
       setLoading(false);
     }
-  }, [loading, hasMore, posts.length]);
+  }, [loading, hasMore, posts.length, activeFilter]);
 
   // Observer
   const observer = useRef<IntersectionObserver | null>(null);
@@ -212,15 +251,6 @@ export default function FeedPage() {
     });
     if (node) observer.current.observe(node);
   }, [loading, hasMore, loadMorePosts]);
-
-  const filteredPosts = posts.filter(post => {
-    if (activeFilter === 'All') return true;
-    if (activeFilter === 'Projects') return post.type === 'project';
-    if (activeFilter === 'Opportunities') return post.type === 'job';
-    if (activeFilter === 'Posts') return post.type === 'post';
-    if (activeFilter === 'Tech News') return post.type === 'tech-news';
-    return true;
-  });
 
   const handleDeletePost = (postId: string) => {
     setPosts(prev => prev.filter(p => p.id !== postId));
@@ -283,7 +313,7 @@ export default function FeedPage() {
           />
         </div>
 
-        {filteredPosts.length === 0 && !loading && (
+        {posts.length === 0 && !loading && (
           <div className={`text-center py-16 ${isDarkMode ? 'text-gray-400' : 'text-gray-500'}`}>
             <div className="mb-4">
               <svg className="w-16 h-16 mx-auto opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -295,8 +325,8 @@ export default function FeedPage() {
           </div>
         )}
 
-        {filteredPosts.map((post, index) => {
-          if (filteredPosts.length === index + 1) {
+        {posts.map((post, index) => {
+          if (posts.length === index + 1) {
              return (
                <div ref={lastPostElementRef} key={post.id}>
                  <FeedItem 
@@ -328,7 +358,7 @@ export default function FeedPage() {
           </div>
         )}
         
-        {!hasMore && filteredPosts.length > 0 && (
+        {!hasMore && posts.length > 0 && (
            <div className="py-8 text-center text-gray-400 text-sm font-medium">
               You&apos;re all caught up!
            </div>

@@ -53,16 +53,17 @@ model ai_interactions {
 }
 
 model applications {
-  id             String        @id @db.Uuid
-  opportunity_id String        @db.Uuid
-  user_id        String        @db.Uuid
+  id             String          @id @db.Uuid
+  opportunity_id String          @db.Uuid
+  user_id        String          @db.Uuid
   resume_url     String?
   cover_letter   String?
-  status         String        @default("submitted")
-  submitted_at   DateTime?     @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  status         String          @default("submitted")
+  submitted_at   DateTime?       @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
   metadata       Json?
-  opportunities  opportunities @relation(fields: [opportunity_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  users          users         @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  opportunities  opportunities   @relation(fields: [opportunity_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  users          users           @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  notifications  notifications[]
 }
 
 model bookmarks {
@@ -353,11 +354,19 @@ model media {
 model messages {
   id              String        @id @db.Uuid
   content         String
+  message_type    String?       @default("TEXT") @db.VarChar(20)
+  file_url        String?
+  file_name       String?       @db.VarChar(255)
+  file_size       Int?
+  file_type       String?       @db.VarChar(100)
+  is_read         Boolean?      @default(false)
   sender_id       String        @db.Uuid
   conversation_id String        @db.Uuid
   created_at      DateTime?     @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
   conversations   conversations @relation(fields: [conversation_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
   users           users         @relation(fields: [sender_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([message_type], map: "idx_messages_type")
 }
 
 model milestone_reviews {
@@ -396,34 +405,43 @@ model milestones {
 }
 
 model notifications {
-  id         String    @id @db.Uuid
-  user_id    String    @db.Uuid
-  title      String    @db.VarChar
-  message    String
-  is_read    Boolean   @default(false)
-  created_at DateTime? @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  users      users     @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  id              String         @id @db.Uuid
+  user_id         String         @db.Uuid
+  title           String         @db.VarChar
+  message         String
+  is_read         Boolean        @default(false)
+  created_at      DateTime?      @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  application_id  String?        @db.Uuid
+  opportunity_id  String?        @db.Uuid
+  project_id      String?        @db.Uuid
+  post_id         String?        @db.Uuid
+  users           users          @relation(fields: [user_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  applications    applications?  @relation(fields: [application_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  opportunities   opportunities? @relation(fields: [opportunity_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  projects        projects?      @relation(fields: [project_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  posts           posts?         @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
 }
 
 model opportunities {
-  id           String         @id @db.Uuid
-  title        String         @db.VarChar
-  description  String?
-  company      String?        @db.VarChar
-  company_id   String?        @db.Uuid
-  location     String?        @db.VarChar
-  salary       String?        @db.VarChar
-  job_type     String?        @db.VarChar
-  deadline     DateTime?      @db.Timestamptz(6)
-  author_id    String         @db.Uuid
-  category_id  String?        @db.Uuid
-  created_at   DateTime?      @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  updated_at   DateTime?      @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  applications applications[]
-  bookmarks    bookmarks[]
-  users        users          @relation(fields: [author_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  categories   categories?    @relation(fields: [category_id], references: [id], onUpdate: NoAction)
-  companies    companies?     @relation(fields: [company_id], references: [id], onUpdate: NoAction)
+  id            String          @id @db.Uuid
+  title         String          @db.VarChar
+  description   String?
+  company       String?         @db.VarChar
+  company_id    String?         @db.Uuid
+  location      String?         @db.VarChar
+  salary        String?         @db.VarChar
+  job_type      String?         @db.VarChar
+  deadline      DateTime?       @db.Timestamptz(6)
+  author_id     String          @db.Uuid
+  category_id   String?         @db.Uuid
+  created_at    DateTime?       @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at    DateTime?       @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  applications  applications[]
+  bookmarks     bookmarks[]
+  notifications notifications[]
+  users         users           @relation(fields: [author_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  categories    categories?     @relation(fields: [category_id], references: [id], onUpdate: NoAction)
+  companies     companies?      @relation(fields: [company_id], references: [id], onUpdate: NoAction)
 
   @@index([job_type])
   @@index([location])
@@ -458,20 +476,21 @@ model post_tags {
 }
 
 model posts {
-  id          String       @id @db.Uuid
-  title       String       @db.VarChar
-  content     String?
-  post_type   String       @default("regular") @db.VarChar
-  author_id   String       @db.Uuid
-  category_id String?      @db.Uuid
-  created_at  DateTime?    @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  updated_at  DateTime?    @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
-  comments    comments[]
-  likes       likes[]
-  post_media  post_media[]
-  post_tags   post_tags[]
-  users       users        @relation(fields: [author_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  categories  categories?  @relation(fields: [category_id], references: [id], onUpdate: NoAction)
+  id            String          @id @db.Uuid
+  title         String          @db.VarChar
+  content       String?
+  post_type     String          @default("regular") @db.VarChar
+  author_id     String          @db.Uuid
+  category_id   String?         @db.Uuid
+  created_at    DateTime?       @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at    DateTime?       @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  comments      comments[]
+  likes         likes[]
+  post_media    post_media[]
+  post_tags     post_tags[]
+  notifications notifications[]
+  users         users           @relation(fields: [author_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  categories    categories?     @relation(fields: [category_id], references: [id], onUpdate: NoAction)
 
   @@index([created_at(sort: Desc)])
 }
@@ -677,6 +696,7 @@ model projects {
   og_image                 String?
   deadline                 DateTime?              @db.Timestamptz(6)
   members_needed           Int?                   @default(0)
+  notifications            notifications[]
   project_analytics        project_analytics[]
   project_applications     project_applications[]
   project_attachments      project_attachments[]
@@ -809,6 +829,7 @@ model users {
   linkedin_url                                       String?
   twitter_url                                        String?
   whatsapp_url                                       String?
+  instagram_url                                      String?
   accounts                                           Account[]
   sessions                                           Session[]
   admin_actions                                      admin_actions[]

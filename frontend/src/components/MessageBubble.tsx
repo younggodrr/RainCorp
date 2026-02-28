@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Trash2, CheckCheck, FileText, Download } from 'lucide-react';
+import { Trash2, Check, CheckCheck, FileText, Download } from 'lucide-react';
 import type { Message } from '@/types';
 
 interface MessageBubbleProps {
@@ -46,18 +46,37 @@ export default function MessageBubble({ message, onDelete, isDarkMode }: Message
             <p className="text-sm leading-relaxed">{message.text}</p>
           )}
           
+          {message.type === 'image' && (
+            <div className="space-y-2">
+              {message.text && message.text !== 'Sent an image' && (
+                <p className="text-sm leading-relaxed">{message.text}</p>
+              )}
+              <img 
+                src={message.imageUrl?.startsWith('http') ? message.imageUrl : `${process.env.NEXT_PUBLIC_API_URL}${message.imageUrl}`}
+                alt="Shared image" 
+                className="rounded-lg max-w-[300px] max-h-[400px] object-cover cursor-pointer hover:opacity-90 transition-opacity"
+                onClick={() => window.open(message.imageUrl?.startsWith('http') ? message.imageUrl : `${process.env.NEXT_PUBLIC_API_URL}${message.imageUrl}`, '_blank')}
+              />
+            </div>
+          )}
+          
           {message.type === 'file' && (
             <div className="flex items-center gap-3">
               <div className="p-2 bg-white/20 rounded-lg">
                 <FileText size={24} />
               </div>
-              <div>
+              <div className="flex-1 min-w-0">
                 <p className="text-sm font-bold truncate max-w-[150px]">{message.fileName}</p>
                 <p className="text-xs opacity-70">{message.fileSize}</p>
               </div>
-              <button className="p-1 hover:bg-white/20 rounded-full transition-colors ml-2">
+              <a 
+                href={(message.fileUrl || message.imageUrl)?.startsWith('http') ? (message.fileUrl || message.imageUrl) : `${process.env.NEXT_PUBLIC_API_URL}${message.fileUrl || message.imageUrl}`}
+                download={message.fileName}
+                className="p-1 hover:bg-white/20 rounded-full transition-colors ml-2"
+                title="Download file"
+              >
                 <Download size={16} />
-              </button>
+              </a>
             </div>
           )}
         </div>
@@ -65,7 +84,11 @@ export default function MessageBubble({ message, onDelete, isDarkMode }: Message
         <div className="flex items-center gap-1 mx-1">
            <span className="text-[10px] text-gray-400 font-medium">{message.time}</span>
            {message.isMe && (
-              <CheckCheck size={12} className={message.read ? "text-[#E50914]" : "text-gray-300"} />
+              message.read ? (
+                <CheckCheck size={12} className="text-[#E50914]" />
+              ) : (
+                <Check size={12} className="text-gray-300" />
+              )
            )}
         </div>
       </div>

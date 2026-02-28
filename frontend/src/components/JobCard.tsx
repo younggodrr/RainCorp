@@ -1,5 +1,8 @@
-import React from 'react';
-import { MoreHorizontal, MapPin, Briefcase, DollarSign, Clock } from 'lucide-react';
+"use client";
+
+import React, { useState, useEffect } from 'react';
+import { MoreHorizontal, MapPin, Briefcase, DollarSign, Clock, Bookmark, BookmarkCheck } from 'lucide-react';
+import { applyToJob, bookmarkJob, getBookmarkState } from '@/services/jobs';
 
 export interface Job {
   id: number;
@@ -17,6 +20,8 @@ export interface Job {
   timeLeft?: string;
   isOwner?: boolean;
   opportunityId?: string | number;
+  hasApplied?: boolean;
+  isBookmarked?: boolean;
 }
 
 interface JobCardProps {
@@ -24,9 +29,71 @@ interface JobCardProps {
   isDarkMode: boolean;
   showExpiration?: boolean;
   isCompact?: boolean;
+  onJobUpdate?: () => void;
 }
 
-export default function JobCard({ job, isDarkMode, showExpiration = false, isCompact = false }: JobCardProps) {
+export default function JobCard({ job, isDarkMode, showExpiration = false, isCompact = false, onJobUpdate }: JobCardProps) {
+  const [applying, setApplying] = useState(false);
+  const [hasApplied, setHasApplied] = useState(job.hasApplied || false);
+  const [isBookmarked, setIsBookmarked] = useState(job.isBookmarked || false);
+  const [bookmarking, setBookmarking] = useState(false);
+
+  useEffect(() => {
+    // Check bookmark state on mount
+    if (job.opportunityId) {
+      checkBookmarkState();
+    }
+  }, [job.opportunityId]);
+
+  const checkBookmarkState = async () => {
+    try {
+      const response = await getBookmarkState(String(job.opportunityId));
+      setIsBookmarked(response.bookmarked || false);
+    } catch (error) {
+      // Silently fail - bookmark state is not critical
+    }
+  };
+
+  const handleApply = async () => {
+    if (applying || hasApplied || !job.opportunityId) return;
+    
+    setApplying(true);
+    try {
+      await applyToJob(String(job.opportunityId), {
+        coverLetter: 'I am interested in this position.'
+      });
+      setHasApplied(true);
+      alert('Application submitted successfully! The employer has been notified.');
+      if (onJobUpdate) onJobUpdate();
+    } catch (error: any) {
+      const errorMsg = error?.message || 'Failed to apply';
+      if (errorMsg.includes('already applied')) {
+        setHasApplied(true);
+        alert('You have already applied to this job.');
+      } else {
+        alert(errorMsg);
+      }
+    } finally {
+      setApplying(false);
+    }
+  };
+
+  const handleBookmark = async () => {
+    if (bookmarking || !job.opportunityId) return;
+    
+    setBookmarking(true);
+    try {
+      const response = await bookmarkJob(String(job.opportunityId));
+      // Toggle based on response
+      setIsBookmarked(response.bookmarked || false);
+      if (onJobUpdate) onJobUpdate();
+    } catch (error: any) {
+      alert(error?.message || 'Failed to update bookmark');
+    } finally {
+      setBookmarking(false);
+    }
+  };
+
   if (isCompact) {
     return (
       <div className={`rounded-xl border shadow-sm overflow-hidden hover:shadow-md transition-all group h-full flex flex-col ${
@@ -158,17 +225,30 @@ export default function JobCard({ job, isDarkMode, showExpiration = false, isCom
             Edit Job
           </a>
         ) : (
-          <button className="flex-1 py-2.5 bg-[#E50914] text-white rounded-xl font-bold text-sm shadow-sm hover:bg-[#cc0812] transition-colors">
-            Apply Now
+          <button 
+            onClick={handleApply}
+            disabled={applying || hasApplied}
+            className={`flex-1 py-2.5 rounded-xl font-bold text-sm shadow-sm transition-colors ${
+              hasApplied
+                ? 'bg-green-600 text-white cursor-not-allowed'
+                : 'bg-[#E50914] text-white hover:bg-[#cc0812]'
+            }`}
+          >
+            {applying ? 'Applying...' : hasApplied ? 'Applied ✓' : 'Apply Now'}
           </button>
         )}
 
-        <button className={`flex-1 py-2.5 border rounded-xl font-bold text-sm transition-colors ${
-          isDarkMode 
-            ? 'bg-transparent border-[#E70008]/40 text-[#F9E4AD] hover:bg-[#E70008]/10' 
-            : 'bg-white border-gray-200 text-black hover:bg-gray-50'
-        }`}>
-          Save Job
+        <button 
+          onClick={handleBookmark}
+          disabled={bookmarking}
+          className={`flex-1 py-2.5 border rounded-xl font-bold text-sm transition-colors flex items-center justify-center gap-2 ${
+            isDarkMode 
+              ? `bg-transparent ${isBookmarked ? 'border-[#E70008] text-[#E70008]' : 'border-[#E70008]/40 text-[#F9E4AD]'} hover:bg-[#E70008]/10` 
+              : `bg-white ${isBookmarked ? 'border-[#E50914] text-[#E50914]' : 'border-gray-200 text-black'} hover:bg-gray-50`
+          }`}
+        >
+          {isBookmarked ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
+          {bookmarking ? 'Saving...' : isBookmarked ? 'Saved' : 'Save Job'}
         </button>
       </div>
     </div>

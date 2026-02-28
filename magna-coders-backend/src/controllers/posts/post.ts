@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { PrismaClient } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
+import { processMentionAsync } from '../../services/magnaAI/mentionHandler';
 
 const prisma = new PrismaClient();
 
@@ -101,7 +102,7 @@ const getPostById = async (req: Request, res: Response): Promise<void> => {
 				take: 10,
 				include: { 
 					users: { select: { id: true, username: true, avatar_url: true } },
-					replies: {
+					other_comments: {
 						orderBy: { created_at: 'asc' },
 						include: { users: { select: { id: true, username: true, avatar_url: true } } }
 					}
@@ -125,7 +126,7 @@ const getPostById = async (req: Request, res: Response): Promise<void> => {
 		comments: post.comments.map(comment => ({
 			...comment,
 			author: comment.users,
-			replies: comment.replies?.map(reply => ({
+			replies: comment.other_comments?.map(reply => ({
 				...reply,
 				author: reply.users
 			}))
@@ -227,6 +228,9 @@ const createPost = async (req: Request, res: Response): Promise<void> => {
 			_count: { select: { likes: true, comments: true } }
 		}
 	});
+
+	// Check for @magnaai mention and process asynchronously
+	processMentionAsync(postId);
 
 	res.status(201).json({
 		...createdPost,
@@ -359,11 +363,16 @@ const likePost = async (req: Request, res: Response): Promise<void> => {
 		where: { post_id: id, user_id: userId }
 	});
 
+	// Toggle like: if already liked, unlike it; if not liked, like it
 	if (existing) {
-		res.status(400).json({ message: 'Post already liked' });
+		// Unlike the post
+		await prisma.likes.delete({ where: { id: existing.id } });
+		const likesCount = await prisma.likes.count({ where: { post_id: id } });
+		res.status(200).json({ liked: false, likesCount });
 		return;
 	}
 
+	// Like the post
 	await prisma.likes.create({
 		data: { id: uuidv4(), post_id: id, user_id: userId }
 	});

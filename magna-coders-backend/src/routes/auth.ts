@@ -4,6 +4,7 @@ import {
   login,
   getUserProfile,
   updateUserProfile,
+  uploadProfilePicture,
   refreshToken,
   handleOAuthCallback,
   linkOAuthAccount,
@@ -11,6 +12,7 @@ import {
 } from '../controllers/auth';
 import { asyncHandler } from '../middleware/errorHandler';
 import { authenticateToken } from '../middleware/auth';
+import { upload } from '../services/fileUpload';
 import rateLimit from 'express-rate-limit';
 
 // OAuth rate limiter: 5 requests per 15 minutes per IP
@@ -248,6 +250,36 @@ router.get('/profile/:id', authenticateToken, asyncHandler(getUserProfile));
  *         description: Server error
  */
 router.put('/profile/:id', authenticateToken, asyncHandler(updateUserProfile));
+
+/**
+ * @swagger
+ * /api/auth/profile/upload-picture:
+ *   post:
+ *     summary: Upload profile picture
+ *     tags: [Profile]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: Profile picture uploaded successfully
+ *       400:
+ *         description: No file uploaded
+ *       401:
+ *         description: Unauthorized
+ *       500:
+ *         description: Server error
+ */
+router.post('/profile/upload-picture', authenticateToken, upload.single('file'), asyncHandler(uploadProfilePicture));
 
 /**
  * @swagger

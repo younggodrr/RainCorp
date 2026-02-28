@@ -9,10 +9,13 @@ import ProfileHeader from '@/components/ProfileHeader';
 import ProfileTabs from '@/components/ProfileTabs';
 import OverviewTab from '@/components/OverviewTab';
 import SkillsTab from '@/components/SkillsTab';
-import ProjectsTab from '@/components/ProjectsTab';
+import UserProjectsTab from '@/components/UserProjectsTab';
 import ActivitiesTab from '@/components/ActivitiesTab';
 import ConnectionsTab from '@/components/ConnectionsTab';
+import UserPostsTab from '@/components/UserPostsTab';
 import { USER_DATA, PROFILE_TABS } from './data';
+import { getUserPosts, Post } from '@/services/posts';
+import { getFriends, Friend } from '@/services/friends';
 
 function UserProfileContent() {
   const router = require('next/navigation').useRouter();
@@ -24,12 +27,18 @@ function UserProfileContent() {
       }
     }
   }, [router]);
+  
   const [activeTab, setActiveTab] = useState('Overview');
   const [userData, setUserData] = useState(USER_DATA);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [userPosts, setUserPosts] = useState<Post[]>([]);
+  const [userFriends, setUserFriends] = useState<Friend[]>([]);
+  const [loadingPosts, setLoadingPosts] = useState(false);
+  const [loadingFriends, setLoadingFriends] = useState(false);
   const searchParams = useSearchParams();
   const isFromNav = searchParams?.get('from') === 'nav';
+  const profileUserId = searchParams?.get('id');
 
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -38,15 +47,14 @@ function UserProfileContent() {
     }
   }, []);
 
-  // API Integration: Fetch Profile
+  // Fetch user profile
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // Check both userId and userid for compatibility
-        const userId = searchParams?.get('id') || localStorage.getItem('userId') || localStorage.getItem('userid');
+        const userId = profileUserId || localStorage.getItem('userId') || localStorage.getItem('userid');
         if (userId) {
           const token = localStorage.getItem('accessToken');
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/auth/profile/${userId}`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/auth/profile/${userId}`, {
             method: 'GET',
             headers: {
               'Accept': 'application/json',
@@ -56,12 +64,8 @@ function UserProfileContent() {
           
           if (response.ok) {
             const result = await response.json();
-            console.log('Fetched profile:', result);
-            
-            // Extract user data from response
             const profileData = result.data || result;
             
-            // Map backend data to frontend structure
             setUserData(prevData => ({
               ...prevData,
               name: profileData.username || profileData.email?.split('@')[0] || prevData.name,
@@ -69,10 +73,7 @@ function UserProfileContent() {
               role: profileData.role || prevData.role,
               location: profileData.location || prevData.location,
               bio: profileData.bio || prevData.bio,
-              // Update other fields if backend provides them
             }));
-          } else {
-            console.error('Profile fetch failed:', response.status, response.statusText);
           }
         }
       } catch (err) {
@@ -80,7 +81,45 @@ function UserProfileContent() {
       }
     };
     fetchProfile();
-  }, [searchParams]);
+  }, [profileUserId]);
+
+  // Fetch user posts
+  useEffect(() => {
+    const fetchUserPosts = async () => {
+      setLoadingPosts(true);
+      try {
+        const userId = profileUserId || localStorage.getItem('userId') || localStorage.getItem('userid');
+        if (userId) {
+          const posts = await getUserPosts(userId, { limit: 20 });
+          setUserPosts(posts);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user posts:', error);
+      } finally {
+        setLoadingPosts(false);
+      }
+    };
+    fetchUserPosts();
+  }, [profileUserId]);
+
+  // Fetch user friends
+  useEffect(() => {
+    const fetchUserFriends = async () => {
+      setLoadingFriends(true);
+      try {
+        const userId = profileUserId || localStorage.getItem('userId') || localStorage.getItem('userid');
+        if (userId) {
+          const friends = await getFriends(userId);
+          setUserFriends(friends);
+        }
+      } catch (error) {
+        console.error('Failed to fetch user friends:', error);
+      } finally {
+        setLoadingFriends(false);
+      }
+    };
+    fetchUserFriends();
+  }, [profileUserId]);
 
   const toggleTheme = () => {
     const newMode = !isDarkMode;
@@ -151,19 +190,34 @@ function UserProfileContent() {
                     )}
 
                     {activeTab === 'Skills' && (
-                      <SkillsTab skills={userData.skillsList} isDarkMode={isDarkMode} />
+                      <SkillsTab isDarkMode={isDarkMode} isOwnProfile={!profileUserId || profileUserId === (localStorage.getItem('userId') || localStorage.getItem('userid'))} />
                     )}
 
                     {activeTab === 'Projects' && (
-                      <ProjectsTab projects={userData.projectsList} isDarkMode={isDarkMode} />
+                      <UserProjectsTab 
+                        isDarkMode={isDarkMode} 
+                        isOwnProfile={!profileUserId || profileUserId === (localStorage.getItem('userId') || localStorage.getItem('userid'))}
+                        userId={profileUserId || undefined}
+                      />
                     )}
 
                     {activeTab === 'Activities' && (
-                      <ActivitiesTab activities={userData.activitiesList} isDarkMode={isDarkMode} />
+                      <UserPostsTab 
+                        posts={userPosts} 
+                        loading={loadingPosts}
+                        isDarkMode={isDarkMode} 
+                      />
                     )}
 
                     {activeTab === 'Connections' && (
-                      <ConnectionsTab connections={userData.connectionsList} isDarkMode={isDarkMode} />
+                      <ConnectionsTab 
+                        connections={userFriends.map(friend => ({
+                          name: friend.username,
+                          role: friend.bio || 'Developer',
+                          avatar: friend.avatar_url
+                        }))} 
+                        isDarkMode={isDarkMode} 
+                      />
                     )}
                 </div>
             </div>

@@ -1,13 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { 
   UserPlus, MessageSquare, MapPin, 
-  Github, Linkedin, MessageCircle, Globe 
+  Github, Linkedin, MessageCircle, Globe, UserCheck, Clock, UserMinus 
 } from 'lucide-react';
+import { sendFriendRequest, checkFriendshipStatus, unfriend } from '@/services/friends';
 
 export interface Builder {
-  id: number;
+  id: string; // Changed from number to string to store UUID
   name: string;
   email: string;
   bio: string;
@@ -17,6 +19,10 @@ export interface Builder {
   status: string;
   connected: boolean;
   avatar: string | null;
+  github_url?: string | null;
+  linkedin_url?: string | null;
+  portfolio_url?: string | null;
+  whatsapp_url?: string | null;
 }
 
 interface BuilderCardProps {
@@ -26,6 +32,148 @@ interface BuilderCardProps {
 }
 
 const BuilderCard: React.FC<BuilderCardProps> = ({ builder, isDarkMode, isCompact = false }) => {
+  const router = useRouter();
+  const [friendshipStatus, setFriendshipStatus] = useState<'friends' | 'request_sent' | 'request_received' | 'none' | 'loading'>('loading');
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  useEffect(() => {
+    const checkStatus = async () => {
+      try {
+        const status = await checkFriendshipStatus(builder.id);
+        setFriendshipStatus(status.status);
+      } catch (error) {
+        console.error('Failed to check friendship status:', error);
+        setFriendshipStatus('none');
+      }
+    };
+    checkStatus();
+  }, [builder.id]);
+
+  const handleConnect = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isProcessing) return;
+    
+    setIsProcessing(true);
+    try {
+      await sendFriendRequest(builder.id);
+      setFriendshipStatus('request_sent');
+    } catch (error: any) {
+      console.error('Failed to send friend request:', error);
+      alert(error.message || 'Failed to send friend request');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleUnfriend = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (isProcessing) return;
+    
+    if (!confirm(`Remove ${builder.name} from your friends?`)) return;
+    
+    setIsProcessing(true);
+    try {
+      await unfriend(builder.id);
+      setFriendshipStatus('none');
+    } catch (error: any) {
+      console.error('Failed to unfriend:', error);
+      alert(error.message || 'Failed to unfriend');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  const handleMessage = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Navigate to messages page and start a chat with this user
+    router.push(`/messages?action=start_chat&userId=${builder.id}&name=${encodeURIComponent(builder.name)}`);
+  };
+
+  const handleSocialClick = (e: React.MouseEvent, url: string | null | undefined) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (url) {
+      window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  };
+
+  const getConnectButton = () => {
+    if (friendshipStatus === 'loading') {
+      return null;
+    }
+
+    if (friendshipStatus === 'friends') {
+      return (
+        <button 
+          onClick={handleUnfriend}
+          disabled={isProcessing}
+          className={`p-2 rounded-lg flex items-center gap-1 transition-colors ${
+            isDarkMode 
+              ? 'bg-green-900/20 text-green-400 hover:bg-red-900/20 hover:text-red-400' 
+              : 'bg-green-50 text-green-700 hover:bg-red-50 hover:text-red-700'
+          }`}
+          title="Unfriend"
+        >
+          <UserMinus size={16} />
+        </button>
+      );
+    }
+
+    if (friendshipStatus === 'request_sent') {
+      return (
+        <button 
+          disabled
+          className={`p-2 rounded-lg flex items-center gap-1 ${
+            isDarkMode 
+              ? 'bg-yellow-900/20 text-yellow-400' 
+              : 'bg-yellow-50 text-yellow-700'
+          }`}
+          title="Request Sent"
+        >
+          <Clock size={16} />
+        </button>
+      );
+    }
+
+    if (friendshipStatus === 'request_received') {
+      return (
+        <button 
+          onClick={handleConnect}
+          disabled={isProcessing}
+          className={`p-2 rounded-lg transition-colors ${
+            isDarkMode 
+              ? 'hover:bg-[#333] text-gray-400 hover:text-white bg-[#222]' 
+              : 'hover:bg-white text-gray-500 hover:text-[#E50914] bg-white border border-gray-100 shadow-sm'
+          }`}
+          title="Accept Request"
+        >
+          <UserPlus size={16} />
+        </button>
+      );
+    }
+
+    return (
+      <button 
+        onClick={handleConnect}
+        disabled={isProcessing}
+        className={`p-2 rounded-lg transition-colors ${
+          isDarkMode 
+            ? 'hover:bg-[#333] text-gray-400 hover:text-white bg-[#222]' 
+            : 'hover:bg-white text-gray-500 hover:text-[#E50914] bg-white border border-gray-100 shadow-sm'
+        }`}
+        title="Connect"
+      >
+        <UserPlus size={16} />
+      </button>
+    );
+  };
   if (isCompact) {
     return (
       <Link 
@@ -146,19 +294,9 @@ const BuilderCard: React.FC<BuilderCardProps> = ({ builder, isDarkMode, isCompac
         <div className={`p-4 rounded-xl mb-6 flex gap-4 ${isDarkMode ? 'bg-[#1A1A1A]' : 'bg-gray-50/80'}`}>
           {/* Action Buttons Column */}
           <div className={`flex flex-col gap-2 border-r pr-4 ${isDarkMode ? 'border-gray-700' : 'border-gray-200'}`}>
+            {getConnectButton()}
             <button 
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
-              className={`p-2 rounded-lg transition-colors ${
-                isDarkMode 
-                  ? 'hover:bg-[#333] text-gray-400 hover:text-white bg-[#222]' 
-                  : 'hover:bg-white text-gray-500 hover:text-[#E50914] bg-white border border-gray-100 shadow-sm'
-              }`}
-              title="Connect"
-            >
-              <UserPlus size={16} />
-            </button>
-            <button 
-              onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
+              onClick={handleMessage}
               className={`p-2 rounded-lg transition-colors ${
                 isDarkMode 
                   ? 'hover:bg-[#333] text-gray-400 hover:text-white bg-[#222]' 
@@ -203,18 +341,58 @@ const BuilderCard: React.FC<BuilderCardProps> = ({ builder, isDarkMode, isCompac
           </div>
 
           <div className="flex items-center gap-3">
-            {[Github, Linkedin, Globe, MessageCircle].map((Icon, i) => (
-              <div 
-                key={i}
+            {builder.github_url && (
+              <button
+                onClick={(e) => handleSocialClick(e, builder.github_url)}
                 className={`transition-colors ${
                   isDarkMode 
                     ? 'text-gray-600 hover:text-gray-300' 
                     : 'text-gray-400 hover:text-gray-600'
                 }`}
+                title="GitHub"
               >
-                <Icon size={16} />
-              </div>
-            ))}
+                <Github size={16} />
+              </button>
+            )}
+            {builder.linkedin_url && (
+              <button
+                onClick={(e) => handleSocialClick(e, builder.linkedin_url)}
+                className={`transition-colors ${
+                  isDarkMode 
+                    ? 'text-gray-600 hover:text-gray-300' 
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+                title="LinkedIn"
+              >
+                <Linkedin size={16} />
+              </button>
+            )}
+            {builder.portfolio_url && (
+              <button
+                onClick={(e) => handleSocialClick(e, builder.portfolio_url)}
+                className={`transition-colors ${
+                  isDarkMode 
+                    ? 'text-gray-600 hover:text-gray-300' 
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+                title="Portfolio"
+              >
+                <Globe size={16} />
+              </button>
+            )}
+            {builder.whatsapp_url && (
+              <button
+                onClick={(e) => handleSocialClick(e, builder.whatsapp_url)}
+                className={`transition-colors ${
+                  isDarkMode 
+                    ? 'text-gray-600 hover:text-gray-300' 
+                    : 'text-gray-400 hover:text-gray-600'
+                }`}
+                title="WhatsApp"
+              >
+                <MessageCircle size={16} />
+              </button>
+            )}
           </div>
         </div>
       </div>

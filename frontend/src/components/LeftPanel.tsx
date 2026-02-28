@@ -59,7 +59,7 @@ export default function LeftPanel({
         const token = localStorage.getItem('accessToken');
         
         if (userId && token) {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/api/auth/profile/${userId}`, {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_BASE}/auth/profile/${userId}`, {
             headers: {
               'Authorization': `Bearer ${token}`,
               'Accept': 'application/json'
@@ -150,7 +150,6 @@ export default function LeftPanel({
             <NavItem 
               icon={<FolderKanban size={20} />} 
               label="Projects" 
-              badge="3" 
               active={activeTab === 'Projects'} 
               isMobile={isMobile} 
               isDarkMode={isDarkMode}
@@ -161,7 +160,6 @@ export default function LeftPanel({
             <NavItem 
               icon={<MessageSquare size={20} />} 
               label="Messages" 
-              badge="12" 
               active={activeTab === 'Messages'} 
               isMobile={isMobile} 
               isDarkMode={isDarkMode}
@@ -372,7 +370,6 @@ export default function LeftPanel({
                   <FolderKanban size={20} />
                   <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Projects</span>
                 </div>
-                <span className={`hidden w-5 h-5 bg-[#F4A261] text-white text-[10px] font-bold rounded-full items-center justify-center ${isSidebarExpanded ? 'lg:flex' : ''}`}>3</span>
               </div>
             </Link>
             <Link href="/messages">
@@ -381,7 +378,6 @@ export default function LeftPanel({
                   <MessageSquare size={20} />
                   <span className={`hidden ${isSidebarExpanded ? 'lg:block' : ''}`}>Messages</span>
                 </div>
-                <span className={`hidden w-5 h-5 bg-[#E50914] text-white text-[10px] font-bold rounded-full items-center justify-center ${isSidebarExpanded ? 'lg:flex' : ''}`}>12</span>
               </div>
             </Link>
             <Link href="/jobs">
